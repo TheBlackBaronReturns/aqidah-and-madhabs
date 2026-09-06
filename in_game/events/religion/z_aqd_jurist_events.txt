@@ -1,0 +1,61 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: foreign jurists arrive.
+#
+# Fired rarely by on_action/00_aqd_game_start.txt's
+# aqd_jurist_migration_pulse (hooked to monthly_country_pulse). Sources
+# a neighboring Muslim country holding a madhhab that is neither the
+# receiver's own current madhhab nor already Plurality-or-above in the
+# receiver (scripted_triggers/z_aqd_jurist_triggers.txt's
+# aqd_is_eligible_jurist_source). Refusable: both options apply an
+# aqidah-judged reaction (scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_apply_jurist_reaction). Accept plants 1-3 madrasas of the
+# source's madhhab in one qualifying province (not a seat) - if that
+# province later reaches 3 madrasas + a mosque the establishment event
+# can grant it a seat without conquest.
+# =====================================================================
+
+namespace = z_aqd_jurists
+
+z_aqd_jurists.1 = {
+	type = country_event
+	title = z_aqd_jurists.1.title
+	desc = z_aqd_jurists.1.desc
+	outcome = neutral
+
+	trigger = {
+		religion.group = religion_group:muslim
+		has_policy = sharia_law_policy
+		any_neighbor_country = {
+			religion.group = religion_group:muslim
+			aqd_is_eligible_jurist_source = yes
+		}
+	}
+
+	illustration_tags = {
+		10 = interior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+		random_neighbor_country = {
+			limit = {
+				religion.group = religion_group:muslim
+				aqd_is_eligible_jurist_source = yes
+			}
+			save_scope_as = z_aqd_jurist_source
+		}
+	}
+
+	option = {
+		name = z_aqd_jurists.1.accept
+		aqd_build_madrasas_of_madhhab_from = { SOURCE = scope:z_aqd_jurist_source }
+		aqd_set_compat_madhhab_from_country = { SOURCE = scope:z_aqd_jurist_source }
+		aqd_apply_jurist_reaction = { OUTCOME = accept }
+	}
+
+	option = {
+		name = z_aqd_jurists.1.refuse
+		aqd_set_compat_madhhab_from_country = { SOURCE = scope:z_aqd_jurist_source }
+		aqd_apply_jurist_reaction = { OUTCOME = refuse }
+	}
+}

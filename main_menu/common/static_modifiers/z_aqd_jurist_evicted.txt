@@ -1,0 +1,13 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - applied by scripted_effects/
+# z_aqd_jurist_effects.txt's aqd_crackdown_effect to every location
+# that loses a jurist seat or a madrasa to a crackdown.
+# =====================================================================
+
+z_aqd_jurist_evicted = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.2
+	local_pop_join_rebel_threshold = -0.05
+}

@@ -1,0 +1,210 @@
+# =====================================================================
+# SYSTEM B - school-of-creed and madhhab change actions.
+# =====================================================================
+
+# REPLACE change_main_school: it now only changes the aqidah
+# religious_school (the select_trigger auto-filters to the whitelist,
+# which is creed-only after System B). The madhhab add_policy branches
+# are removed - madhhab is now changed via aqd_change_madhhab.
+REPLACE:change_main_school = {
+	type = religious
+	sound = UI_action_religion_generic
+
+	potential = {
+		scope:actor = {
+			religion = { has_religious_schools = yes }
+		}
+	}
+
+	allow = {
+		scope:actor = {
+			any_invited_religious_figure = { count > 0 }
+		}
+	}
+
+	ai_tick = monthly
+	ai_tick_frequency = 1
+	automation_tick = monthly
+	automation_tick_frequency = 1
+	player_automated_category = religiousdoctrines
+
+	price = price:change_main_school
+
+	select_trigger = {
+		looking_for_a = religion
+		source = actor
+		target_flag = recipient
+		name = "choose_religion"
+		column = { data = name }
+	}
+
+	select_trigger = {
+		looking_for_a = religious_school
+		source = recipient
+		target_flag = target
+		name = "choose_religious_school"
+		none_available_msg_key = "no_valid_religious_school"
+		column = { data = name }
+		visible = {
+			scope:actor = {
+				any_invited_religious_figure ?= {
+					religious_school ?= root
+				}
+			}
+		}
+	}
+
+	effect = {
+		if = {
+			limit = { exists = scope:target }
+			scope:actor = {
+				set_religious_school = scope:target
+			}
+		}
+	}
+
+	ai_will_do = {
+		add = "scope:actor.currency_utility(stability|10)"
+	}
+}
+
+# New: change your realm's madhhab (a sharia_law policy). The single
+# friction-bearing madhhab-change path now that it is no longer coupled
+# to the school of creed.
+aqd_change_madhhab = {
+	show_message = no
+	type = religious
+	sound = UI_action_religion_generic
+
+	ai_tick = monthly
+	ai_tick_frequency = 12
+	automation_tick = never
+
+	potential = {
+		scope:actor = {
+			religion.group = religion_group:muslim
+			has_policy = sharia_law_policy
+		}
+	}
+	allow = { }
+	cooldown = { type = aqd_change_madhhab  months = 60 }
+	price = price:aqd_change_madhhab
+
+	select_trigger = {
+		looking_for_a = policy
+		target_flag = target
+		name = "aqd_madhhab_select"
+		none_available_msg_key = "aqd_madhhab_none"
+		column = { data = name }
+		visible = {
+			OR = {
+				this = policy:hanafi_policy
+				this = policy:hanbali_policy
+				this = policy:maliki_policy
+				this = policy:shafii_policy
+				this = policy:zahiri_policy
+				this = policy:ismaili_policy
+				this = policy:jafari_policy
+				this = policy:zaidi_policy
+				this = policy:ibadi_policy
+			}
+		}
+	}
+
+	effect = {
+		scope:actor = {
+			add_policy = scope:target
+		}
+	}
+	ai_will_do = { add = 0 }
+}
+
+# =====================================================================
+# Ulema Institutions - crack down on a rival madhhab present in the
+# realm (see building_types/z_aqd_jurist_seats.txt, z_aqd_madrasas.txt,
+# script_values/z_aqd_madhhab_counts.txt). Cannot target the realm's own
+# current madhhab. Knocks the target down exactly one institutional
+# tier (scripted_effects/z_aqd_jurist_effects.txt's aqd_crackdown_effect,
+# madrasas destroyed before the seat) rather than wiping it out - the
+# cooldown below is what prevents repeated use from erasing a school in
+# one sitting.
+# =====================================================================
+aqd_crackdown_madhhab = {
+	show_message = yes
+	type = religious
+	sound = UI_action_religion_generic
+
+	ai_tick = monthly
+	ai_tick_frequency = 12
+	automation_tick = never
+
+	potential = {
+		scope:actor = {
+			religion.group = religion_group:muslim
+			has_policy = sharia_law_policy
+		}
+	}
+	allow = { }
+	cooldown = { type = aqd_crackdown_madhhab  months = 60 }
+	price = price:aqd_crackdown_madhhab
+
+	select_trigger = {
+		looking_for_a = policy
+		target_flag = target
+		name = "aqd_crackdown_select"
+		none_available_msg_key = "aqd_crackdown_none"
+		column = { data = name }
+		visible = {
+			# 'this' = the candidate policy being filtered - must stay unshadowed,
+			# so scope:actor is reached explicitly per-clause rather than wrapping
+			# the whole OR in `scope:actor = {}` (that rebinds 'this' to a country
+			# and breaks every `this = policy:X` identity check - confirmed by
+			# "Left side and right side during comparison were of different
+			# types (left was 'country', right was 'policy')" in error.log).
+			OR = {
+				AND = { this = policy:hanafi_policy    NOT = { scope:actor = { has_policy = hanafi_policy } }    scope:actor = { hanafi_institution_score > 0 } }
+				AND = { this = policy:hanbali_policy   NOT = { scope:actor = { has_policy = hanbali_policy } }   scope:actor = { hanbali_institution_score > 0 } }
+				AND = { this = policy:maliki_policy    NOT = { scope:actor = { has_policy = maliki_policy } }    scope:actor = { maliki_institution_score > 0 } }
+				AND = { this = policy:shafii_policy    NOT = { scope:actor = { has_policy = shafii_policy } }    scope:actor = { shafii_institution_score > 0 } }
+				AND = { this = policy:zahiri_policy    NOT = { scope:actor = { has_policy = zahiri_policy } }    scope:actor = { zahiri_institution_score > 0 } }
+				AND = { this = policy:ismaili_policy   NOT = { scope:actor = { has_policy = ismaili_policy } }   scope:actor = { ismaili_institution_score > 0 } }
+				AND = { this = policy:jafari_policy    NOT = { scope:actor = { has_policy = jafari_policy } }    scope:actor = { jafari_institution_score > 0 } }
+				AND = { this = policy:zaidi_policy     NOT = { scope:actor = { has_policy = zaidi_policy } }     scope:actor = { zaidi_institution_score > 0 } }
+				AND = { this = policy:ibadi_policy     NOT = { scope:actor = { has_policy = ibadi_policy } }     scope:actor = { ibadi_institution_score > 0 } }
+			}
+		}
+	}
+
+	effect = {
+		scope:actor = {
+			if = { limit = { scope:target = policy:hanafi_policy }
+				aqd_crackdown_effect = { MADHHAB = hanafi  SCORE = hanafi_institution_score }
+			}
+			else_if = { limit = { scope:target = policy:hanbali_policy }
+				aqd_crackdown_effect = { MADHHAB = hanbali  SCORE = hanbali_institution_score }
+			}
+			else_if = { limit = { scope:target = policy:maliki_policy }
+				aqd_crackdown_effect = { MADHHAB = maliki  SCORE = maliki_institution_score }
+			}
+			else_if = { limit = { scope:target = policy:shafii_policy }
+				aqd_crackdown_effect = { MADHHAB = shafii  SCORE = shafii_institution_score }
+			}
+			else_if = { limit = { scope:target = policy:zahiri_policy }
+				aqd_crackdown_effect = { MADHHAB = zahiri  SCORE = zahiri_institution_score }
+			}
+			else_if = { limit = { scope:target = policy:ismaili_policy }
+				aqd_crackdown_effect = { MADHHAB = ismaili  SCORE = ismaili_institution_score }
+			}
+			else_if = { limit = { scope:target = policy:jafari_policy }
+				aqd_crackdown_effect = { MADHHAB = jafari  SCORE = jafari_institution_score }
+			}
+			else_if = { limit = { scope:target = policy:zaidi_policy }
+				aqd_crackdown_effect = { MADHHAB = zaidi  SCORE = zaidi_institution_score }
+			}
+			else_if = { limit = { scope:target = policy:ibadi_policy }
+				aqd_crackdown_effect = { MADHHAB = ibadi  SCORE = ibadi_institution_score }
+			}
+		}
+	}
+	ai_will_do = { add = 0 }
+}

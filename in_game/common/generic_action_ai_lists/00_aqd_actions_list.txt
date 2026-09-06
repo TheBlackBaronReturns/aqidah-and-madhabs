@@ -1,0 +1,9 @@
+aqd_actions_list = {
+	potential = {
+		religion.group = religion_group:muslim
+	}
+	actions = {
+		aqd_change_madhhab
+		aqd_crackdown_madhhab
+	}
+}

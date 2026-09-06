@@ -1,0 +1,181 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: seat establishment.
+#
+# A province (province_definition) that holds 3 madrasas of one madhhab
+# X owned by the same nation, plus at least one mosque (temple), and no
+# seat of X yet, and whose capital carries no recent
+# z_aqd_establishment_pending marker, lets its owner raise a standing
+# seat of jurists - or crack down on the school.
+#
+# Fired from on_action/00_aqd_game_start.txt's aqd_seat_establishment_pulse
+# (four_yearly_country_pulse), pre-filtered there by <X>_institution_score
+# >= 3 so only a realm with a madhhab already at Noteworthy is scanned.
+#
+# The "3" and ">= 3" here are the Noteworthy threshold and MUST be kept
+# in sync with auto_modifiers/z_aqd_madhhab_tiers.txt (see that file's
+# header for the full list of sites).
+#
+# Canonical madhhab index (var:aqd_establish_madhhab): 1 hanafi
+# 2 hanbali 3 maliki 4 shafii 5 zahiri 6 ismaili 7 jafari 8 zaidi
+# 9 ibadi.
+# =====================================================================
+
+# Called from the pulse effect at country scope. Finds at most one
+# (madhhab, province) that is ready and fires z_aqd_establishment.1 for
+# it. var:aqd_establish_fired is a pulse-local guard (set to 0 up
+# front, cleared at the end) so only one event fires per pulse.
+aqd_try_seat_establishment = {
+	set_variable = { name = aqd_establish_fired  value = 0 }
+
+	aqd_establish_scan_one = { MADHHAB = hanafi  SECT = sunni  IDX = 1 }
+	aqd_establish_scan_one = { MADHHAB = hanbali SECT = sunni  IDX = 2 }
+	aqd_establish_scan_one = { MADHHAB = maliki  SECT = sunni  IDX = 3 }
+	aqd_establish_scan_one = { MADHHAB = shafii  SECT = sunni  IDX = 4 }
+	aqd_establish_scan_one = { MADHHAB = zahiri  SECT = sunni  IDX = 5 }
+	aqd_establish_scan_one = { MADHHAB = ismaili SECT = shia   IDX = 6 }
+	aqd_establish_scan_one = { MADHHAB = jafari  SECT = shia   IDX = 7 }
+	aqd_establish_scan_one = { MADHHAB = zaidi   SECT = shia   IDX = 8 }
+	aqd_establish_scan_one = { MADHHAB = ibadi   SECT = ibadi  IDX = 9 }
+
+	remove_variable = aqd_establish_fired
+}
+
+aqd_establish_scan_one = {
+	# The density trigger already implies institution_score >= 3 (3
+	# madrasas = weight 3), so no separate score check is needed here -
+	# the cheap 9-way score pre-filter lives on the pulse's own trigger
+	# in on_action/00_aqd_game_start.txt.
+	if = {
+		limit = {
+			var:aqd_establish_fired = 0
+			aqd_province_has_madhhab_density = { MADHHAB = $MADHHAB$  SECT = $SECT$ }
+		}
+		set_variable = { name = aqd_establish_madhhab  value = $IDX$ }
+		set_variable = { name = aqd_establish_fired  value = 1 }
+		trigger_event_non_silently = { id = z_aqd_establishment.1  days = 1 }
+	}
+}
+
+# Called from z_aqd_establishment.1's immediate at country scope, once,
+# for var:aqd_establish_madhhab. Re-derives the target province and
+# saves the scopes the options use:
+#   scope:aqd_establish_seat_loc - a guaranteed owned city+ location in
+#                                  the province with the sect present
+#   scope:aqd_establish_prov     - the province_definition
+#   scope:aqd_establish_loc      - the seat target: the province capital
+#                                  if we own it and it is a city+, else
+#                                  scope:aqd_establish_seat_loc. Always
+#                                  an owned city+ location when it exists.
+aqd_establish_save_target_dispatch = {
+	if      = { limit = { var:aqd_establish_madhhab = 1 } aqd_establish_save_target = { MADHHAB = hanafi  SECT = sunni } }
+	else_if = { limit = { var:aqd_establish_madhhab = 2 } aqd_establish_save_target = { MADHHAB = hanbali SECT = sunni } }
+	else_if = { limit = { var:aqd_establish_madhhab = 3 } aqd_establish_save_target = { MADHHAB = maliki  SECT = sunni } }
+	else_if = { limit = { var:aqd_establish_madhhab = 4 } aqd_establish_save_target = { MADHHAB = shafii  SECT = sunni } }
+	else_if = { limit = { var:aqd_establish_madhhab = 5 } aqd_establish_save_target = { MADHHAB = zahiri  SECT = sunni } }
+	else_if = { limit = { var:aqd_establish_madhhab = 6 } aqd_establish_save_target = { MADHHAB = ismaili SECT = shia } }
+	else_if = { limit = { var:aqd_establish_madhhab = 7 } aqd_establish_save_target = { MADHHAB = jafari  SECT = shia } }
+	else_if = { limit = { var:aqd_establish_madhhab = 8 } aqd_establish_save_target = { MADHHAB = zaidi   SECT = shia } }
+	else_if = { limit = { var:aqd_establish_madhhab = 9 } aqd_establish_save_target = { MADHHAB = ibadi   SECT = ibadi } }
+}
+
+aqd_establish_save_target = {
+	# Pick an owned city (or larger) with the sect present, whose
+	# province holds the 3-madrasa + mosque density. This is the
+	# guaranteed seat target - a seat can only be raised in a city+.
+	random_owned_location = {
+		limit = {
+			"religion_percentage(religion:$SECT$)" >= 0.25
+			OR = {
+				location_rank ?= location_rank:city
+				location_rank ?= location_rank:megalopolis
+			}
+			province_definition = {
+				any_location_in_province_definition = {
+					count >= 3
+					owner = root
+					has_building = building_type:madrasa_of_$MADHHAB$_fiqh
+				}
+				any_location_in_province_definition = {
+					count >= 1
+					owner = root
+					has_building = building_type:temple
+				}
+				NOT = { any_location_in_province_definition = { has_building = building_type:seat_of_$MADHHAB$_jurists } }
+				NOT = { any_location_in_province_definition = { has_location_modifier = z_aqd_establishment_pending } }
+			}
+		}
+		save_scope_as = aqd_establish_seat_loc
+		province_definition = { save_scope_as = aqd_establish_prov }
+	}
+	# Prefer the province capital if we own it and it is a city+.
+	if = {
+		limit = { exists = scope:aqd_establish_prov }
+		scope:aqd_establish_prov = {
+			province_capital = {
+				if = {
+					limit = {
+						owner = root
+						OR = {
+							location_rank ?= location_rank:city
+							location_rank ?= location_rank:megalopolis
+						}
+					}
+					save_scope_as = aqd_establish_loc
+				}
+			}
+		}
+	}
+	if = {
+		limit = {
+			exists = scope:aqd_establish_seat_loc
+			NOT = { exists = scope:aqd_establish_loc }
+		}
+		scope:aqd_establish_seat_loc = { save_scope_as = aqd_establish_loc }
+	}
+}
+
+# ALLOW option - raise the seat at scope:aqd_establish_loc.
+aqd_establishment_place_seat = {
+	if = {
+		limit = { exists = scope:aqd_establish_loc }
+		if      = { limit = { var:aqd_establish_madhhab = 1 } aqd_establish_plant_seat = { MADHHAB = hanafi } }
+		else_if = { limit = { var:aqd_establish_madhhab = 2 } aqd_establish_plant_seat = { MADHHAB = hanbali } }
+		else_if = { limit = { var:aqd_establish_madhhab = 3 } aqd_establish_plant_seat = { MADHHAB = maliki } }
+		else_if = { limit = { var:aqd_establish_madhhab = 4 } aqd_establish_plant_seat = { MADHHAB = shafii } }
+		else_if = { limit = { var:aqd_establish_madhhab = 5 } aqd_establish_plant_seat = { MADHHAB = zahiri } }
+		else_if = { limit = { var:aqd_establish_madhhab = 6 } aqd_establish_plant_seat = { MADHHAB = ismaili } }
+		else_if = { limit = { var:aqd_establish_madhhab = 7 } aqd_establish_plant_seat = { MADHHAB = jafari } }
+		else_if = { limit = { var:aqd_establish_madhhab = 8 } aqd_establish_plant_seat = { MADHHAB = zaidi } }
+		else_if = { limit = { var:aqd_establish_madhhab = 9 } aqd_establish_plant_seat = { MADHHAB = ibadi } }
+	}
+}
+
+aqd_establish_plant_seat = {
+	scope:aqd_establish_loc = {
+		change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
+	}
+}
+
+# CRACK DOWN option - knock the madhhab down one institutional tier.
+aqd_establishment_crackdown = {
+	if      = { limit = { var:aqd_establish_madhhab = 1 } aqd_crackdown_effect = { MADHHAB = hanafi   SCORE = hanafi_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 2 } aqd_crackdown_effect = { MADHHAB = hanbali  SCORE = hanbali_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 3 } aqd_crackdown_effect = { MADHHAB = maliki   SCORE = maliki_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 4 } aqd_crackdown_effect = { MADHHAB = shafii   SCORE = shafii_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 5 } aqd_crackdown_effect = { MADHHAB = zahiri   SCORE = zahiri_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 6 } aqd_crackdown_effect = { MADHHAB = ismaili  SCORE = ismaili_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 7 } aqd_crackdown_effect = { MADHHAB = jafari   SCORE = jafari_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 8 } aqd_crackdown_effect = { MADHHAB = zaidi    SCORE = zaidi_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 9 } aqd_crackdown_effect = { MADHHAB = ibadi    SCORE = ibadi_institution_score } }
+}
+
+# Apply the pending marker to the province capital (or the fallback
+# location) on either outcome.
+aqd_establishment_mark_pending = {
+	if = {
+		limit = { exists = scope:aqd_establish_loc }
+		scope:aqd_establish_loc = {
+			add_location_modifier = { modifier = z_aqd_establishment_pending  years = 15  mode = add_and_extend }
+		}
+	}
+}

@@ -1,0 +1,186 @@
+# =====================================================================
+# SYSTEM B - the Islamic religious_school slot repurposed to *aqidah*
+# (schools of creed) only.
+#
+# Full-file override of the vanilla common/religions/muslim.txt. The
+# ONLY change from vanilla is the religious_school = x whitelist of each
+# block: the schools of jurisprudence (madhhab) and the Sufi-order
+# schools are removed. Madhhab stays in vanilla sharia_law (see
+# laws/z_aqd_sharia_law.txt); the Sufi orders are this mod's
+# building-country system.
+#
+# din_i_ilahi_school is the one exception kept in the whitelist despite
+# living in religious_schools/sufi.txt: it is not a tariqa/order (no
+# building-country identity to hand off to) and vanilla's own
+# is_sufi_school trigger (scripted_triggers/religion_triggers.txt)
+# already agrees - it's excluded there too. It stays an aqidah choice
+# for both Shia and Sunni, unlockable exactly as vanilla intends via
+# has_global_variable = din_i_ilahi_founded (flavor_mug.1).
+#
+# ibadi_school is likewise evicted despite living in
+# religious_schools/ibadi.txt: vanilla's is_jurisprudence_school trigger
+# groups it with the madhhab keys, not a creed one, so it is structurally
+# a fiqh school. Its modifier now lives on sharia_law's ibadi_policy (see
+# laws/z_aqd_sharia_law.txt), and religious_schools/z_aqd_ibadi_aqidah.txt
+# adds wahbi_school and azzaba_school in its place as Ibadism's actual
+# schools of creed - both Wahbiyya, split by institutional form
+# (Imamate vs. the Maghreb's scholarly-council azzaba system) rather
+# than doctrine; see that file's header for the history.
+#
+# Ibadi's whitelist is wahbi_school and azzaba_school ONLY - the
+# vanilla-inherited Ashari/Maturidi/Athari/Mutazili crossover options are
+# deliberately dropped (see scripted_effects/z_aqd_migrate.txt for the
+# cleanup of any Ibadi country/character already holding one).
+#
+# ICD does not touch this file. Loading this mod together with a mod
+# that also overrides muslim.txt (e.g. The Persianate World) is
+# last-wins and unsupported.
+# =====================================================================
+
+ibadi = {
+	color = color_ibadi
+	group = muslim
+	language = classical_arabic_dialect
+
+	# Schools of creed only.
+	religious_school = wahbi_school
+	religious_school = azzaba_school
+
+	definition_modifier = {
+		global_merchant_power = 0.05
+		ship_build_speed = 0.05
+
+		allow_mysticism_vs_jurisprudence = yes
+
+		ban_imports_of_wine = yes
+		ban_imports_of_beer = yes
+		ban_imports_of_liquor = yes
+
+		number_of_allowed_religious_figures = 1
+	}
+
+	opinions = {
+		sunni = negative
+		catholic = enemy
+	}
+
+	unique_names = {
+		name_muhammad
+	}
+
+	max_religious_figures_for_religion = {
+		every_country_in_religion = {
+			add = 1.5
+		}
+		every_holy_site_in_religion = {
+			add = 1
+		}
+	}
+
+	tags = { muslim_gfx abrahamic_gfx }
+}
+
+shia = {
+	color = color_shia
+	group = muslim
+	language = classical_arabic_dialect
+
+	# Twelver identity is Imamiya only - Usuli vs Akhbari (religious_schools/
+	# z_aqd_shia_aqidah.txt) is a post-1700 dispute inside Twelver
+	# jurisprudence and anachronistic as a standing choice across the
+	# whole timeline, so both are dropped from the whitelist (any country/
+	# character already holding one is migrated to imamiya_school - see
+	# scripted_effects/z_aqd_migrate.txt).
+	#
+	# Ungated theology schools kept from vanilla (Ismaili / Zaydi reads,
+	# Imamiya, Alevism, Alawi). jafari_school (jurisprudence-gated) is
+	# removed - its identity lives in sharia_law's jafari_policy.
+	religious_school = ismaili_school
+	religious_school = zaidi_school
+	religious_school = imamiya_school
+	religious_school = nizari_school
+	religious_school = mustali_school
+	religious_school = alevism_school
+	religious_school = alawi_school
+	religious_school = din_i_ilahi_school
+
+	definition_modifier = {
+		land_morale_modifier = 0.05
+
+		allow_mysticism_vs_jurisprudence = yes
+
+		ban_imports_of_wine = yes
+		ban_imports_of_beer = yes
+		ban_imports_of_liquor = yes
+
+		number_of_allowed_religious_figures = 1
+	}
+
+	opinions = {
+		sunni = negative
+		catholic = enemy
+	}
+
+	unique_names = {
+		name_muhammad
+	}
+
+	max_religious_figures_for_religion = {
+		every_country_in_religion = {
+			add = 1.5
+		}
+		every_holy_site_in_religion = {
+			add = 1
+		}
+	}
+
+	tags = { muslim_gfx abrahamic_gfx }
+}
+
+sunni = {
+	color = religion_sunni
+	group = muslim
+	language = classical_arabic_dialect
+
+	# Schools of creed only. The five madhhab schools and eleven
+	# tariqa-order schools of vanilla are removed.
+	religious_school = ashari_school
+	religious_school = maturidi_school
+	religious_school = athari_school
+	religious_school = mutazili_school
+	religious_school = wahhabi_school
+	religious_school = din_i_ilahi_school
+
+	definition_modifier = {
+
+		selling_efficiency = tiny_trade_efficiency_bonus
+
+		allow_mysticism_vs_jurisprudence = yes
+
+		ban_imports_of_wine = yes
+		ban_imports_of_beer = yes
+		ban_imports_of_liquor = yes
+
+		number_of_allowed_religious_figures = 1
+	}
+
+	opinions = {
+		shia = negative
+		catholic = enemy
+	}
+
+	unique_names = {
+		name_muhammad
+	}
+
+	max_religious_figures_for_religion = {
+		every_country_in_religion = {
+			add = 1.5
+		}
+		every_holy_site_in_religion = {
+			add = 1
+		}
+	}
+
+	tags = { muslim_gfx abrahamic_gfx }
+}

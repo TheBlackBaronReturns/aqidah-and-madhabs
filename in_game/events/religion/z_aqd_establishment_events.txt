@@ -1,0 +1,72 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: seat establishment.
+#
+# Fired by on_action/00_aqd_game_start.txt's aqd_seat_establishment_pulse
+# (four_yearly_country_pulse) via scripted_effects/
+# z_aqd_establishment_effects.txt's aqd_try_seat_establishment, which
+# has already confirmed one owned province holds 3 madrasas of madhhab
+# var:aqd_establish_madhhab + a mosque and has no seat of it yet.
+#
+# The immediate re-derives that province and saves:
+#   scope:aqd_establish_prov     - the province_definition
+#   scope:aqd_establish_loc      - the seat target (an owned city+: the
+#                                  province capital if eligible, else a
+#                                  city in the province with the sect
+#                                  present). A seat can only be raised
+#                                  in a city or larger.
+#   scope:aqd_establish_seat_loc - the guaranteed city+ fallback
+#
+# Allow  -> raise the seat, weak aqidah-judged clergy/legitimacy reaction
+# Crack down -> knock the madhhab down one institutional tier
+# Both leave a 15-year z_aqd_establishment_pending marker on the capital.
+# =====================================================================
+
+namespace = z_aqd_establishment
+
+z_aqd_establishment.1 = {
+	type = country_event
+	title = z_aqd_establishment.1.title
+	desc = z_aqd_establishment.1.desc
+	outcome = neutral
+
+	trigger = {
+		has_variable = aqd_establish_madhhab
+	}
+
+	illustration_tags = {
+		10 = interior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+		aqd_establish_save_target_dispatch = yes
+		set_variable = { name = aqd_compat_madhhab  value = var:aqd_establish_madhhab }
+		aqd_classify_madhhab_compatibility = yes
+	}
+
+	option = {
+		name = z_aqd_establishment.1.allow
+		aqd_establishment_place_seat = yes
+		aqd_apply_jurist_reaction = { OUTCOME = accept }
+		aqd_establishment_mark_pending = yes
+		ai_chance = { base = 90 }
+	}
+
+	option = {
+		name = z_aqd_establishment.1.crackdown
+		aqd_establishment_crackdown = yes
+		aqd_apply_jurist_reaction = { OUTCOME = refuse }
+		aqd_establishment_mark_pending = yes
+		ai_chance = {
+			base = 6
+			modifier = {
+				factor = 5
+				var:aqd_jurist_compat = -1
+			}
+			modifier = {
+				factor = 0
+				var:aqd_jurist_compat = 1
+			}
+		}
+	}
+}

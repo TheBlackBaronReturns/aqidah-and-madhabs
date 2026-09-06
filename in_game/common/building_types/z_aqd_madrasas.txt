@@ -1,0 +1,490 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: madhhab madrasas.
+#
+# The madrasa is the buildable grassroots unit of a school of
+# jurisprudence (madhhab, a sharia_law policy). It replaces the old
+# court_of_<X>_fiqh entirely and is what feeds script_values/
+# z_aqd_madhhab_counts.txt's per-madhhab institution score (weight 1,
+# vs. 2 for a jurist seat), driving the tiered auto_modifiers in
+# auto_modifiers/z_aqd_madhhab_tiers.txt.
+#
+# WHO CAN BUILD WHICH:
+#  - the nation's OWN current sharia_law madhhab: anywhere the sect
+#    population threshold (>= 25%) is met - the `owner has_policy`
+#    branch of location_potential;
+#  - any OTHER (foreign) madhhab: only in a location whose AREA already
+#    contains a seat_of_<X>_jurists that THIS SAME NATION owns - the
+#    `area = { any_location_in_area = { owner = root.owner ... } }`
+#    branch. A neighbouring realm's seat in the area does not count.
+#    This models a madhhab spreading outward from a juristic centre
+#    the realm has established (or conquered).
+#
+# The foreign-jurist event (events/religion/z_aqd_jurist_events.txt via
+# scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_build_madrasas_of_madhhab_from) plants 1-3 of these directly with
+# change_building_level_in_location, bypassing location_potential - so a
+# realm can be seeded with a foreign madhhab with no prior seat, and if
+# that province then reaches 3 madrasas + a mosque the establishment
+# event (events/religion/z_aqd_establishment_events.txt) can grant it a
+# seat without conquest.
+#
+# The modifier is DELIBERATELY identical to the base madrasa/"Maktab"
+# (common/building_types/religion_buildings.txt) payload, plus one
+# per-madhhab societal-axis nudge - madrasas are not weaker than the
+# generic school. The single-level cap and clergy food upkeep are the
+# built-in brakes on the AI over-building them.
+#
+# Removed by scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_crackdown_destroy_<X>_madrasa (crackdown), or auto-removed by
+# remove_if on demographic collapse / non-Muslim conquest.
+# =====================================================================
+
+madrasa_of_hanafi_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	location_potential = {
+		"religion_percentage(religion:sunni)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_hanafi_fiqh }
+		OR = {
+			owner = { has_policy = hanafi_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_hanafi_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_mysticism = societal_value_minor_monthly_move
+	}
+}
+
+madrasa_of_hanbali_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	location_potential = {
+		"religion_percentage(religion:sunni)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_hanbali_fiqh }
+		OR = {
+			owner = { has_policy = hanbali_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_hanbali_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_traditionalist = societal_value_minor_monthly_move
+	}
+}
+
+madrasa_of_maliki_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	location_potential = {
+		"religion_percentage(religion:sunni)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_maliki_fiqh }
+		OR = {
+			owner = { has_policy = maliki_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_maliki_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_spiritualist = societal_value_minor_monthly_move
+	}
+}
+
+madrasa_of_shafii_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	location_potential = {
+		"religion_percentage(religion:sunni)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_shafii_fiqh }
+		OR = {
+			owner = { has_policy = shafii_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_shafii_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_free_trade = societal_value_minor_monthly_move
+	}
+}
+
+madrasa_of_zahiri_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	location_potential = {
+		"religion_percentage(religion:sunni)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_zahiri_fiqh }
+		OR = {
+			owner = { has_policy = zahiri_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_zahiri_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_conciliatory = societal_value_minor_monthly_move
+	}
+}
+
+madrasa_of_ismaili_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:shia }
+	location_potential = {
+		"religion_percentage(religion:shia)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_ismaili_fiqh }
+		OR = {
+			owner = { has_policy = ismaili_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_ismaili_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:shia)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_belligerent = societal_value_minor_monthly_move
+	}
+}
+
+madrasa_of_jafari_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:shia }
+	location_potential = {
+		"religion_percentage(religion:shia)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_jafari_fiqh }
+		OR = {
+			owner = { has_policy = jafari_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_jafari_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:shia)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_humanist = societal_value_minor_monthly_move
+	}
+}
+
+madrasa_of_zaidi_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:shia }
+	location_potential = {
+		"religion_percentage(religion:shia)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_zaidi_fiqh }
+		OR = {
+			owner = { has_policy = zaidi_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_zaidi_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:shia)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_free_subjects = societal_value_minor_monthly_move
+	}
+}
+
+madrasa_of_ibadi_fiqh = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = estate_clergy_employment
+	max_levels = estate_building_single_level
+
+	graphical_tags = { medium_religious }
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:ibadi }
+	location_potential = {
+		"religion_percentage(religion:ibadi)" >= 0.25
+		NOT = { has_building = building_type:madrasa_of_ibadi_fiqh }
+		OR = {
+			owner = { has_policy = ibadi_policy }
+			area = {
+				any_location_in_area = {
+					owner = root.owner
+					has_building = building_type:seat_of_ibadi_jurists
+				}
+			}
+		}
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:ibadi)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		local_clergy_max_literacy = 5
+		local_pop_conversion_speed_modifier = 0.1
+		local_clergy_food_consumption = 0.1
+		local_tribal_promotion = 0.1
+		monthly_towards_individualism = societal_value_minor_monthly_move
+	}
+}

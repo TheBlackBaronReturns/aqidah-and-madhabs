@@ -1,0 +1,12 @@
+{
+	"name":	"Aqidah: Schools of Creed",
+	"id":	"aqidah_schools_of_creed",
+	"version":	"0.1.0",
+	"supported_game_version":	"1.3.11",
+	"short_description":	"Narrows the Islamic religious_school slot to schools of creed (aqidah: Ashari/Maturidi/Athari/Mutazili/Wahhabi for Sunnis, new Usuli/Akhbari for Twelver Shia). Madhhab moves into a decoupled, directly-selectable sharia_law. Standalone; compatible with Improved Culture Dynamics. Pairs with (but does not require) 'Sufi Tariqa Orders'.",
+	"picture":	"thumbnail.png",
+	"tags":	["Religion", "Events", "Historical", "Gameplay", "Balance"],
+	"relationships":	[],
+	"game_custom_data":	{
+	}
+}

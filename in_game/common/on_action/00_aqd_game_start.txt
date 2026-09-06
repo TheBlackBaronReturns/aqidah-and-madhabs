@@ -1,0 +1,141 @@
+# Aqidah: Schools of Creed - migration hooks.
+#
+# IMPORTANT: on_game_start's own `effect` field does NOT merge across
+# files - confirmed via jomini_onaction.cpp's own log warning ("There
+# is more than one 'effect' defined... using most recent"). Base game's
+# common/on_action/_hardcoded.txt:2 also puts a raw `effect` directly
+# on on_game_start, and whichever file's `effect` block loads last wins
+# outright, discarding the other entirely. Only the `on_actions = {}`
+# LIST field actually merges/accumulates across files (confirmed by
+# four_yearly_country_pulse and monthly_country_pulse below both
+# working correctly) - so game-start hooks must delegate through a
+# separate named on_action via `on_actions`, never put `effect`
+# directly on on_game_start itself.
+on_game_start = {
+	on_actions = { aqd_on_game_start }
+}
+aqd_on_game_start = {
+	effect = {
+		# Repoint any country left on an evicted religious_school.
+		aqd_schools_migrate = yes
+		# Then overwrite with the historically-accurate starting aqidah/
+		# madhhab for every Muslim country (scripted_effects/
+		# z_aqd_starting_schools.txt). Must run after the migrate call
+		# above so it has the final say.
+		aqd_set_starting_schools = yes
+		# Seed jurist seats at the prominent 1337 juristic centres
+		# (scripted_effects/z_aqd_starting_schools.txt). After
+		# aqd_set_starting_schools so the sharia_law policies are in
+		# place. No starting madrasas are seeded - those grow from play.
+		aqd_seed_starting_seats = yes
+	}
+}
+
+# Catch stragglers (AI/events that set an evicted school after game
+# start, and newly formed countries).
+on_new_country_formed = {
+	on_actions = { aqd_migrate_new_country }
+}
+aqd_migrate_new_country = {
+	trigger = {
+		religion = { has_religious_schools = yes }
+		exists = religious_school
+	}
+	effect = {
+		aqd_migrate_one_country = yes
+	}
+}
+
+four_yearly_country_pulse = {
+	on_actions = { aqd_migrate_pulse  aqd_seat_establishment_pulse }
+}
+
+# Ulema Institutions - seat establishment. For a Muslim realm that
+# already has some madhhab at Noteworthy (institution_score >= 3), scan
+# its provinces for one holding 3 madrasas of that madhhab + a mosque
+# and no seat yet, and offer to raise a seat (or crack down). See
+# scripted_effects/z_aqd_establishment_effects.txt and events/religion/
+# z_aqd_establishment_events.txt. The 9-way `>= 3` pre-filter below is
+# the Noteworthy lower bound - keep in sync with auto_modifiers/
+# z_aqd_madhhab_tiers.txt.
+aqd_seat_establishment_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		has_policy = sharia_law_policy
+		OR = {
+			hanafi_institution_score  >= 3
+			hanbali_institution_score >= 3
+			maliki_institution_score  >= 3
+			shafii_institution_score  >= 3
+			zahiri_institution_score  >= 3
+			ismaili_institution_score >= 3
+			jafari_institution_score  >= 3
+			zaidi_institution_score   >= 3
+			ibadi_institution_score   >= 3
+		}
+	}
+	effect = {
+		aqd_try_seat_establishment = yes
+	}
+}
+
+# Ulema Institutions - rare foreign-jurist-arrival event (events/
+# religion/z_aqd_jurist_events.txt). Hooks monthly_country_pulse, which
+# this mod doesn't otherwise touch, additively alongside base/other-mod
+# subscribers - same merge-not-override guarantee documented above for
+# on_game_start.
+monthly_country_pulse = {
+	on_actions = { aqd_jurist_migration_pulse }
+}
+aqd_jurist_migration_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		has_policy = sharia_law_policy
+		any_neighbor_country = {
+			religion.group = religion_group:muslim
+			aqd_is_eligible_jurist_source = yes
+		}
+	}
+	random_events = {
+		100 = z_aqd_jurists.1
+
+		chance_to_happen = 1
+	}
+}
+aqd_migrate_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		exists = religious_school
+		OR = {
+			religious_school ?= {
+				OR = {
+					is_sufi_school = yes
+					this = religious_school:hanafi_school
+					this = religious_school:hanbali_school
+					this = religious_school:maliki_school
+					this = religious_school:shafii_school
+					this = religious_school:zahiri_school
+					this = religious_school:jafari_school
+					this = religious_school:ibadi_school
+					this = religious_school:usuli_school
+					this = religious_school:akhbari_school
+				}
+			}
+			# Ibadi-only eviction: these four stay legal for Sunni.
+			AND = {
+				religion = religion:ibadi
+				religious_school ?= {
+					OR = {
+						this = religious_school:ashari_school
+						this = religious_school:maturidi_school
+						this = religious_school:athari_school
+						this = religious_school:mutazili_school
+					}
+				}
+			}
+		}
+	}
+	effect = {
+		aqd_migrate_one_country = yes
+	}
+}

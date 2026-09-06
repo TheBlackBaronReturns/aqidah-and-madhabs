@@ -1,0 +1,17 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - applied by scripted_effects/
+# z_aqd_establishment_effects.txt's aqd_establishment_mark_pending to
+# the capital of a province after its seat-establishment question has
+# just been settled (allowed or cracked down). While present, the
+# establishment scan (scripted_triggers/z_aqd_jurist_triggers.txt's
+# aqd_province_has_madhhab_density) skips that province, so a crackdown
+# is not re-litigated for 15 years. The small local unrest is the
+# lingering agitation of the affair.
+# =====================================================================
+
+z_aqd_establishment_pending = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}

@@ -1,0 +1,12 @@
+# Aqidah: Schools of Creed - action prices.
+
+# Realm changes its madhhab (the sharia_law policy).
+aqd_change_madhhab = {
+	stability = 50
+}
+
+# Realm cracks down on a rival madhhab's institutions.
+aqd_crackdown_madhhab = {
+	stability = 25
+	gold = 50
+}

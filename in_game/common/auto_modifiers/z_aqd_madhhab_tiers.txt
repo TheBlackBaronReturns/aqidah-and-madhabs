@@ -1,0 +1,222 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: tiered national
+# modifiers per madhhab (Presence / Noteworthy / Plurality /
+# Predominance), driven by script_values/z_aqd_madhhab_counts.txt's
+# per-madhhab institution score (seats=2, madrasas=1).
+#
+# Predominance also fires automatically if the madhhab is the nation's
+# own current sharia_law policy, regardless of score - holding the
+# official law IS predominance. The three lower tiers explicitly
+# exclude that case (NOT has_policy) so they never overlap with it.
+# A madhhab with zero seats/madrasas that is also not the active law
+# matches none of the four blocks below, i.e. shows no modifier at
+# all - this is intentional, not a missing "tier 0" block.
+#
+# Thresholds (1/3/5/8) MUST be kept in sync with:
+#  - scripted_triggers/z_aqd_jurist_triggers.txt's
+#    aqd_is_eligible_jurist_source (Plurality lower bound = 5);
+#  - scripted_effects/z_aqd_jurist_effects.txt's aqd_crackdown_effect
+#    (all four thresholds);
+#  - on_action/00_aqd_game_start.txt's aqd_seat_establishment_pulse and
+#    scripted_triggers/z_aqd_jurist_triggers.txt's
+#    aqd_province_has_madhhab_density (Noteworthy lower bound = 3, and
+#    the "3 madrasas in one province" literal in the density trigger).
+# =====================================================================
+
+aqd_hanafi_predominance = {
+	potential_trigger = { OR = { hanafi_institution_score >= 8  has_policy = hanafi_policy } }
+	monthly_towards_mysticism = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_hanafi_plurality = {
+	potential_trigger = { hanafi_institution_score >= 5  hanafi_institution_score < 8  NOT = { has_policy = hanafi_policy } }
+	monthly_towards_mysticism = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_hanafi_noteworthy = {
+	potential_trigger = { hanafi_institution_score >= 3  hanafi_institution_score < 5  NOT = { has_policy = hanafi_policy } }
+	monthly_towards_mysticism = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_hanafi_presence = {
+	potential_trigger = { hanafi_institution_score >= 1  hanafi_institution_score < 3  NOT = { has_policy = hanafi_policy } }
+	monthly_towards_mysticism = societal_value_minor_monthly_move
+}
+
+aqd_hanbali_predominance = {
+	potential_trigger = { OR = { hanbali_institution_score >= 8  has_policy = hanbali_policy } }
+	monthly_towards_traditionalist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_hanbali_plurality = {
+	potential_trigger = { hanbali_institution_score >= 5  hanbali_institution_score < 8  NOT = { has_policy = hanbali_policy } }
+	monthly_towards_traditionalist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_hanbali_noteworthy = {
+	potential_trigger = { hanbali_institution_score >= 3  hanbali_institution_score < 5  NOT = { has_policy = hanbali_policy } }
+	monthly_towards_traditionalist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_hanbali_presence = {
+	potential_trigger = { hanbali_institution_score >= 1  hanbali_institution_score < 3  NOT = { has_policy = hanbali_policy } }
+	monthly_towards_traditionalist = societal_value_minor_monthly_move
+}
+
+aqd_maliki_predominance = {
+	potential_trigger = { OR = { maliki_institution_score >= 8  has_policy = maliki_policy } }
+	monthly_towards_spiritualist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_maliki_plurality = {
+	potential_trigger = { maliki_institution_score >= 5  maliki_institution_score < 8  NOT = { has_policy = maliki_policy } }
+	monthly_towards_spiritualist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_maliki_noteworthy = {
+	potential_trigger = { maliki_institution_score >= 3  maliki_institution_score < 5  NOT = { has_policy = maliki_policy } }
+	monthly_towards_spiritualist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_maliki_presence = {
+	potential_trigger = { maliki_institution_score >= 1  maliki_institution_score < 3  NOT = { has_policy = maliki_policy } }
+	monthly_towards_spiritualist = societal_value_minor_monthly_move
+}
+
+aqd_shafii_predominance = {
+	potential_trigger = { OR = { shafii_institution_score >= 8  has_policy = shafii_policy } }
+	monthly_towards_free_trade = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_shafii_plurality = {
+	potential_trigger = { shafii_institution_score >= 5  shafii_institution_score < 8  NOT = { has_policy = shafii_policy } }
+	monthly_towards_free_trade = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_shafii_noteworthy = {
+	potential_trigger = { shafii_institution_score >= 3  shafii_institution_score < 5  NOT = { has_policy = shafii_policy } }
+	monthly_towards_free_trade = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_shafii_presence = {
+	potential_trigger = { shafii_institution_score >= 1  shafii_institution_score < 3  NOT = { has_policy = shafii_policy } }
+	monthly_towards_free_trade = societal_value_minor_monthly_move
+}
+
+aqd_zahiri_predominance = {
+	potential_trigger = { OR = { zahiri_institution_score >= 8  has_policy = zahiri_policy } }
+	monthly_towards_conciliatory = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_zahiri_plurality = {
+	potential_trigger = { zahiri_institution_score >= 5  zahiri_institution_score < 8  NOT = { has_policy = zahiri_policy } }
+	monthly_towards_conciliatory = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_zahiri_noteworthy = {
+	potential_trigger = { zahiri_institution_score >= 3  zahiri_institution_score < 5  NOT = { has_policy = zahiri_policy } }
+	monthly_towards_conciliatory = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_zahiri_presence = {
+	potential_trigger = { zahiri_institution_score >= 1  zahiri_institution_score < 3  NOT = { has_policy = zahiri_policy } }
+	monthly_towards_conciliatory = societal_value_minor_monthly_move
+}
+
+aqd_ismaili_predominance = {
+	potential_trigger = { OR = { ismaili_institution_score >= 8  has_policy = ismaili_policy } }
+	monthly_towards_belligerent = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_ismaili_plurality = {
+	potential_trigger = { ismaili_institution_score >= 5  ismaili_institution_score < 8  NOT = { has_policy = ismaili_policy } }
+	monthly_towards_belligerent = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_ismaili_noteworthy = {
+	potential_trigger = { ismaili_institution_score >= 3  ismaili_institution_score < 5  NOT = { has_policy = ismaili_policy } }
+	monthly_towards_belligerent = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_ismaili_presence = {
+	potential_trigger = { ismaili_institution_score >= 1  ismaili_institution_score < 3  NOT = { has_policy = ismaili_policy } }
+	monthly_towards_belligerent = societal_value_minor_monthly_move
+}
+
+aqd_jafari_predominance = {
+	potential_trigger = { OR = { jafari_institution_score >= 8  has_policy = jafari_policy } }
+	monthly_towards_humanist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_jafari_plurality = {
+	potential_trigger = { jafari_institution_score >= 5  jafari_institution_score < 8  NOT = { has_policy = jafari_policy } }
+	monthly_towards_humanist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_jafari_noteworthy = {
+	potential_trigger = { jafari_institution_score >= 3  jafari_institution_score < 5  NOT = { has_policy = jafari_policy } }
+	monthly_towards_humanist = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_jafari_presence = {
+	potential_trigger = { jafari_institution_score >= 1  jafari_institution_score < 3  NOT = { has_policy = jafari_policy } }
+	monthly_towards_humanist = societal_value_minor_monthly_move
+}
+
+aqd_zaidi_predominance = {
+	potential_trigger = { OR = { zaidi_institution_score >= 8  has_policy = zaidi_policy } }
+	monthly_towards_free_subjects = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_zaidi_plurality = {
+	potential_trigger = { zaidi_institution_score >= 5  zaidi_institution_score < 8  NOT = { has_policy = zaidi_policy } }
+	monthly_towards_free_subjects = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_zaidi_noteworthy = {
+	potential_trigger = { zaidi_institution_score >= 3  zaidi_institution_score < 5  NOT = { has_policy = zaidi_policy } }
+	monthly_towards_free_subjects = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_zaidi_presence = {
+	potential_trigger = { zaidi_institution_score >= 1  zaidi_institution_score < 3  NOT = { has_policy = zaidi_policy } }
+	monthly_towards_free_subjects = societal_value_minor_monthly_move
+}
+
+aqd_ibadi_predominance = {
+	potential_trigger = { OR = { ibadi_institution_score >= 8  has_policy = ibadi_policy } }
+	monthly_towards_individualism = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.15
+	global_clergy_max_literacy = 10
+}
+aqd_ibadi_plurality = {
+	potential_trigger = { ibadi_institution_score >= 5  ibadi_institution_score < 8  NOT = { has_policy = ibadi_policy } }
+	monthly_towards_individualism = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.10
+	global_clergy_max_literacy = 5
+}
+aqd_ibadi_noteworthy = {
+	potential_trigger = { ibadi_institution_score >= 3  ibadi_institution_score < 5  NOT = { has_policy = ibadi_policy } }
+	monthly_towards_individualism = societal_value_minor_monthly_move
+	global_clergy_estate_power = 0.05
+}
+aqd_ibadi_presence = {
+	potential_trigger = { ibadi_institution_score >= 1  ibadi_institution_score < 3  NOT = { has_policy = ibadi_policy } }
+	monthly_towards_individualism = societal_value_minor_monthly_move
+}

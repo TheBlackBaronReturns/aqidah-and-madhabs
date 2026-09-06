@@ -1,0 +1,112 @@
+# =====================================================================
+# SYSTEM B - decouple the madhhab law (vanilla sharia_law) from
+# religious_school.
+#
+# Vanilla makes each madhhab policy selectable only when your
+# religious_school is that madhhab (or a non-madhhab), and the law is
+# "changed through the main school" (change_main_school). After System B
+# the religious_school slot is creed-only, so:
+#   - the law is locked to direct editing (locked = always) and changed
+#     only through the deliberate aqd_change_madhhab action;
+#   - each policy potential drops the religious_school ?= { NOR ... }
+#     sub-clause, so any madhhab of the sect is a legal target;
+#   - the modifiers the evicted *_school entries carried (incl. the
+#     mysticism/jurisprudence axis pushes) are folded into the policies.
+# =====================================================================
+
+REPLACE:sharia_law = {
+	law_category = administrative
+	potential = { has_policy = sharia_law_policy }
+
+	locked = { always = yes }
+
+	# Axis scheme: Hanafi/Maliki pull towards mysticism; Hanbali/Shafii/
+	# Zahiri pull towards jurisprudence. All pulls are minor - the schools'
+	# own (pre-System-B) axis pushes were folded in at minor strength to
+	# match the other flavor pulls each policy already carried.
+	hanafi_policy = {
+		potential = { religion = religion:sunni }
+		country_modifier = {
+			global_clergy_max_literacy = 10
+			monthly_towards_communalism = societal_value_minor_monthly_move
+			monthly_towards_mysticism = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+
+	hanbali_policy = {
+		potential = { religion = religion:sunni }
+		country_modifier = {
+			antagonism_received_modifier = -0.05
+			monthly_towards_traditionalist = societal_value_minor_monthly_move
+			monthly_towards_jurisprudence = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+
+	maliki_policy = {
+		potential = { religion = religion:sunni }
+		country_modifier = {
+			global_monthly_development = 0.001
+			monthly_towards_spiritualist = societal_value_minor_monthly_move
+			monthly_towards_mysticism = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+
+	shafii_policy = {
+		potential = { religion = religion:sunni }
+		country_modifier = {
+			global_merchant_capacity_modifier = 0.1
+			selling_efficiency = small_trade_efficiency_bonus
+			monthly_towards_free_trade = societal_value_minor_monthly_move
+			monthly_towards_jurisprudence = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+
+	zahiri_policy = {
+		potential = { religion = religion:sunni }
+		country_modifier = {
+			global_pop_conversion_speed_modifier = 0.1
+			monthly_towards_conciliatory = societal_value_minor_monthly_move
+			monthly_towards_inward = societal_value_minor_monthly_move
+			monthly_towards_jurisprudence = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+
+	ismaili_policy = {
+		potential = { religion = religion:shia }
+		country_modifier = {
+			monthly_towards_belligerent = societal_value_minor_monthly_move
+			monthly_towards_outward = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+
+	jafari_policy = {
+		potential = { religion = religion:shia }
+		country_modifier = {
+			global_population_growth = 0.00025
+			monthly_towards_humanist = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+
+	zaidi_policy = {
+		potential = { religion = religion:shia }
+		country_modifier = {
+			monthly_towards_free_subjects = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+
+	ibadi_policy = {
+		potential = { religion = religion:ibadi }
+		country_modifier = {
+			monthly_towards_individualism = societal_value_minor_monthly_move
+		}
+		years = 2
+	}
+}

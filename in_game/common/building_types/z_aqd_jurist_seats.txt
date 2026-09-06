@@ -1,0 +1,378 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: Jurist Seats.
+#
+# A seat is the standing juristic authority of a madhhab (a sharia_law
+# policy, see laws/z_aqd_sharia_law.txt) in a province - the body that
+# trains and appoints its qadis.
+#
+# Seats are EVENT-ONLY. They are never buildable through the UI
+# (allow = { always = no }). They come to exist three ways:
+#
+#  - the establishment event (events/religion/z_aqd_establishment_events.txt
+#    via scripted_effects/z_aqd_establishment_effects.txt): a province
+#    that has 3 madrasas of madhhab X (building_types/z_aqd_madrasas.txt)
+#    plus at least one mosque, no seat of X yet, and an owned city (or
+#    larger) to house it, offers its owner the choice to raise a seat
+#    there - the province capital if eligible - or crack down;
+#  - the historically-seeded seats placed at game start for the
+#    prominent 1337 juristic centres (scripted_effects/
+#    z_aqd_starting_schools.txt's aqd_seed_starting_seats);
+#  - conquest of a location that already holds one.
+#
+# All three place the seat with change_building_level_in_location, which
+# bypasses `allow` / `location_potential` / `country_potential`. The
+# location_potential below is kept only as a double-placement guard for
+# any future path that does route through the build system; the
+# religion-percentage clause is deliberately dropped so the engine's
+# periodic building sweep cannot prune a legitimately-placed seat in a
+# thin-minority capital - remove_if (0.05 floor + non-Muslim owner)
+# stays as the demographic-cleanup path.
+#
+# A seat can never be manually demolished (can_destroy = always = no).
+# It is removed only by scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_crackdown_effect (see generic_actions/z_aqd_piety.txt's
+# aqd_crackdown_madhhab and the establishment event's crackdown option)
+# or by remove_if. Switching the realm's official madhhab does not
+# remove an existing seat.
+#
+# Counted into script_values/z_aqd_madhhab_counts.txt's per-madhhab
+# institution score (weight 2, vs. 1 for a madrasa), which drives the
+# tiered auto_modifiers in auto_modifiers/z_aqd_madhhab_tiers.txt.
+#
+# ICON: placeholder - intended to reuse each madhhab's religious-school
+# / <X>_policy sprite via an interface/*.gfx mapping. Not yet wired;
+# the seats currently fall back to the default estate-building icon.
+# =====================================================================
+
+seat_of_hanafi_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_hanafi_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		global_clergy_max_literacy = 5
+	}
+}
+
+seat_of_hanbali_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_hanbali_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		global_clergy_estate_power = 0.05
+	}
+}
+
+seat_of_maliki_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_maliki_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		global_monthly_development = 0.0005
+	}
+}
+
+seat_of_shafii_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_shafii_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		selling_efficiency = tiny_trade_efficiency_bonus
+	}
+}
+
+seat_of_zahiri_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:sunni }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_zahiri_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:sunni)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		global_pop_conversion_speed_modifier = 0.05
+	}
+}
+
+seat_of_ismaili_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:shia }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_ismaili_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:shia)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		global_clergy_estate_power = 0.05
+	}
+}
+
+seat_of_jafari_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:shia }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_jafari_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:shia)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		global_population_growth = 0.00015
+	}
+}
+
+seat_of_zaidi_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:shia }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_zaidi_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:shia)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		global_clergy_max_literacy = 5
+	}
+}
+
+seat_of_ibadi_jurists = {
+	estate = clergy_estate
+	category = estate_category
+	pop_type = clergy
+	employment_size = large_religious_building_employment
+	max_levels = estate_building_single_level
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = estate_build_time
+	construction_demand = estate_construct_building
+
+	country_potential = { religion = religion:ibadi }
+	allow = { always = no }
+	can_destroy = { always = no }
+
+	location_potential = {
+		NOT = { has_building = building_type:seat_of_ibadi_jurists }
+	}
+	remove_if = {
+		location = {
+			OR = {
+				owner ?= { religion.group != religion_group:muslim }
+				"religion_percentage(religion:ibadi)" < 0.05
+			}
+		}
+	}
+
+	possible_production_methods = { estate_building_input }
+	modifier = {
+		tolerance_heretic = 1
+	}
+}

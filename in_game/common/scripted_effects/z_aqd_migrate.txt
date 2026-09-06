@@ -1,0 +1,136 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - migration: repoint any country / character left holding a
+# now-evicted religious_school to an aqidah school, and (for a fiqh
+# school - Sunni madhhab, Twelver jafari, or Ibadi) set the matching
+# sharia_law policy so the fiqh identity is preserved.
+#
+# Shia fallback (and usuli_school/akhbari_school themselves, now also
+# evicted) is imamiya_school: Usuli vs Akhbari is a post-1700 dispute
+# inside Twelver jurisprudence (see the muslim_school_events.22
+# substitute's own 1700 gate for Wahhabism, a parallel case), so it's
+# anachronistic as a standing choice across the whole timeline, not just
+# as a fallback. imamiya_school is the mainstream Twelver theological
+# label that actually predates the split, and is now Twelver Shia's only
+# whitelisted identity (muslim.txt).
+#
+# Ibadi fallback is azzaba_school (Maghreb capital) or wahbi_school
+# (everywhere else, principally Oman), not ashari_school: Ibadi's
+# whitelist is those two only now (muslim.txt) - the vanilla-inherited
+# Sunni kalam crossover (Ashari/Maturidi/Athari/Mutazili) is evicted
+# too. See religious_schools/z_aqd_ibadi_aqidah.txt - both are the same
+# Wahbiyya creed, split by institutional form (Imamate vs. the Maghreb's
+# scholarly-council azzaba system), not doctrine.
+#
+# Idempotent: only acts on evicted keys. Run from on_game_start and the
+# per-country pulses.
+# =====================================================================
+
+aqd_migrate_one_country = {
+	# --- Sunni madhhab schools -> aqidah + madhhab policy ---
+	if = {
+		limit = { religious_school ?= religious_school:hanafi_school }
+		set_religious_school = religious_school:maturidi_school
+		if = { limit = { has_policy = sharia_law_policy  NOT = { has_policy = hanafi_policy } } add_policy = policy:hanafi_policy }
+	}
+	if = {
+		limit = { religious_school ?= religious_school:hanbali_school }
+		set_religious_school = religious_school:athari_school
+		if = { limit = { has_policy = sharia_law_policy  NOT = { has_policy = hanbali_policy } } add_policy = policy:hanbali_policy }
+	}
+	if = {
+		limit = { religious_school ?= religious_school:maliki_school }
+		set_religious_school = religious_school:ashari_school
+		if = { limit = { has_policy = sharia_law_policy  NOT = { has_policy = maliki_policy } } add_policy = policy:maliki_policy }
+	}
+	if = {
+		limit = { religious_school ?= religious_school:shafii_school }
+		set_religious_school = religious_school:ashari_school
+		if = { limit = { has_policy = sharia_law_policy  NOT = { has_policy = shafii_policy } } add_policy = policy:shafii_policy }
+	}
+	if = {
+		limit = { religious_school ?= religious_school:zahiri_school }
+		set_religious_school = religious_school:athari_school
+		if = { limit = { has_policy = sharia_law_policy  NOT = { has_policy = zahiri_policy } } add_policy = policy:zahiri_policy }
+	}
+	# --- Shia jafari -> imamiya + jafari policy ---
+	if = {
+		limit = { religious_school ?= religious_school:jafari_school }
+		set_religious_school = religious_school:imamiya_school
+		if = { limit = { has_policy = sharia_law_policy  NOT = { has_policy = jafari_policy } } add_policy = policy:jafari_policy }
+	}
+	# --- Ibadi fiqh school -> azzaba/wahbi aqidah + ibadi policy ---
+	if = {
+		limit = { religious_school ?= religious_school:ibadi_school }
+		if = {
+			limit = { capital.region = region:maghreb_region }
+			set_religious_school = religious_school:azzaba_school
+		}
+		else = {
+			set_religious_school = religious_school:wahbi_school
+		}
+		if = { limit = { has_policy = sharia_law_policy  NOT = { has_policy = ibadi_policy } } add_policy = policy:ibadi_policy }
+	}
+	# --- Twelver Usuli/Akhbari -> imamiya (anachronistic as a standing choice) ---
+	if = {
+		limit = {
+			OR = {
+				religious_school ?= religious_school:usuli_school
+				religious_school ?= religious_school:akhbari_school
+			}
+		}
+		set_religious_school = religious_school:imamiya_school
+	}
+	# --- Ibadi holding a (now-evicted-for-them) Sunni kalam school -> azzaba/wahbi ---
+	if = {
+		limit = {
+			religion = religion:ibadi
+			OR = {
+				religious_school ?= religious_school:ashari_school
+				religious_school ?= religious_school:maturidi_school
+				religious_school ?= religious_school:athari_school
+				religious_school ?= religious_school:mutazili_school
+			}
+		}
+		if = {
+			limit = { capital.region = region:maghreb_region }
+			set_religious_school = religious_school:azzaba_school
+		}
+		else = {
+			set_religious_school = religious_school:wahbi_school
+		}
+	}
+	# --- Sufi-order schools -> aqidah default by religion ---
+	if = {
+		limit = {
+			religious_school ?= { is_sufi_school = yes }
+		}
+		if = {
+			limit = { religion = religion:shia }
+			set_religious_school = religious_school:imamiya_school
+		}
+		else_if = {
+			limit = { religion = religion:ibadi  capital.region = region:maghreb_region }
+			set_religious_school = religious_school:azzaba_school
+		}
+		else_if = {
+			limit = { religion = religion:ibadi }
+			set_religious_school = religious_school:wahbi_school
+		}
+		else = {
+			set_religious_school = religious_school:ashari_school
+		}
+	}
+	# din_i_ilahi_school is kept in the aqidah whitelist (muslim.txt) - it
+	# is not a tariqa/order and vanilla's own is_sufi_school trigger
+	# already excludes it - so it is NOT migrated away here.
+}
+
+aqd_schools_migrate = {
+	every_country = {
+		limit = {
+			religion = { has_religious_schools = yes }
+			exists = religious_school
+		}
+		aqd_migrate_one_country = yes
+	}
+}

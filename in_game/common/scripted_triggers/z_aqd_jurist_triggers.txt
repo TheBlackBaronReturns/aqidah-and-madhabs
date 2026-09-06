@@ -1,0 +1,120 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: shared triggers.
+#
+# aqd_is_eligible_jurist_source: is 'this' (a candidate neighbor
+# country) a valid source of "foreign jurists" for 'root' (the
+# receiving country)? A candidate qualifies for a given madhhab if it
+# holds that madhhab as its own current law, root does NOT already
+# hold that same madhhab as its own current law (never offer your own
+# madhhab as "foreign"), root's institution score for that madhhab has
+# not already reached Plurality (see auto_modifiers/
+# z_aqd_madhhab_tiers.txt - the "5" threshold below must match that
+# file's Plurality lower bound for every madhhab), AND root actually
+# has a location whose population meets the population threshold for
+# the CANDIDATE's own religion (sunni/shia/ibadi per madhhab) - so the
+# event is never offered when accepting it could never actually place
+# a seat anywhere (e.g. a wholly-Sunni root has no province any Shia
+# jurists could realistically settle in). The 0.25 threshold here must
+# match building_types/z_aqd_madrasas.txt and scripted_effects/
+# z_aqd_jurist_effects.txt's aqd_build_madrasas_of_madhhab_from exactly.
+#
+# aqd_province_has_madhhab_density = { MADHHAB SECT }: does 'this' (a
+# country, = root here) own a province_definition holding >= 3 of its
+# own madrasas of MADHHAB plus >= 1 mosque (temple), with no seat of
+# MADHHAB and whose capital carries no z_aqd_establishment_pending
+# marker? Drives the establishment pulse in on_action/00_aqd_game_start.txt.
+# The "3" is the Noteworthy threshold - keep in sync with
+# auto_modifiers/z_aqd_madhhab_tiers.txt.
+# =====================================================================
+
+aqd_is_eligible_jurist_source = {
+	OR = {
+		AND = {
+			this = { has_policy = hanafi_policy }
+			NOT = { root = { has_policy = hanafi_policy } }
+			root.hanafi_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+		}
+		AND = {
+			this = { has_policy = hanbali_policy }
+			NOT = { root = { has_policy = hanbali_policy } }
+			root.hanbali_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+		}
+		AND = {
+			this = { has_policy = maliki_policy }
+			NOT = { root = { has_policy = maliki_policy } }
+			root.maliki_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+		}
+		AND = {
+			this = { has_policy = shafii_policy }
+			NOT = { root = { has_policy = shafii_policy } }
+			root.shafii_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+		}
+		AND = {
+			this = { has_policy = zahiri_policy }
+			NOT = { root = { has_policy = zahiri_policy } }
+			root.zahiri_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+		}
+		AND = {
+			this = { has_policy = ismaili_policy }
+			NOT = { root = { has_policy = ismaili_policy } }
+			root.ismaili_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:shia)" >= 0.25 } }
+		}
+		AND = {
+			this = { has_policy = jafari_policy }
+			NOT = { root = { has_policy = jafari_policy } }
+			root.jafari_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:shia)" >= 0.25 } }
+		}
+		AND = {
+			this = { has_policy = zaidi_policy }
+			NOT = { root = { has_policy = zaidi_policy } }
+			root.zaidi_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:shia)" >= 0.25 } }
+		}
+		AND = {
+			this = { has_policy = ibadi_policy }
+			NOT = { root = { has_policy = ibadi_policy } }
+			root.ibadi_institution_score < 5
+			root = { any_owned_location = { "religion_percentage(religion:ibadi)" >= 0.25 } }
+		}
+	}
+}
+
+aqd_province_has_madhhab_density = {
+	any_owned_location = {
+		province_definition = {
+			# 3+ of our own madrasas of the madhhab
+			any_location_in_province_definition = {
+				count >= 3
+				owner = root
+				has_building = building_type:madrasa_of_$MADHHAB$_fiqh
+			}
+			# a mosque
+			any_location_in_province_definition = {
+				count >= 1
+				owner = root
+				has_building = building_type:temple
+			}
+			# no seat of the madhhab yet
+			NOT = { any_location_in_province_definition = { has_building = building_type:seat_of_$MADHHAB$_jurists } }
+			# not recently settled here
+			NOT = { any_location_in_province_definition = { has_location_modifier = z_aqd_establishment_pending } }
+			# a valid seat target we own: a city (or larger) with the sect present
+			any_location_in_province_definition = {
+				count >= 1
+				owner = root
+				"religion_percentage(religion:$SECT$)" >= 0.25
+				OR = {
+					location_rank ?= location_rank:city
+					location_rank ?= location_rank:megalopolis
+				}
+			}
+		}
+	}
+}

@@ -1,0 +1,306 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - historically-accurate starting aqidah +
+# madhhab for every Muslim country, run once at on_game_start (after
+# aqd_schools_migrate, so it has the final say - see
+# on_action/00_aqd_game_start.txt).
+#
+# Vanilla does not assign religious_school by history at all (no
+# setup/countries field for it, no country_history equivalent, nothing
+# in on_game_start): whatever a fresh game starts a Muslim country on
+# is engine-internal and not something this mod's data can read, let
+# alone rely on being reasonable. So instead of patching a vanilla
+# default, this sets every religion:sunni / religion:shia /
+# religion:ibadi country's aqidah (religious_school) and, where
+# System B moved it, its madhhab (a sharia_law policy) directly by
+# well-documented regional/cultural pattern. It is intentionally NOT a
+# per-tag list: with 246 Sunni + 22 Shia + 5 Ibadi tags across the
+# setup files, most of them single-location chiefdoms with no
+# individually recorded madhhab, a per-tag list would mean inventing
+# specifics for polities the historical record doesn't actually
+# distinguish at this granularity. Region/culture rules are both more
+# honest about that uncertainty and self-maintaining if the country
+# list changes.
+#
+# --- Ibadi ---
+# Ibadism does not split fiqh from creed the way Sunni Islam does - both
+# ibadi_policy (fiqh) and the two Ibadi creed schools apply uniformly
+# regardless of which of the two a country holds. The two ARE, however,
+# a genuine regional split worth modelling (see religious_schools/
+# z_aqd_ibadi_aqidah.txt for the full history): azzaba_school for the
+# Maghreb (capital in maghreb_region - the Mzab, Jabal Nafusa, Djerba,
+# Ouargla/Wargla all fall there), where Ibadism has organized around
+# scholarly councils rather than a ruling Imam since the Rustamid
+# Imamate fell in 909; wahbi_school as the default everywhere else,
+# above all Oman, whose continuous Imamate is the other historically
+# attested form. These are Ibadi's only two whitelisted schools at all
+# (muslim.txt) - the vanilla Sunni kalam crossover (Ashari/Maturidi/
+# Athari/Mutazili) has been dropped entirely.
+#
+# --- Shia ---
+# Usuli vs Akhbari is a post-1700 dispute (see z_aqd_migrate.txt's
+# header) and so is anachronistic as a standing choice across the whole
+# timeline, not just at game start - both are dropped from Twelver
+# Shia's whitelist entirely (muslim.txt). imamiya_school - the actual
+# pre-Safavid Twelver theological label - plus jafari_policy is the
+# default and, for Twelver countries, the only aqidah on offer. The one
+# carve-out is the Yemeni highlands specifically - north_yemen_area and
+# south_yemen_area, NOT the whole arabia_region: Zaydism has been the
+# continuously dominant Shia branch there since the Rassid Imamate
+# (897), a much better-attested regional identity than any of the
+# alternative branches (Ismaili, Alawi, Alevi are either extinct as
+# states by 1337 or - Alevism especially - not yet crystallized as an
+# identity), so those two areas get zaidi_school + zaidi_policy instead.
+# Deliberately narrower than arabia_region as a whole: Bahrain
+# (bahrein_area, e.g. the Jarwanids) falls outside both Yemen areas and
+# so correctly lands on the Twelver default instead - Bahrain's Baharna
+# community is one of the best-attested Twelver Shia populations
+# anywhere, not Zaydi, and lumping the whole peninsula into one bucket
+# would have mislabeled it.
+#
+# A second carve-out, ahead of the Yemen check: Hunza and Gilgit (tags
+# HNZ/GLI, confirmed by their internal map-color keys - map_hunza,
+# map_gilgit - since the setup files carry no English names) sit in the
+# Karakoram, the heartland Nizari Ismailis fled to and have continuously
+# held since the Mongols destroyed the Alamut state in 1256 - not
+# anachronistic at all, unlike Alevism/Alawi, and unambiguous enough to
+# name by tag rather than by area (there is no broader region key that
+# would capture just this pocket without over- or under-including). They
+# get nizari_school + ismaili_policy - Nizari is the specific branch
+# actually attested there; the fiqh identity for any Ismaili branch is
+# just ismaili_policy in sharia_law, vanilla draws no separate
+# nizari/mustali distinction at the jurisprudence level.
+#
+# No other Shia tag gets an Ismaili or Alevi override. The Levant/
+# Caucasus tags (HLL/IHB) read, from culture and the map-color-key
+# naming pattern this game uses, as an Iraqi Hilla-adjacent and a
+# Caspian Ispahbadan-adjacent polity respectively - if anything the
+# former reinforces the Twelver default (Hilla was THE center of
+# Twelver jurisprudence), not an Ismaili claim. The two Anatolian tags
+# (AHI/DUL, Turkish culture) are exactly the kind of Turkoman group that
+# later fed into Alevism, but that identity crystallizes out of the
+# 15th-16th century Safavid-era Qizilbash movement - two centuries+
+# after 1337 - so they stay on the Twelver default rather than being
+# tagged with an identity that doesn't exist yet.
+#
+# --- Sunni ---
+# Four-tier fiqh+kalam pairing, applied in priority order:
+#  1. Hanbali + Athari - Najd (arabia_region's najd_area) specifically.
+#     The Arabian interior's isolation from the coastal Hejaz/Gulf trade
+#     and scholarly networks let a strict Hanbali-Athari textualist
+#     tradition persist there continuously below the level of an
+#     independent state; it is the same Najdi substrate 18th-century
+#     Wahhabism itself later grew from. This also means a Najdi Sunni
+#     country now starts already holding hanbali_policy, the actual
+#     precondition muslim_school_events.22 checks for that later
+#     founding.
+#  2. Hanafi + Maturidi - the canonical Central-Asian-Turkic pairing.
+#     Triggered by Turkic culture OR a capital in the historically
+#     Hanafi-heartland regions: Khorasan (where Hanafi jurisprudence
+#     itself developed around Kufa's Central Asian students), the
+#     steppe/Xinjiang khanates, and the Indian subcontinent (Hindustan/
+#     Bengal/Central India/Western India/Deccan) - Ghurid- and
+#     Delhi-descended Turkic and Afghan dynasties made Hanafi-Maturidi
+#     the enduring identity of South Asian Sunni Islam regardless of a
+#     given successor sultanate's own ruling culture tag.
+#  3. Maliki + Ashari - Maghreb and West Africa (Sahel/Guinea): Maliki
+#     law has been the near-exclusive madhhab of North and West Africa
+#     since the Almoravid-era spread of Sanhaja Maliki scholarship along
+#     the trans-Saharan trade routes.
+#  4. Shafii + Ashari - the fallback for everyone else: Egypt, the
+#     Crescent/Levant, Arabia, the Horn of Africa, the Swahili coast,
+#     and Southeast Asia/Indonesia are all part of the same Indian-
+#     Ocean-rim Shafii scholarly network (via Hijazi and Hadrami
+#     missionary and trade links), and Ashari kalam is the Arab-world
+#     theological mainstream this fiqh network shares.
+# No Sunni country outside Najd defaults to Hanbali, and none at all
+# defaults to Zahiri (state patronage died out with the Almohads) or
+# Mutazili (no state patronized it after the Abbasid Mihna ended in
+# 848). All four remain reachable later via change_main_school /
+# aqd_change_madhhab regardless of starting tier.
+# =====================================================================
+
+aqd_set_starting_schools = {
+	every_country = {
+		limit = { religion = religion:ibadi }
+		if = {
+			limit = { capital.region = region:maghreb_region }
+			set_religious_school = religious_school:azzaba_school
+		}
+		else = {
+			set_religious_school = religious_school:wahbi_school
+		}
+		if = {
+			limit = { has_policy = sharia_law_policy  NOT = { has_policy = ibadi_policy } }
+			add_policy = policy:ibadi_policy
+		}
+	}
+
+	every_country = {
+		limit = { religion = religion:shia }
+		if = {
+			limit = {
+				OR = {
+					this = c:HNZ
+					this = c:GLI
+				}
+			}
+			set_religious_school = religious_school:nizari_school
+			if = {
+				limit = { has_policy = sharia_law_policy  NOT = { has_policy = ismaili_policy } }
+				add_policy = policy:ismaili_policy
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					capital.area = area:north_yemen_area
+					capital.area = area:south_yemen_area
+				}
+			}
+			set_religious_school = religious_school:zaidi_school
+			if = {
+				limit = { has_policy = sharia_law_policy  NOT = { has_policy = zaidi_policy } }
+				add_policy = policy:zaidi_policy
+			}
+		}
+		else = {
+			set_religious_school = religious_school:imamiya_school
+			if = {
+				limit = { has_policy = sharia_law_policy  NOT = { has_policy = jafari_policy } }
+				add_policy = policy:jafari_policy
+			}
+		}
+	}
+
+	every_country = {
+		limit = { religion = religion:sunni }
+		if = {
+			limit = { capital.area = area:najd_area }
+			set_religious_school = religious_school:athari_school
+			if = {
+				limit = { has_policy = sharia_law_policy  NOT = { has_policy = hanbali_policy } }
+				add_policy = policy:hanbali_policy
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					culture = { has_culture_group = culture_group:turkic_group }
+					capital.region = region:hindustan_region
+					capital.region = region:bengal_region
+					capital.region = region:central_india_region
+					capital.region = region:western_india_region
+					capital.region = region:deccan_region
+					capital.region = region:khorasan_region
+					capital.region = region:steppes_region
+					capital.region = region:xinjiang_region
+				}
+			}
+			set_religious_school = religious_school:maturidi_school
+			if = {
+				limit = { has_policy = sharia_law_policy  NOT = { has_policy = hanafi_policy } }
+				add_policy = policy:hanafi_policy
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					capital.region = region:maghreb_region
+					capital.region = region:sahel_region
+					capital.region = region:guinea_region
+				}
+			}
+			set_religious_school = religious_school:ashari_school
+			if = {
+				limit = { has_policy = sharia_law_policy  NOT = { has_policy = maliki_policy } }
+				add_policy = policy:maliki_policy
+			}
+		}
+		else = {
+			set_religious_school = religious_school:ashari_school
+			if = {
+				limit = { has_policy = sharia_law_policy  NOT = { has_policy = shafii_policy } }
+				add_policy = policy:shafii_policy
+			}
+		}
+	}
+}
+
+# =====================================================================
+# Historical seed of jurist seats at the prominent 1337 juristic
+# centres. Seats only - NO starting madrasas (those grow from play).
+# Run from on_action/00_aqd_game_start.txt's aqd_on_game_start, after
+# aqd_set_starting_schools. Each seat is placed with
+# change_building_level_in_location (seats are allow = { always = no }),
+# only if the city exists, is Muslim-owned, and lacks that seat.
+#
+# A seeded seat immediately opens area-wide building of that madhhab's
+# madrasas within the owner's borders (building_types/z_aqd_madrasas.txt).
+#
+# Cairo carries all four Sunni madhhabs (Al-Azhar / the Mamluk four
+# chief qadis). Damascus and Baghdad add Hanbali beside the Shafii
+# mainstream (the Salihiyya / Ibn Taymiyya tradition; the Baghdadi
+# birthplace of the madhhab). Yemen's highlands are Zaydi; Hilla,
+# Karbala and Qom are the Twelver centres; Nizwa and the Mzab are
+# Ibadi. No Ismaili seed - no prominent urban Ismaili polity survives
+# to 1337; still reachable later via the density/event system.
+# =====================================================================
+
+aqd_seed_seat = {
+	if = {
+		limit = { exists = location:$LOC$ }
+		location:$LOC$ = {
+			if = {
+				limit = {
+					owner ?= { religion.group = religion_group:muslim }
+					NOT = { has_building = building_type:seat_of_$MADHHAB$_jurists }
+				}
+				change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
+			}
+		}
+	}
+}
+
+aqd_seed_starting_seats = {
+	# --- Sunni ---
+	aqd_seed_seat = { LOC = cairo     MADHHAB = hanafi }
+	aqd_seed_seat = { LOC = cairo     MADHHAB = maliki }
+	aqd_seed_seat = { LOC = cairo     MADHHAB = shafii }
+	aqd_seed_seat = { LOC = cairo     MADHHAB = hanbali }
+	aqd_seed_seat = { LOC = damascus  MADHHAB = shafii }
+	aqd_seed_seat = { LOC = damascus  MADHHAB = hanbali }
+	aqd_seed_seat = { LOC = baghdad   MADHHAB = shafii }
+	aqd_seed_seat = { LOC = baghdad   MADHHAB = hanbali }
+	aqd_seed_seat = { LOC = mecca     MADHHAB = shafii }
+	aqd_seed_seat = { LOC = mecca     MADHHAB = hanafi }
+	aqd_seed_seat = { LOC = medina    MADHHAB = maliki }
+	aqd_seed_seat = { LOC = medina    MADHHAB = shafii }
+	aqd_seed_seat = { LOC = jerusalem MADHHAB = shafii }
+	aqd_seed_seat = { LOC = fez       MADHHAB = maliki }
+	aqd_seed_seat = { LOC = tunis     MADHHAB = maliki }
+	aqd_seed_seat = { LOC = kairouan  MADHHAB = maliki }
+	aqd_seed_seat = { LOC = tlemcen   MADHHAB = maliki }
+	aqd_seed_seat = { LOC = granada   MADHHAB = maliki }
+	aqd_seed_seat = { LOC = timbuktu  MADHHAB = maliki }
+	aqd_seed_seat = { LOC = bukhara   MADHHAB = hanafi }
+	aqd_seed_seat = { LOC = samarkand MADHHAB = hanafi }
+	aqd_seed_seat = { LOC = herat     MADHHAB = hanafi }
+	aqd_seed_seat = { LOC = delhi     MADHHAB = hanafi }
+	aqd_seed_seat = { LOC = bursa     MADHHAB = hanafi }
+	aqd_seed_seat = { LOC = konya     MADHHAB = hanafi }
+	aqd_seed_seat = { LOC = zabid     MADHHAB = shafii }
+
+	# --- Shia (Twelver) ---
+	aqd_seed_seat = { LOC = hillah    MADHHAB = jafari }
+	aqd_seed_seat = { LOC = karbala   MADHHAB = jafari }
+	aqd_seed_seat = { LOC = qom       MADHHAB = jafari }
+
+	# --- Shia (Zaydi highlands) ---
+	aqd_seed_seat = { LOC = sada      MADHHAB = zaidi }
+	aqd_seed_seat = { LOC = sana      MADHHAB = zaidi }
+
+	# --- Ibadi ---
+	aqd_seed_seat = { LOC = nizwa     MADHHAB = ibadi }
+	aqd_seed_seat = { LOC = ghardaia  MADHHAB = ibadi }
+	aqd_seed_seat = { LOC = ouargla   MADHHAB = ibadi }
+}

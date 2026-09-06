@@ -1,0 +1,176 @@
+﻿l_english:
+ # ---- Schools of creed (Twelver Shia) ----
+ usuli_school: "Usuli School"
+ usuli_school_desc: "The rationalist Twelver school: the qualified jurist (mujtahid) may reason from the sources, and the believer follows a living authority."
+ akhbari_school: "Akhbari School"
+ akhbari_school_desc: "The traditionist Twelver school: only the reports (akhbar) of the Imams bind, and independent legal reasoning is mistrusted."
+
+ # ---- Schools of creed (Ibadi) ----
+ wahbi_school: "Wahbi School"
+ wahbi_school_desc: "The mainstream Ibadi school of creed, tracing to 'Abd Allah ibn Ibad and the teachings of Jabir ibn Zayd. Moderate where the wider Kharijite movement it grew from was not, it rejects takfir against other $muslim_ADJ$ branches and holds the imamate to be earned through the community's choice of the most qualified, not lineage. The Wahbiyya is the only branch of Ibadism to survive to the present day. This form holds to a sovereign elected Imam, as continuously practiced in Oman."
+ azzaba_school: "Azzaba School"
+ azzaba_school_desc: "The same Wahbiyya creed as $wahbi_school$, but organized around the halqat al-'ilm - the 'circle of knowledge' - rather than a ruling Imam. Communal life is administered by scholarly councils, the 'azzaba, a system that let Ibadi identity endure across the Maghreb - the Mzab, Jabal Nafusa, Djerba, and Wargla - for a thousand years after the Rustamid Imamate of Tahert fell in 909."
+
+ # ---- Actions ----
+ aqd_change_madhhab: "Change the Madhhab"
+ aqd_change_madhhab_desc: "Adopt a different school of jurisprudence for your realm's courts. A deliberate act, paid for in stability."
+ aqd_madhhab_select: "Which madhhab?"
+ aqd_madhhab_none: "No other madhhab is open to your confession."
+
+ aqd_crackdown_madhhab: "Crack Down on Jurists"
+ aqd_crackdown_madhhab_desc: "Move against a rival madhhab's institutions in your realm - closing courts, and if need be a seat itself, until its standing is broken back by one degree. The Ulema will not forget it quickly."
+ aqd_crackdown_select: "Crack down on which madhhab?"
+ aqd_crackdown_none: "No rival madhhab has enough of a foothold in your realm to crack down on."
+
+ # ---- Ulema Institutions: Jurist Seats ----
+ seat_of_hanafi_jurists: "Seat of Hanafi Jurists"
+ seat_of_hanafi_jurists_desc: "A standing institution of Hanafi jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+ seat_of_hanbali_jurists: "Seat of Hanbali Jurists"
+ seat_of_hanbali_jurists_desc: "A standing institution of Hanbali jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+ seat_of_maliki_jurists: "Seat of Maliki Jurists"
+ seat_of_maliki_jurists_desc: "A standing institution of Maliki jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+ seat_of_shafii_jurists: "Seat of Shafi'i Jurists"
+ seat_of_shafii_jurists_desc: "A standing institution of Shafi'i jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+ seat_of_zahiri_jurists: "Seat of Zahiri Jurists"
+ seat_of_zahiri_jurists_desc: "A standing institution of Zahiri jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+ seat_of_ismaili_jurists: "Seat of Ismaili Jurists"
+ seat_of_ismaili_jurists_desc: "A standing institution of Ismaili jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+ seat_of_jafari_jurists: "Seat of Jafari Jurists"
+ seat_of_jafari_jurists_desc: "A standing institution of Jafari jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+ seat_of_zaidi_jurists: "Seat of Zaidi Jurists"
+ seat_of_zaidi_jurists_desc: "A standing institution of Zaidi jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+ seat_of_ibadi_jurists: "Seat of Ibadi Jurists"
+ seat_of_ibadi_jurists_desc: "A standing institution of Ibadi jurisprudence, seat of scholars who train and appoint qadis in the school's method."
+
+ # ---- Ulema Institutions: madhhab madrasas ----
+ madrasa_of_hanafi_fiqh: "Hanafi Madrasa"
+ madrasa_of_hanafi_fiqh_desc: "A local college of Hanafi fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+ madrasa_of_hanbali_fiqh: "Hanbali Madrasa"
+ madrasa_of_hanbali_fiqh_desc: "A local college of Hanbali fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+ madrasa_of_maliki_fiqh: "Maliki Madrasa"
+ madrasa_of_maliki_fiqh_desc: "A local college of Maliki fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+ madrasa_of_shafii_fiqh: "Shafi'i Madrasa"
+ madrasa_of_shafii_fiqh_desc: "A local college of Shafi'i fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+ madrasa_of_zahiri_fiqh: "Zahiri Madrasa"
+ madrasa_of_zahiri_fiqh_desc: "A local college of Zahiri fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+ madrasa_of_ismaili_fiqh: "Ismaili Madrasa"
+ madrasa_of_ismaili_fiqh_desc: "A local college of Ismaili fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+ madrasa_of_jafari_fiqh: "Jafari Madrasa"
+ madrasa_of_jafari_fiqh_desc: "A local college of Jafari fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+ madrasa_of_zaidi_fiqh: "Zaidi Madrasa"
+ madrasa_of_zaidi_fiqh_desc: "A local college of Zaidi fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+ madrasa_of_ibadi_fiqh: "Ibadi Madrasa"
+ madrasa_of_ibadi_fiqh_desc: "A local college of Ibadi fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
+
+ # ---- Ulema Institutions: madhhab presence tiers ----
+ aqd_hanafi_presence: "Hanafi School Presence"
+ aqd_hanafi_noteworthy: "Hanafi School Noteworthy"
+ aqd_hanafi_plurality: "Hanafi School Plurality"
+ aqd_hanafi_predominance: "Hanafi School Predominance"
+ aqd_hanbali_presence: "Hanbali School Presence"
+ aqd_hanbali_noteworthy: "Hanbali School Noteworthy"
+ aqd_hanbali_plurality: "Hanbali School Plurality"
+ aqd_hanbali_predominance: "Hanbali School Predominance"
+ aqd_maliki_presence: "Maliki School Presence"
+ aqd_maliki_noteworthy: "Maliki School Noteworthy"
+ aqd_maliki_plurality: "Maliki School Plurality"
+ aqd_maliki_predominance: "Maliki School Predominance"
+ aqd_shafii_presence: "Shafi'i School Presence"
+ aqd_shafii_noteworthy: "Shafi'i School Noteworthy"
+ aqd_shafii_plurality: "Shafi'i School Plurality"
+ aqd_shafii_predominance: "Shafi'i School Predominance"
+ aqd_zahiri_presence: "Zahiri School Presence"
+ aqd_zahiri_noteworthy: "Zahiri School Noteworthy"
+ aqd_zahiri_plurality: "Zahiri School Plurality"
+ aqd_zahiri_predominance: "Zahiri School Predominance"
+ aqd_ismaili_presence: "Ismaili School Presence"
+ aqd_ismaili_noteworthy: "Ismaili School Noteworthy"
+ aqd_ismaili_plurality: "Ismaili School Plurality"
+ aqd_ismaili_predominance: "Ismaili School Predominance"
+ aqd_jafari_presence: "Jafari School Presence"
+ aqd_jafari_noteworthy: "Jafari School Noteworthy"
+ aqd_jafari_plurality: "Jafari School Plurality"
+ aqd_jafari_predominance: "Jafari School Predominance"
+ aqd_zaidi_presence: "Zaidi School Presence"
+ aqd_zaidi_noteworthy: "Zaidi School Noteworthy"
+ aqd_zaidi_plurality: "Zaidi School Plurality"
+ aqd_zaidi_predominance: "Zaidi School Predominance"
+ aqd_ibadi_presence: "Ibadi School Presence"
+ aqd_ibadi_noteworthy: "Ibadi School Noteworthy"
+ aqd_ibadi_plurality: "Ibadi School Plurality"
+ aqd_ibadi_predominance: "Ibadi School Predominance"
+
+ # ---- Ulema Institutions: crackdown province modifier ----
+ z_aqd_jurist_evicted: "Jurist Evicted"
+ z_aqd_jurist_evicted_desc: "A madhhab's jurists were driven out of this province by force. The unrest has not settled."
+
+ # ---- Ulema Institutions: foreign jurists event ----
+ z_aqd_jurists.1.title: "Foreign Jurists at the Gate"
+ z_aqd_jurists.1.desc: "A party of jurists from a neighboring land has arrived, asking leave to open their school's teaching in your realm. Your own ulema watch closely to see what you will do."
+ z_aqd_jurists.1.accept: "Give them leave to teach"
+ z_aqd_jurists.1.refuse: "Turn them away"
+
+ # ---- Ulema Institutions: seat establishment ----
+ z_aqd_establishment.1.title: "A School Puts Down Roots"
+ z_aqd_establishment.1.desc: "The madrasas of one school of jurisprudence have multiplied across a province of the realm, and now stand in strength beside its mosques. Its jurists ask leave to raise a permanent Seat in one of the province's cities - a standing authority to train and appoint the qadis of their school. Grant it, and the school is anchored in your realm for good. Refuse, and your officers must move against its colleges instead."
+ z_aqd_establishment.1.allow: "Let them raise their Seat"
+ z_aqd_establishment.1.crackdown: "Move against the school"
+ z_aqd_establishment_pending: "Jurists Petitioning"
+ z_aqd_establishment_pending_desc: "The question of a jurists' Seat here has recently been settled. It will not be raised again for some years."
+
+ # ===================================================================
+ # BASE-GAME "madrasa" -> "Maktab" (elementary Qur'an school / kuttab)
+ #
+ # Localisation-only override. The building key stays `madrasa` so every
+ # base system that names it - missions, DHE chains, country setup,
+ # muslim_school_events, the great_madrasa upgrade - keeps working
+ # untouched. Only presentation changes: the base building is reframed
+ # as the elementary town school every quarter had, and the higher-
+ # learning flavour that used to hang off it is re-pointed at "the
+ # mosque circles and the great colleges that come after" (this mod's
+ # halqa / seat-of-jurists layer). The genuinely grand institutions
+ # keep their own keys and stay "Madrasa": great_madrasa,
+ # al_azhar_madrasa, mahmud_gawan_madrasa, and the Sankore art/advance.
+ #
+ # These are loc keys, not script - if a future patch renames a key,
+ # the override simply goes unused and the base string returns.
+ # ===================================================================
+
+ # ---- The building itself + its maintenance good ----
+ madrasa: "Maktab"
+ madrasa_desc: "A maktab - also called a kuttab - is the elementary school of the Muslim town, found in almost every quarter and in most villages. Under a single schoolmaster the children of the district learn to read and write Arabic, to recite and commit to memory the $common_string_quran$, and to reckon simple sums; some also teach the rudiments of grammar and the lives of the pious. It is where the faith and the letters are first handed to the young. The deeper study of law and doctrine belongs to the mosque circles and the great colleges that come after."
+ madrasa_maintenance: "Maktabs"
+
+ # ---- Static modifiers named after the building ----
+ STATIC_MODIFIER_NAME_muslim_madrassa: "Supported Maktabs"
+ STATIC_MODIFIER_NAME_expanded_madrasah: "Renowned Maktab"
+ STATIC_MODIFIER_NAME_hampered_expansion_of_madrasah: "Hampered Maktab Expansion"
+ STATIC_MODIFIER_NAME_new_madrasas_modifier: "New Maktabs"
+
+ # ---- muslim_flavor.21: what the building is ----
+ muslim_flavor.21.title: "The Schooling of the Young"
+ muslim_flavor.21.desc: "In every quarter of every town stands a [ShowBuildingTypeName('madrasa')], where a schoolmaster gathers the children of the district to learn their letters, to write, and to recite and memorise the $common_string_quran$. Some also teach a little grammar, arithmetic, and the lives of the pious. It is humble work - but the future of the land lies in the hands of these children, and a realm that sees them taught is a realm that can trust them with its future."
+ muslim_flavor.21.a: "Support our [ShowBuildingTypeNameWithNoTooltip('madrasa')]!"
+ muslim_flavor.21.b: "Do nothing."
+
+ # ---- muslim_school_events.1: a gifted pupil rises to the bench ----
+ muslim_school_events.1.desc: "A career in law begins early. A boy learns his letters and the $common_string_quran$ at the [ShowBuildingTypeName('madrasa')] of his town, and only the ablest go on to years of study under the $rank_county_arabic_ruler_male$ of the mosque circles and the colleges, collecting an 'Ijāza for each work they master.\n\nOne such student, who first learned to read at the [ShowBuildingTypeNameWithNoTooltip('madrasa')] in [mufti_province.GetName], has lately been making a very good impression around the country. Those who taught him expect a great career as a Qāḍī or Muftī ahead of him."
+
+ # ---- muslim_school_events.3: a town's maktab graduates to a full college ----
+ muslim_school_events.3.title: "A Madrasa for [madrassah_province.GetNameWithNoTooltip]"
+ muslim_school_events.3.desc: "[madrassah_province.GetName] already has its mosque and its [ShowBuildingTypeName('madrasa')], and its children are well taught. Now the prominent citizens of [madrassah_province.GetProvince.GetName] have made a number of charitable donations to found something greater - a proper madrasa, a college of higher learning. They have invited scholars from across [madrassah_province.GetProvince.GetNameWithNoTooltip] and from other parts of our territory, and even foreign theologians."
+
+ # ---- muslim_school_events.9: foreign scholars hosted in our schools ----
+ muslim_school_events.9.desc: "By hosting [SCOPE.sCountry('scholar_country').GetAdjectiveWithNoTooltip] scholars in our schools we are not only improving the theological discussion in our country but also improving our ties with the [SCOPE.sCountry('scholar_country').GetName] [SCOPE.sCountry('scholar_country').GetGovernment.GetGovernmentType.GetName]."
+
+ # ---- muslim_school_events.16: a town's maktab wins renown ----
+ muslim_school_events.16.title: "The Maktab of [madrasa_province.GetNameWithNoTooltip]"
+ muslim_school_events.16.desc: "The [ShowBuildingTypeName('madrasa')] of [madrasa_province.GetName] has earned a name for itself - not only for teaching the young their letters and the $common_string_quran$, but for the reputation of the men who teach there. [inv_school.GetName] scholars passing through have lent it a further shine, and pupils now come from well beyond the district; the adjoining market and the city as a whole are the busier for it.\n\nSuch growth still has to be paid for. If [target_ruler.GetName] [target_ruler.GetHerselfHimself] would set aside a larger charitable endowment for its upkeep, it would benefit both the town and the country at large."
+
+ # ---- mission: still 'Islamic Colleges' (also counts great_madrasa) ----
+ mission_islamic_colleges_desc: "The teaching of scripture and the preservation of knowledge are our solemn duty. We must plant maktabs through our towns so the young may learn the $common_string_quran$ and their letters, and raise up great madrasas where that learning can ripen into true scholarship."
+
+ # ---- Incidental prose: de-token where it clearly means a college ----
+ flavor_tur.16.desc: "There is turmoil in [ShowRegionName('anatolia_region')]. Madrasa students, irregular Sekban soldiers, and minor officials have joined forces under a [ShowReligionAdjective('shia')] preacher named [sheikh_celal.GetName], enraged by financial woes. They have begun riots in many provinces, and demand lower taxes, less government meddling in local affairs, and more respect for the [ShowReligionAdjectiveWithNoTooltip('shia')] faithful."
+ flavor_tur.133.desc: "The many scholars among the [ROOT.GetCountry.GetGovernment.GetEstateName('clergy_estate')] are finding it more and more difficult to find work. While Qāḍī are always in demand, those positions are coveted and highly competitive, and there is not enough for all. Fathers are now advising their sons not to become scholars, and perhaps not even study in the madrasa at all. They miss now, the scholars say, the days of 'Alī al-Qawshajī and Taqī ad-Dīn, when science of all kinds was still appreciated by the state."
+ waqf_payments_desc: "To demonstrate our piety and religious dedication, we will grant #italic waqf#! payments as charitable endowments, which shall be used to fund maktabs and madrasas, hospitals, and mosques, as well as to aid the less fortunate."

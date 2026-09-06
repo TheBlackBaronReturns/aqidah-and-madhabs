@@ -1,0 +1,70 @@
+# =====================================================================
+# SYSTEM B - Ibadi aqidah (school of creed).
+#
+# Vanilla's ibadi_school (religious_schools/ibadi.txt) is grouped with
+# the madhhab keys by is_jurisprudence_school
+# (scripted_triggers/religion_triggers.txt), not is_sufi_school - it is
+# Ibadism's fiqh identity, structurally identical to jafari_school or
+# hanafi_school. System B evicts it from the whitelist the same way
+# (see religions/muslim.txt and scripted_effects/z_aqd_migrate.txt) and
+# its modifier now lives on sharia_law's ibadi_policy.
+#
+# That leaves Ibadi religion with no dedicated school of creed of its
+# own - only the borrowed Sunni kalam schools (Ashari/Maturidi/Athari/
+# Mutazili, which vanilla already permits Ibadi countries to hold, and
+# which System B has since evicted from Ibadi's own whitelist - see
+# religions/muslim.txt). wahbi_school and azzaba_school fill that gap.
+# Both are the Wahbiyya, the moderate branch that traces to 'Abd Allah
+# ibn Ibad and Jabir ibn Zayd and is the sole branch to survive to the
+# present - this is not a doctrinal split like Ashari/Maturidi/Athari,
+# both schools hold the same creed. The split is institutional, between
+# Wahbi Ibadism's two historically distinct forms of self-governance:
+#
+#  - wahbi_school: the Imamate model - a sovereign elected Imam, as
+#    continuously practiced in Oman (and East African communities under
+#    its orbit, e.g. Zanzibar).
+#  - azzaba_school: the halqat al-'ilm ("circle of knowledge") model -
+#    communal religious life administered by scholarly councils (the
+#    'azzaba) rather than a ruling Imam, the form Ibadism took across
+#    the Maghreb (the Mzab, Jabal Nafusa, Djerba, Ouargla/Wargla) after
+#    the Rustamid Imamate of Tahert fell in 909 and those communities
+#    became stateless minorities. The system (formalized by 11th-century
+#    reformers such as Abu 'Abd Allah al-Wisyani) is what let Ibadi
+#    identity persist there for a millennium without a state of its own,
+#    and Mzab towns like Ghardaia still run on it today.
+#
+# The extinct Kharijite-adjacent offshoots (Nukkariyya, Sufriyya,
+# Yazidiyya) are not represented by either school.
+# =====================================================================
+
+wahbi_school = {
+	color = rgb { 120 90 20 }
+
+	enabled_for_country = {
+		religion = religion:ibadi
+	}
+	enabled_for_character = {
+		religion = religion:ibadi
+	}
+
+	modifier = {
+		tolerance_heretic = 1
+		global_clergy_estate_power = 0.05
+	}
+}
+
+azzaba_school = {
+	color = rgb { 90 110 60 }
+
+	enabled_for_country = {
+		religion = religion:ibadi
+	}
+	enabled_for_character = {
+		religion = religion:ibadi
+	}
+
+	modifier = {
+		global_clergy_max_literacy = 10
+		pop_join_rebel_threshold = -0.05
+	}
+}

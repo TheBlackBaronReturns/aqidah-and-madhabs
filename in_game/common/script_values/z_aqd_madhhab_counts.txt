@@ -1,0 +1,58 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: per-madhhab institution
+# score. A seat counts for 2, a madrasa for 1 - the madrasa
+# (building_types/z_aqd_madrasas.txt) is the grassroots unit, the seat
+# (building_types/z_aqd_jurist_seats.txt) its consolidated authority.
+# Drives the tiered auto_modifiers in auto_modifiers/
+# z_aqd_madhhab_tiers.txt, the foreign-jurist event's eligibility
+# trigger in scripted_triggers/z_aqd_jurist_triggers.txt, the
+# establishment pulse's pre-filter in on_action/00_aqd_game_start.txt,
+# and the crackdown effect's tier-detection in scripted_effects/
+# z_aqd_jurist_effects.txt. All must be kept in sync with the tier
+# thresholds defined in auto_modifiers/z_aqd_madhhab_tiers.txt.
+# =====================================================================
+
+hanafi_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_hanafi_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_hanafi_fiqh }   add = 1 }
+}
+
+hanbali_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_hanbali_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_hanbali_fiqh }   add = 1 }
+}
+
+maliki_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_maliki_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_maliki_fiqh }   add = 1 }
+}
+
+shafii_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_shafii_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_shafii_fiqh }   add = 1 }
+}
+
+zahiri_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_zahiri_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_zahiri_fiqh }   add = 1 }
+}
+
+ismaili_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_ismaili_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_ismaili_fiqh }   add = 1 }
+}
+
+jafari_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_jafari_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_jafari_fiqh }   add = 1 }
+}
+
+zaidi_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_zaidi_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_zaidi_fiqh }   add = 1 }
+}
+
+ibadi_institution_score = {
+	every_owned_location = { limit = { has_building = building_type:seat_of_ibadi_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:madrasa_of_ibadi_fiqh }   add = 1 }
+}

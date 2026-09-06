@@ -1,0 +1,184 @@
+namespace = flavor_ira
+
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED COMPAT - re-plumb the base Safavid-formation
+# chain off the removed safavid_school.
+#
+# Only flavor_ira.47 and .48 gate on religious_school:safavid_school;
+# both are redefined below with their ONLY change being that trigger
+# line. flavor_ira.50 ("Rise of the Safavids") is already school-free
+# and is left to the base file.
+#
+# Self-sufficient substitute condition: a sufficiently mystic realm
+# holding Ardabil qualifies - the same societal value vanilla's own
+# Sufi religious_school gate required (mysticism_vs_jurisprudence
+# <= -50 is exactly the gate the sufi.txt schools carried). This needs
+# nothing beyond this mod.
+#
+# Optional enhancement: if the separate "Sufi Tariqa Orders" mod is
+# ALSO installed and its Safaviyya order (tag SSF) has proclaimed its
+# confession (has_variable = stq_declared), that also qualifies - a
+# soft OR-branch, never a requirement. c:SSF / has_variable are
+# runtime lookups that resolve safely to "no" if that tag was never
+# instantiated (i.e. if the other mod isn't installed) - unlike a
+# building_type/reform key reference, which would be a hard load
+# error if undefined. That order (a country_type = building) itself
+# never graduates either way - what forms here is a SEPARATE
+# territorial Safavid state (the base ABL tag), born from cores
+# exactly as vanilla does it.
+# =====================================================================
+
+# --- Rise of the Safavid Order as a country --------------------------
+flavor_ira.47 = {
+	type = country_event
+	title = flavor_ira.47.title
+	desc = flavor_ira.47.desc
+	outcome = neutral
+
+	fire_only_once = yes
+
+	trigger = {
+		current_year >= 1400
+		current_year <= 1560
+		owns = location:ardabil
+		location:ardabil = { is_capital = no }
+		# CHANGED: was religious_school = religious_school:safavid_school
+		OR = {
+			societal_value:mysticism_vs_jurisprudence <= -50
+			AND = {
+				exists = c:SSF
+				c:SSF = { has_variable = stq_declared }
+			}
+		}
+		NOT = { country_exists = c:ABL }
+	}
+
+	illustration_tags = {
+		10 = regular
+		10 = exterior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate background = estate_type:clergy_estate }
+		location:ardabil = {
+			save_scope_as = target_location
+			area ?= { save_scope_as = target_area }
+			create_dynasty_from_location = safavid_dynasty
+		}
+
+		create_character = {
+			first_name = name_xwaja
+			dynasty = dynasty:safavid_dynasty
+			estate = estate_type:clergy_estate
+			religion = religion:shia
+			culture = culture:kurdish_culture
+			birth_location = location:diyarbekir
+			birth_date = 1370.5.12
+			adm = 50
+			dip = 40
+			mil = 75
+			save_scope_as = target_character
+		}
+
+		ruler_or_regent ?= { save_scope_as = target_character2 }
+	}
+
+	option = {
+		name = flavor_ira.47.a
+		custom_tooltip = {
+			text = flavor_ira.47.a.tt
+			scope:target_area = {
+				every_location_in_area = {
+					limit = { owner ?= root  is_capital = no }
+					add_core = c:ABL
+				}
+			}
+			create_country_from_cores_in_our_locations = c:ABL
+			c:ABL = {
+				set_new_ruler = scope:target_character
+				make_subject_of = { target = root  type = subject_type:vassal }
+				every_owned_location = { change_integration_level = core }
+				change_culture = culture:farsi_culture
+				set_variable = aqd_ira_safavid_state
+			}
+		}
+	}
+
+	option = {
+		name = flavor_ira.47.b
+		change_societal_value = { type = mysticism_vs_jurisprudence value = societal_value_tiny_move_to_right }
+		add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_extreme_penalty }
+		scope:target_character = { banish_character = yes }
+	}
+
+	option = {
+		name = flavor_ira.47.c
+		high_risk_option = yes
+		custom_tooltip = {
+			text = flavor_ira.47.a.tt
+			scope:target_area = {
+				every_location_in_area = {
+					limit = { owner ?= root }
+					add_core = c:ABL
+				}
+			}
+			create_country_from_cores_in_our_locations = c:ABL
+			c:ABL = {
+				set_new_ruler = scope:target_character
+				make_subject_of = { target = root  type = subject_type:vassal }
+				every_owned_location = { change_integration_level = core }
+				change_culture = culture:farsi_culture
+				set_variable = aqd_ira_safavid_state
+			}
+		}
+		change_player = c:ABL
+	}
+}
+
+# --- Ardabil militarism ---------------------------------------------
+flavor_ira.48 = {
+	type = country_event
+	title = flavor_ira.48.title
+	desc = flavor_ira.48.desc
+	outcome = neutral
+
+	dynamic_historical_event = {
+		tag = ABL
+		from = 1440.1.1
+		to = 1500.1.1
+		monthly_chance = 3
+	}
+
+	fire_only_once = yes
+
+	trigger = {
+		ruler_or_regent ?= { mil >= 80 }
+		# CHANGED: was religious_school = religious_school:safavid_school
+		# tag = ABL (from dynamic_historical_event) + the Safavid dynasty
+		# is gate enough now.
+		ruler_or_heir_if_regent ?= { dynasty ?= dynasty:safavid_dynasty }
+	}
+
+	illustration_tags = {
+		10 = regular
+		10 = exterior
+	}
+
+	immediate = {
+		event_illustration_poptype_effect = { foreground = pop_type:soldiers background = pop_type:soldiers }
+		ruler_or_regent ?= { save_scope_as = target_character }
+	}
+
+	option = {
+		name = flavor_ira.48.a
+		change_societal_value = { type = belligerent_vs_conciliatory value = societal_value_move_to_left }
+		change_societal_value = { type = outward_vs_inward value = societal_value_move_to_left }
+		add_army_tradition = army_tradition_severe_bonus
+	}
+
+	option = {
+		name = flavor_ira.48.b
+		change_societal_value = { type = belligerent_vs_conciliatory value = societal_value_move_to_right }
+		change_societal_value = { type = outward_vs_inward value = societal_value_move_to_right }
+	}
+}

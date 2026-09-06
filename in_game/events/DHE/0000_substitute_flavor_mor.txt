@@ -1,0 +1,66 @@
+namespace = flavor_mor
+
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED COMPAT - Isawiyya founding (Morocco flavor).
+#
+# Base flavor_mor.35 option .b calls
+# set_religious_school = religious_school:isawiyya_school. isawiyya_school
+# is a Sufi-order school, evicted from the whitelist by System B (see
+# religions/muslim.txt), so the assignment can never stick - the next
+# aqd_migrate_pulse (on_action/00_aqd_game_start.txt) reverts it via
+# is_sufi_school = yes, silently undoing the player's choice a few years
+# later.
+#
+# This redefinition drops ONLY the set_religious_school line from
+# option .b. The global variable (isawiyya_founded) and the
+# mysticism_vs_jurisprudence shift - the two effects that carry
+# consequence outside the removed religious_school slot - are kept
+# verbatim, so the choice still means something even standalone. If the
+# separate "Sufi Tariqa Orders" mod is installed, its Isawiyya order can
+# key off isawiyya_founded the same way this mod's flavor_ira substitute
+# keys off stq_declared for the Safaviyya.
+# =====================================================================
+
+flavor_mor.35 = {
+	type = country_event
+	title = flavor_mor.35.title
+	desc = flavor_mor.35.desc
+	outcome = neutral
+
+	dynamic_historical_event = {
+		tag = MOR
+		from = 1450.1.1
+		to = 1821.1.1
+		monthly_chance = 2
+	}
+	fire_only_once = yes
+
+	illustration_tags = {
+		10 = exterior
+		10 = regular
+	}
+
+	trigger = {
+		religion.group = religion_group:muslim
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate background = estate_type:clergy_estate }
+		set_global_variable = isawiyya_founded
+	}
+
+	option = {
+		name = flavor_mor.35.a
+
+		custom_tooltip = mor_unlock_isawiyya_school_tt
+	}
+
+	option = {
+		name = flavor_mor.35.b
+
+		change_societal_value = { type = mysticism_vs_jurisprudence value = societal_value_move_to_left }
+		# REMOVED: set_religious_school = religious_school:isawiyya_school
+
+		custom_tooltip = mor_unlock_isawiyya_school_tt
+	}
+}

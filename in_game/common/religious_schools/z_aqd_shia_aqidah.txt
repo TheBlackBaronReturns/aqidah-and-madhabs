@@ -1,0 +1,42 @@
+# System B - Twelver Shia schools of creed (aqidah).
+# No mysticism_vs_jurisprudence gate: that is the structural marker of
+# an aqidah school.
+#
+# NOT in the shia whitelist (religions/muslim.txt) - kept defined here,
+# unused, rather than deleted. Usuli vs Akhbari is a post-1700 dispute,
+# anachronistic as a standing choice across the whole timeline; Twelver
+# Shia's sole whitelisted aqidah is imamiya_school instead (see
+# scripted_effects/z_aqd_starting_schools.txt and z_aqd_migrate.txt,
+# which repoints anyone already holding either of these to imamiya).
+
+usuli_school = {
+	color = rgb { 120 20 20 }
+
+	enabled_for_country = {
+		religion = religion:shia
+	}
+	enabled_for_character = {
+		religion = religion:shia
+	}
+
+	modifier = {
+		research_speed_modifier = 0.05
+		global_clergy_estate_power = 0.10
+	}
+}
+
+akhbari_school = {
+	color = rgb { 90 40 30 }
+
+	enabled_for_country = {
+		religion = religion:shia
+	}
+	enabled_for_character = {
+		religion = religion:shia
+	}
+
+	modifier = {
+		stability_investment = standard_stability_investment
+		research_speed_modifier = -0.05
+	}
+}

@@ -1,0 +1,54 @@
+namespace = muslim_school_events
+
+# =====================================================================
+# SYSTEM B COMPAT - the founding of Wahhabism.
+#
+# Base muslim_school_events.22 gates on
+# religious_school ?= religious_school:hanbali_school. After System B the
+# madhhab schools are gone from the whitelist (Hanbalis run
+# hanbali_policy in sharia_law instead), so the event could never fire
+# and wahhabi_school - which System B KEEPS in the Sunni whitelist -
+# would never become unlockable.
+#
+# This redefinition changes ONLY that trigger line to has_policy =
+# hanbali_policy. Everything else is verbatim from base.
+# =====================================================================
+
+muslim_school_events.22 = {
+	type = country_event
+	title = muslim_school_events.22.title
+	desc = muslim_school_events.22.desc
+	outcome = neutral
+	trigger = {
+		# CHANGED: was religious_school ?= religious_school:hanbali_school
+		has_policy = hanbali_policy
+		current_date >= 1700.1.1
+		societal_value:mysticism_vs_jurisprudence >= 65
+		OR = {
+			current_date >= 1780.1.1
+			has_global_variable = neo_sufism
+		}
+	}
+
+	illustration_tags = {
+		10 = angry
+		10 = interior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate background = estate_type:clergy_estate }
+		hidden_effect = {
+			set_global_variable = wahabism_founded
+		}
+	}
+
+	option = {
+		name = muslim_school_events.22.a
+		custom_tooltip = muslim_school_events.22.a.tt
+	}
+
+	option = {
+		name = muslim_school_events.22.b
+		set_religious_school = religious_school:wahhabi_school
+	}
+}
