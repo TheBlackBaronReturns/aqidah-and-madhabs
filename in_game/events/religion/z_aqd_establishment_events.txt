@@ -42,6 +42,10 @@ z_aqd_establishment.1 = {
 		aqd_establish_save_target_dispatch = yes
 		set_variable = { name = aqd_compat_madhhab  value = var:aqd_establish_madhhab }
 		aqd_classify_madhhab_compatibility = { COUNTRY = root }
+		# Projected confiscation gold for the crack-down option's text
+		# (script_values/z_aqd_madhhab_counts.txt). Wipeout ceiling - the
+		# option text frames it as "up to".
+		set_variable = { name = aqd_crackdown_gold_est  value = aqd_crackdown_gold_estimate_establish }
 	}
 
 	option = {
@@ -54,6 +58,10 @@ z_aqd_establishment.1 = {
 
 	option = {
 		name = z_aqd_establishment.1.crackdown
+		# Projected confiscation gold as a result line (the real add_gold
+		# happens per-razed-building inside aqd_crackdown_effect's loops,
+		# which the effect tooltip can't total). var set in immediate.
+		custom_tooltip = aqd_crackdown_gold_result_tt
 		aqd_establishment_crackdown = yes
 		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = root }
 		aqd_establishment_mark_pending = yes

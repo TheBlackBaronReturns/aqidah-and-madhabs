@@ -13,6 +13,28 @@
 # =====================================================================
 
 # ---------------------------------------------------------------------
+# Cache the realm's total jurist strength (the denominator for the
+# share-based tiers) in var:aqd_realm_jurist_total, so the 9-way sum in
+# script_values/z_aqd_madhhab_counts.txt is not recomputed inside every
+# auto_modifier block. Refreshed monthly + at game start (on_action/
+# 00_aqd_game_start.txt) and immediately after any jurist building is
+# placed or razed (crackdown, establishment grant, exile grant,
+# foreign-jurist madrasa seeding). Run at the country's own scope.
+# ---------------------------------------------------------------------
+aqd_recount_jurist_total = {
+	set_variable = { name = aqd_realm_jurist_total  value = aqd_realm_jurist_total_recount }
+}
+aqd_recount_all_jurist_totals = {
+	every_country = {
+		limit = {
+			religion.group = religion_group:muslim
+			has_policy = sharia_law_policy
+		}
+		aqd_recount_jurist_total = yes
+	}
+}
+
+# ---------------------------------------------------------------------
 # Foreign-jurist madrasa seeding. Called from events/religion/
 # z_aqd_jurist_events.txt's accept option with SOURCE = the chosen
 # neighbour country scope. Branches on the SOURCE's held madhhab
@@ -32,22 +54,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = hanafi_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:sunni)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_hanafi_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:sunni)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_hanafi_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_hanafi_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_hanafi_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_hanafi_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_hanafi_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_hanafi_fiqh  value = 1 }
 						}
 					}
@@ -59,22 +87,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = hanbali_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:sunni)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_hanbali_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:sunni)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_hanbali_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_hanbali_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_hanbali_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_hanbali_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_hanbali_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_hanbali_fiqh  value = 1 }
 						}
 					}
@@ -86,22 +120,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = maliki_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:sunni)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_maliki_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:sunni)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_maliki_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_maliki_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_maliki_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_maliki_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_maliki_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_maliki_fiqh  value = 1 }
 						}
 					}
@@ -113,22 +153,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = shafii_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:sunni)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_shafii_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:sunni)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_shafii_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_shafii_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_shafii_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_shafii_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_shafii_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_shafii_fiqh  value = 1 }
 						}
 					}
@@ -140,22 +186,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = zahiri_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:sunni)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_zahiri_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:sunni)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_zahiri_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_zahiri_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_zahiri_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_zahiri_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:sunni)" >= 0.25  NOT = { has_building = building_type:madrasa_of_zahiri_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_zahiri_fiqh  value = 1 }
 						}
 					}
@@ -167,22 +219,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = ismaili_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:shia)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_ismaili_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:shia)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_ismaili_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_ismaili_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_ismaili_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_ismaili_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_ismaili_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_ismaili_fiqh  value = 1 }
 						}
 					}
@@ -194,22 +252,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = jafari_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:shia)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_jafari_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:shia)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_jafari_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_jafari_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_jafari_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_jafari_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_jafari_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_jafari_fiqh  value = 1 }
 						}
 					}
@@ -221,22 +285,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = zaidi_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:shia)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_zaidi_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:shia)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_zaidi_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_zaidi_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_zaidi_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_zaidi_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:shia)" >= 0.25  NOT = { has_building = building_type:madrasa_of_zaidi_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_zaidi_fiqh  value = 1 }
 						}
 					}
@@ -248,22 +318,28 @@ aqd_build_madrasas_of_madhhab_from = {
 		limit = { $SOURCE$ = { has_policy = ibadi_policy } }
 		random_owned_location = {
 			limit = {
-				"religion_percentage(religion:ibadi)" >= 0.25
-				NOT = { has_building = building_type:madrasa_of_ibadi_fiqh }
+				NOT = { location_rank ?= location_rank:rural_settlement }
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				province_definition = {
+					any_location_in_province_definition = {
+						owner = root
+						"religion_percentage(religion:ibadi)" >= 0.25
+					}
+				}
 			}
 			province_definition = {
 				random_location_in_province_definition = {
-					limit = { owner = root  "religion_percentage(religion:ibadi)" >= 0.25  NOT = { has_building = building_type:madrasa_of_ibadi_fiqh } }
+					limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 					change_building_level_in_location = { building = building_type:madrasa_of_ibadi_fiqh  value = 1 }
 				}
 				random = { chance = 66
 					random_location_in_province_definition = {
-						limit = { owner = root  "religion_percentage(religion:ibadi)" >= 0.25  NOT = { has_building = building_type:madrasa_of_ibadi_fiqh } }
+						limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 						change_building_level_in_location = { building = building_type:madrasa_of_ibadi_fiqh  value = 1 }
 					}
 					random = { chance = 50
 						random_location_in_province_definition = {
-							limit = { owner = root  "religion_percentage(religion:ibadi)" >= 0.25  NOT = { has_building = building_type:madrasa_of_ibadi_fiqh } }
+							limit = { owner = root  NOT = { location_rank ?= location_rank:rural_settlement }  NOT = { aqd_location_has_fiqh_madrasa = yes } }
 							change_building_level_in_location = { building = building_type:madrasa_of_ibadi_fiqh  value = 1 }
 						}
 					}
@@ -271,6 +347,9 @@ aqd_build_madrasas_of_madhhab_from = {
 			}
 		}
 	}
+	# New madrasas changed the realm's jurist footprint - refresh the
+	# cached tier denominator so tiers update at once, not next month.
+	aqd_recount_jurist_total = yes
 }
 
 # ---------------------------------------------------------------------
@@ -534,70 +613,92 @@ aqd_jurist_reaction_refuse_opposed = {
 }
 
 # ---------------------------------------------------------------------
-# Crackdown: destroy just enough of $MADHHAB$'s buildings (madrasas
-# first, then the seat) to drop $SCORE$ below the current tier's lower
-# bound - thresholds here (8/5/3/1) MUST match auto_modifiers/
-# z_aqd_madhhab_tiers.txt, scripted_triggers/z_aqd_jurist_triggers.txt,
-# on_action/00_aqd_game_start.txt's establishment pre-filter, and
-# scripted_effects/z_aqd_establishment_effects.txt exactly. Called from
-# generic_actions/z_aqd_piety.txt's aqd_crackdown_madhhab and from the
-# establishment event's crackdown option (via
+# Crackdown on $MADHHAB$. Two regimes, split on the school's footprint
+# (owned locations holding one of its buildings), which this effect
+# counts up front anyway:
+#
+#   footprint < 3  -> TOTAL WIPEOUT: raze every madrasa and seat of the
+#                     madhhab. Two colleges or fewer can be stamped out.
+#   footprint >= 3 -> KNOCK DOWN ONE TIER: raze (madrasas first) until
+#                     $MADHHAB$_institution_tier drops below the tier
+#                     the school held when the crackdown began, OR until
+#                     half the school's pre-crackdown strength
+#                     ($SCORE$ / 2) has been razed - whichever first.
+#                     The half-strength cap guarantees a real blow every
+#                     time; a school that swamps the realm's jurist
+#                     total is halved, not demoted, and finished by the
+#                     next crackdown or the wipeout branch once it is
+#                     down to <= 2 buildings.
+#
+# Called from generic_actions/z_aqd_piety.txt's aqd_crackdown_madhhab
+# and from the establishment event's crackdown option (via
 # z_aqd_establishment_effects.txt's aqd_establishment_crackdown) at the
 # acting country's scope, with:
 #   MADHHAB - bare identifier, e.g. "hanafi"
-#   SECT    - bare religion id: sunni / shia / ibadi (used to decide
-#             whether this is a heresy of the realm's own religion)
-#   SCORE   - that madhhab's institution score
+#   SECT    - bare religion id: sunni / shia / ibadi (whether this is a
+#             heresy of the realm's own religion)
+#   SCORE   - that madhhab's raw institution score (script_value name),
+#             used only for the half-strength cap
+#   TIER    - that madhhab's 0-4 institution tier (script_value name),
+#             the value the tier-drop loop chases down by one
 #
-# Beyond the tier knockdown the effect also: gains confiscation gold per
-# razed building; applies a footprint-scaled stability hit; stamps the
+# Beyond the razing the effect also: gains confiscation gold per razed
+# building; applies a footprint-scaled stability hit; stamps the
 # nationwide "Legal School Persecuted" location modifier
 # (z_aqd_jurist_evicted) on every location holding the school's
 # buildings; adds a national modifier - z_aqd_heretics_suppressed if
 # SECT differs from the realm's religion, else base game's
-# ulema_displeased; and drops the opinion of every Muslim realm within
+# ulema_displeased; drops the opinion of every Muslim realm within
 # diplomatic range whose own law is this madhhab
-# (common/biases/z_aqd_opinion.txt).
+# (common/biases/z_aqd_opinion.txt); refreshes the cached realm jurist
+# total; and, if the school was Noteworthy+ before, may trigger the
+# exiled-jurists follow-up (z_aqd_exile.1) on a bordering realm.
 #
 # NOTE: destroy_building's "building(X|Y)" target-link string does NOT
-# tolerate a $param$ substituted inside the quotes - confirmed broken
-# in testing (the engine mangles it: 'buildingbuilding_type:...$|root)').
-# So the actual destroy_building calls are split into 18 fully-literal
+# tolerate a $param$ substituted inside the quotes (the engine mangles
+# it). So the destroy_building calls are split into 18 fully-literal
 # per-madhhab effects below, dispatched via dynamic EFFECT NAME
-# construction instead (aqd_crackdown_destroy_$MADHHAB$_madrasa/_seat) -
-# that pattern IS confirmed safe, since it's the same one already used
-# successfully by aqd_apply_jurist_reaction's
-# aqd_jurist_reaction_$OUTCOME$_favored/_opposed dispatch above.
+# construction (aqd_crackdown_destroy_$MADHHAB$_madrasa/_seat) - that
+# pattern IS safe.
 # ---------------------------------------------------------------------
 aqd_crackdown_effect = {
 	# Current scope is the acting country at both call sites
 	# (z_aqd_piety.txt wraps this in scope:actor = { }, the establishment
-	# event runs it at root). Save it so the location sweep below can
-	# write back to a country variable without relying on root, which is
-	# unreliable inside a generic_action.
+	# event runs it at root). Save it so the sweeps below can write back
+	# to a country variable without relying on root, which is unreliable
+	# inside a generic_action.
 	save_scope_as = aqd_crackdown_country
 
-	if      = { limit = { $SCORE$ >= 8 } set_variable = { name = aqd_crackdown_ceiling  value = 8 } }
-	else_if = { limit = { $SCORE$ >= 5 } set_variable = { name = aqd_crackdown_ceiling  value = 5 } }
-	else_if = { limit = { $SCORE$ >= 3 } set_variable = { name = aqd_crackdown_ceiling  value = 3 } }
-	else    = { set_variable = { name = aqd_crackdown_ceiling  value = 1 } }
+	# The tier the school holds right now (0 none / 1 Presence /
+	# 2 Noteworthy / 3 Plurality; 4 Predominance is impossible for a
+	# crackdown target). Drives the tier-drop loop and the clergy hit.
+	set_variable = { name = aqd_crackdown_tier_before  value = $TIER$ }
 
-	if      = { limit = { var:aqd_crackdown_ceiling = 8 } set_variable = { name = aqd_crackdown_tier_before  value = 4 } }
-	else_if = { limit = { var:aqd_crackdown_ceiling = 5 } set_variable = { name = aqd_crackdown_tier_before  value = 3 } }
-	else_if = { limit = { var:aqd_crackdown_ceiling = 3 } set_variable = { name = aqd_crackdown_tier_before  value = 2 } }
-	else    = { set_variable = { name = aqd_crackdown_tier_before  value = 1 } }
+	# Half the pre-crackdown strength, snapshotted so it does not track
+	# the shrinking live $SCORE$. Cap for the tier-drop branch.
+	set_variable    = { name = aqd_crackdown_strength_cap  value = $SCORE$ }
+	change_variable = { name = aqd_crackdown_strength_cap  multiply = 0.5 }
 
 	# Nationwide backlash: BEFORE any building is razed, stamp "Legal
 	# School Persecuted" (z_aqd_jurist_evicted) on every owned location
-	# that holds a madrasa or seat of this madhhab - locations about to
-	# be razed still hold their building here, so they are covered too -
-	# and count them into var:aqd_crackdown_footprint for the stability
-	# hit below. One linear pass over owned locations, run once per
-	# crackdown (60-month cooldown / 4-yearly-gated event): no tick cost.
+	# that holds a madrasa or seat of this madhhab, and count them into
+	# var:aqd_crackdown_footprint - which also decides the wipeout vs
+	# tier-drop branch below. One linear pass, run once per crackdown
+	# (60-month cooldown / 4-yearly-gated event): no tick cost.
 	set_variable = { name = aqd_crackdown_footprint  value = 0 }
-	# Jurist Seats (not madrasas) razed by the while loop below - drives
-	# the exiled-jurists follow-up chance at the end of this effect.
+	# Jurist Seats (not madrasas) razed below - drives the exiled-jurists
+	# follow-up chance at the end of this effect.
 	set_variable = { name = aqd_crackdown_seats_razed  value = 0 }
+	# Total strength razed below (seat 4 / madrasa 1) - the tier-drop
+	# branch stops at var:aqd_crackdown_strength_cap.
+	set_variable = { name = aqd_crackdown_strength_razed  value = 0 }
+	# Hard iteration backstop for the razing while-loops below. With
+	# destroy_building_forcefully the natural has_building limits terminate
+	# on their own; this only stops a stuck loop from flooding the log.
+	# 50 is far above any realistic single-madhhab footprint. Reset before
+	# each loop; incremented inside via scope:aqd_crackdown_country like
+	# every other counter here (root is unreliable in a generic_action).
+	set_variable = { name = aqd_crackdown_iter  value = 0 }
 	every_owned_location = {
 		limit = {
 			OR = {
@@ -621,25 +722,82 @@ aqd_crackdown_effect = {
 		add_opinion = { target = scope:aqd_crackdown_country  modifier = z_aqd_crackdown_on_our_school }
 	}
 
-	while = {
-		limit = { $SCORE$ >= var:aqd_crackdown_ceiling }
-		if = {
-			limit = { any_owned_location = { has_building = building_type:madrasa_of_$MADHHAB$_fiqh } }
+	if = {
+		# SMALL SCHOOL (< 3 institution locations) -> stamp it out.
+		limit = { var:aqd_crackdown_footprint < 3 }
+		scope:aqd_crackdown_country = { set_variable = { name = aqd_crackdown_iter  value = 0 } }
+		while = {
+			limit = {
+				var:aqd_crackdown_iter < 50
+				any_owned_location = { has_building = building_type:madrasa_of_$MADHHAB$_fiqh }
+			}
+			scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_iter  add = 1 } }
 			aqd_crackdown_destroy_$MADHHAB$_madrasa = yes
-			# Confiscation of the college's endowed property - gold gained.
 			add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 0.25 }
+			scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_strength_razed  add = 1 } }
 		}
-		else_if = {
-			limit = { any_owned_location = { has_building = building_type:seat_of_$MADHHAB$_jurists } }
+		scope:aqd_crackdown_country = { set_variable = { name = aqd_crackdown_iter  value = 0 } }
+		while = {
+			limit = {
+				var:aqd_crackdown_iter < 50
+				any_owned_location = { has_building = building_type:seat_of_$MADHHAB$_jurists }
+			}
+			scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_iter  add = 1 } }
 			aqd_crackdown_destroy_$MADHHAB$_seat = yes
-			# A seat's waqf endowment is worth far more than a madrasa's.
 			add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 1 }
-			scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_seats_razed  add = 1 } }
-		}
-		else = {
-			set_variable = { name = aqd_crackdown_ceiling  value = 0 }
+			scope:aqd_crackdown_country = {
+				change_variable = { name = aqd_crackdown_seats_razed     add = 1 }
+				change_variable = { name = aqd_crackdown_strength_razed  add = 4 }
+			}
 		}
 	}
+	else = {
+		# ESTABLISHED SCHOOL (3+ locations) -> knock the school down one
+		# tier, but raze at least half its pre-crackdown strength so a
+		# crackdown is never a no-op. $TIER$ is re-read each pass; the
+		# recount at the end of the loop body refreshes the cached
+		# denominator so $TIER$ reflects the TRUE post-raze share, not a
+		# stale one - otherwise the loop can stop a building early and
+		# the school pops back up a tier on the next evaluation.
+		scope:aqd_crackdown_country = { set_variable = { name = aqd_crackdown_iter  value = 0 } }
+		while = {
+			limit = {
+				var:aqd_crackdown_iter < 50
+				$TIER$ >= var:aqd_crackdown_tier_before
+				var:aqd_crackdown_strength_razed < var:aqd_crackdown_strength_cap
+			}
+			scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_iter  add = 1 } }
+			if = {
+				limit = { any_owned_location = { has_building = building_type:madrasa_of_$MADHHAB$_fiqh } }
+				aqd_crackdown_destroy_$MADHHAB$_madrasa = yes
+				# Confiscation of the college's endowed property - gold gained.
+				add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 0.25 }
+				scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_strength_razed  add = 1 } }
+			}
+			else_if = {
+				limit = { any_owned_location = { has_building = building_type:seat_of_$MADHHAB$_jurists } }
+				aqd_crackdown_destroy_$MADHHAB$_seat = yes
+				# A seat's waqf endowment is worth far more than a madrasa's.
+				add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 1 }
+				scope:aqd_crackdown_country = {
+					change_variable = { name = aqd_crackdown_seats_razed     add = 1 }
+					change_variable = { name = aqd_crackdown_strength_razed  add = 4 }
+				}
+			}
+			else = {
+				# Nothing of this madhhab left - force the loop to end
+				# (the limit reads strength_razed, so push it past the cap).
+				set_variable = { name = aqd_crackdown_strength_razed  value = 99 }
+			}
+			scope:aqd_crackdown_country = { aqd_recount_jurist_total = yes }
+		}
+	}
+
+	# The realm's jurist footprint just changed - refresh the cached
+	# denominator so tiers (auto_modifiers/z_aqd_madhhab_tiers.txt) are
+	# right at once rather than next month. tier_before was captured
+	# above, so the tail below is unaffected.
+	scope:aqd_crackdown_country = { aqd_recount_jurist_total = yes }
 
 	# Stability hit, scaled to how widespread the school was - so the
 	# cost depends on which madhhab was targeted.
@@ -689,127 +847,109 @@ aqd_crackdown_effect = {
 aqd_crackdown_destroy_hanafi_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_hanafi_fiqh }
-		destroy_building = "building(building_type:madrasa_of_hanafi_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_hanafi_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_hanafi_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_hanafi_jurists }
-		destroy_building = "building(building_type:seat_of_hanafi_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_hanafi_jurists|owner)"
 	}
 }
 aqd_crackdown_destroy_hanbali_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_hanbali_fiqh }
-		destroy_building = "building(building_type:madrasa_of_hanbali_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_hanbali_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_hanbali_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_hanbali_jurists }
-		destroy_building = "building(building_type:seat_of_hanbali_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_hanbali_jurists|owner)"
 	}
 }
 aqd_crackdown_destroy_maliki_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_maliki_fiqh }
-		destroy_building = "building(building_type:madrasa_of_maliki_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_maliki_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_maliki_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_maliki_jurists }
-		destroy_building = "building(building_type:seat_of_maliki_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_maliki_jurists|owner)"
 	}
 }
 aqd_crackdown_destroy_shafii_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_shafii_fiqh }
-		destroy_building = "building(building_type:madrasa_of_shafii_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_shafii_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_shafii_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_shafii_jurists }
-		destroy_building = "building(building_type:seat_of_shafii_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_shafii_jurists|owner)"
 	}
 }
 aqd_crackdown_destroy_zahiri_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_zahiri_fiqh }
-		destroy_building = "building(building_type:madrasa_of_zahiri_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_zahiri_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_zahiri_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_zahiri_jurists }
-		destroy_building = "building(building_type:seat_of_zahiri_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_zahiri_jurists|owner)"
 	}
 }
 aqd_crackdown_destroy_ismaili_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_ismaili_fiqh }
-		destroy_building = "building(building_type:madrasa_of_ismaili_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_ismaili_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_ismaili_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_ismaili_jurists }
-		destroy_building = "building(building_type:seat_of_ismaili_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_ismaili_jurists|owner)"
 	}
 }
 aqd_crackdown_destroy_jafari_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_jafari_fiqh }
-		destroy_building = "building(building_type:madrasa_of_jafari_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_jafari_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_jafari_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_jafari_jurists }
-		destroy_building = "building(building_type:seat_of_jafari_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_jafari_jurists|owner)"
 	}
 }
 aqd_crackdown_destroy_zaidi_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_zaidi_fiqh }
-		destroy_building = "building(building_type:madrasa_of_zaidi_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_zaidi_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_zaidi_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_zaidi_jurists }
-		destroy_building = "building(building_type:seat_of_zaidi_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_zaidi_jurists|owner)"
 	}
 }
 aqd_crackdown_destroy_ibadi_madrasa = {
 	random_owned_location = {
 		limit = { has_building = building_type:madrasa_of_ibadi_fiqh }
-		destroy_building = "building(building_type:madrasa_of_ibadi_fiqh|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:madrasa_of_ibadi_fiqh|owner)"
 	}
 }
 aqd_crackdown_destroy_ibadi_seat = {
 	random_owned_location = {
 		limit = { has_building = building_type:seat_of_ibadi_jurists }
-		destroy_building = "building(building_type:seat_of_ibadi_jurists|root)"
-		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		destroy_building_forcefully = "building(building_type:seat_of_ibadi_jurists|owner)"
 	}
 }
 

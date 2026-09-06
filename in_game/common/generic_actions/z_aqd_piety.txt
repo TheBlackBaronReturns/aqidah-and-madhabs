@@ -173,55 +173,71 @@ aqd_crackdown_madhhab = {
 			# "Left side and right side during comparison were of different
 			# types (left was 'country', right was 'policy')" in error.log).
 			OR = {
-				AND = { this = policy:hanafi_policy    NOT = { scope:actor = { has_policy = hanafi_policy } }    scope:actor = { hanafi_institution_score > 0 } }
-				AND = { this = policy:hanbali_policy   NOT = { scope:actor = { has_policy = hanbali_policy } }   scope:actor = { hanbali_institution_score > 0 } }
-				AND = { this = policy:maliki_policy    NOT = { scope:actor = { has_policy = maliki_policy } }    scope:actor = { maliki_institution_score > 0 } }
-				AND = { this = policy:shafii_policy    NOT = { scope:actor = { has_policy = shafii_policy } }    scope:actor = { shafii_institution_score > 0 } }
-				AND = { this = policy:zahiri_policy    NOT = { scope:actor = { has_policy = zahiri_policy } }    scope:actor = { zahiri_institution_score > 0 } }
-				AND = { this = policy:ismaili_policy   NOT = { scope:actor = { has_policy = ismaili_policy } }   scope:actor = { ismaili_institution_score > 0 } }
-				AND = { this = policy:jafari_policy    NOT = { scope:actor = { has_policy = jafari_policy } }    scope:actor = { jafari_institution_score > 0 } }
-				AND = { this = policy:zaidi_policy     NOT = { scope:actor = { has_policy = zaidi_policy } }     scope:actor = { zaidi_institution_score > 0 } }
-				AND = { this = policy:ibadi_policy     NOT = { scope:actor = { has_policy = ibadi_policy } }     scope:actor = { ibadi_institution_score > 0 } }
+				AND = { this = policy:hanafi_policy    NOT = { scope:actor = { has_policy = hanafi_policy } }    scope:actor = { hanafi_institution_tier >= 1 } }
+				AND = { this = policy:hanbali_policy   NOT = { scope:actor = { has_policy = hanbali_policy } }   scope:actor = { hanbali_institution_tier >= 1 } }
+				AND = { this = policy:maliki_policy    NOT = { scope:actor = { has_policy = maliki_policy } }    scope:actor = { maliki_institution_tier >= 1 } }
+				AND = { this = policy:shafii_policy    NOT = { scope:actor = { has_policy = shafii_policy } }    scope:actor = { shafii_institution_tier >= 1 } }
+				AND = { this = policy:zahiri_policy    NOT = { scope:actor = { has_policy = zahiri_policy } }    scope:actor = { zahiri_institution_tier >= 1 } }
+				AND = { this = policy:ismaili_policy   NOT = { scope:actor = { has_policy = ismaili_policy } }   scope:actor = { ismaili_institution_tier >= 1 } }
+				AND = { this = policy:jafari_policy    NOT = { scope:actor = { has_policy = jafari_policy } }    scope:actor = { jafari_institution_tier >= 1 } }
+				AND = { this = policy:zaidi_policy     NOT = { scope:actor = { has_policy = zaidi_policy } }     scope:actor = { zaidi_institution_tier >= 1 } }
+				AND = { this = policy:ibadi_policy     NOT = { scope:actor = { has_policy = ibadi_policy } }     scope:actor = { ibadi_institution_tier >= 1 } }
 			}
 		}
 	}
 
 	effect = {
+		# scope:actor does NOT reliably retain script variables across
+		# nested scripted_effect calls in a generic_action (confirmed in
+		# error.log: aqd_compat_madhhab / aqd_jurist_compat / aqd_crackdown_*
+		# all read back unset when set on scope:actor and read in a later
+		# macro). save_scope_as a named country scope once and thread THAT
+		# through every call - named scopes persist reliably.
+		scope:actor = { save_scope_as = aqd_crackdown_actor }
+
+		# Projected confiscation gold, shown in the action tooltip
+		# (script_values/z_aqd_madhhab_counts.txt - wipeout ceiling, so
+		# the text says "up to").
+		scope:aqd_crackdown_actor = {
+			set_variable = { name = aqd_crackdown_gold_est  value = aqd_crackdown_gold_estimate_target }
+		}
+		custom_tooltip = aqd_crackdown_gold_tt
+
 		# Same aqidah-madhhab relations reaction as declining a seat
 		# establishment: cracking down on a school your creed favours
 		# costs clergy standing + legitimacy; cracking down on one it
 		# opposes is rewarded. (scripted_effects/z_aqd_jurist_effects.txt)
-		aqd_set_compat_madhhab_from_target = { COUNTRY = scope:actor }
-		scope:actor = {
+		aqd_set_compat_madhhab_from_target = { COUNTRY = scope:aqd_crackdown_actor }
+		scope:aqd_crackdown_actor = {
 			if = { limit = { scope:target = policy:hanafi_policy }
-				aqd_crackdown_effect = { MADHHAB = hanafi  SECT = sunni  SCORE = hanafi_institution_score }
+				aqd_crackdown_effect = { MADHHAB = hanafi  SECT = sunni  SCORE = hanafi_institution_score  TIER = hanafi_institution_tier }
 			}
 			else_if = { limit = { scope:target = policy:hanbali_policy }
-				aqd_crackdown_effect = { MADHHAB = hanbali  SECT = sunni  SCORE = hanbali_institution_score }
+				aqd_crackdown_effect = { MADHHAB = hanbali  SECT = sunni  SCORE = hanbali_institution_score  TIER = hanbali_institution_tier }
 			}
 			else_if = { limit = { scope:target = policy:maliki_policy }
-				aqd_crackdown_effect = { MADHHAB = maliki  SECT = sunni  SCORE = maliki_institution_score }
+				aqd_crackdown_effect = { MADHHAB = maliki  SECT = sunni  SCORE = maliki_institution_score  TIER = maliki_institution_tier }
 			}
 			else_if = { limit = { scope:target = policy:shafii_policy }
-				aqd_crackdown_effect = { MADHHAB = shafii  SECT = sunni  SCORE = shafii_institution_score }
+				aqd_crackdown_effect = { MADHHAB = shafii  SECT = sunni  SCORE = shafii_institution_score  TIER = shafii_institution_tier }
 			}
 			else_if = { limit = { scope:target = policy:zahiri_policy }
-				aqd_crackdown_effect = { MADHHAB = zahiri  SECT = sunni  SCORE = zahiri_institution_score }
+				aqd_crackdown_effect = { MADHHAB = zahiri  SECT = sunni  SCORE = zahiri_institution_score  TIER = zahiri_institution_tier }
 			}
 			else_if = { limit = { scope:target = policy:ismaili_policy }
-				aqd_crackdown_effect = { MADHHAB = ismaili  SECT = shia  SCORE = ismaili_institution_score }
+				aqd_crackdown_effect = { MADHHAB = ismaili  SECT = shia  SCORE = ismaili_institution_score  TIER = ismaili_institution_tier }
 			}
 			else_if = { limit = { scope:target = policy:jafari_policy }
-				aqd_crackdown_effect = { MADHHAB = jafari  SECT = shia  SCORE = jafari_institution_score }
+				aqd_crackdown_effect = { MADHHAB = jafari  SECT = shia  SCORE = jafari_institution_score  TIER = jafari_institution_tier }
 			}
 			else_if = { limit = { scope:target = policy:zaidi_policy }
-				aqd_crackdown_effect = { MADHHAB = zaidi  SECT = shia  SCORE = zaidi_institution_score }
+				aqd_crackdown_effect = { MADHHAB = zaidi  SECT = shia  SCORE = zaidi_institution_score  TIER = zaidi_institution_tier }
 			}
 			else_if = { limit = { scope:target = policy:ibadi_policy }
-				aqd_crackdown_effect = { MADHHAB = ibadi  SECT = ibadi  SCORE = ibadi_institution_score }
+				aqd_crackdown_effect = { MADHHAB = ibadi  SECT = ibadi  SCORE = ibadi_institution_score  TIER = ibadi_institution_tier }
 			}
 		}
-		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = scope:actor }
+		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = scope:aqd_crackdown_actor }
 	}
 	ai_will_do = { add = 0 }
 }

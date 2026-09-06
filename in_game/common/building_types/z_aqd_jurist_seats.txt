@@ -20,24 +20,35 @@
 #  - conquest of a location that already holds one.
 #
 # All three place the seat with change_building_level_in_location, which
-# bypasses `allow` / `location_potential` / `country_potential`. The
-# location_potential below is kept only as a double-placement guard for
-# any future path that does route through the build system; the
-# religion-percentage clause is deliberately dropped so the engine's
-# periodic building sweep cannot prune a legitimately-placed seat in a
-# thin-minority capital - remove_if (0.05 floor + non-Muslim owner)
-# stays as the demographic-cleanup path.
+# bypasses `allow` / `location_potential` / `country_potential`.
+#
+# country_potential = { always = no } is LOAD-BEARING. A seat is an
+# estate_category clergy_estate building with construction_demand /
+# build_time set, so any country_potential that resolves TRUE lets the
+# clergy estate auto-construct it (allow = { always = no } only hides the
+# player's manual build button - it does not stop estate construction or
+# the game-start building fill). With the old country_potential = {
+# religion = religion:sunni } every Sunni realm sprouted unseeded seats
+# of random madhhabs from turn zero - e.g. a Zahiri seat in the Ottoman
+# lands. { always = no } is the same value base uses on its own
+# event-only buildings (seat_of_cardinal, great_madrasa, everything in
+# event_only_buildings.txt); those are placed only by script, exactly
+# like these.
+#
+# location_potential below is now dead weight (every real placement path
+# bypasses it) but harmless. remove_if (0.05 sect floor + non-Muslim
+# owner) stays as the demographic-cleanup path.
 #
 # A seat can never be manually demolished (can_destroy = always = no).
 # It is removed only by scripted_effects/z_aqd_jurist_effects.txt's
-# aqd_crackdown_effect (see generic_actions/z_aqd_piety.txt's
-# aqd_crackdown_madhhab and the establishment event's crackdown option)
-# or by remove_if. Switching the realm's official madhhab does not
-# remove an existing seat.
+# aqd_crackdown_effect - which razes it with destroy_building_forcefully
+# (plain destroy_building is refused by can_destroy = no) - or by
+# remove_if. Switching the realm's official madhhab does not remove an
+# existing seat.
 #
 # Counted into script_values/z_aqd_madhhab_counts.txt's per-madhhab
-# institution score (weight 2, vs. 1 for a madrasa), which drives the
-# tiered auto_modifiers in auto_modifiers/z_aqd_madhhab_tiers.txt.
+# institution score (weight 4, vs. 1 for a madrasa), which drives the
+# share-based tier in auto_modifiers/z_aqd_madhhab_tiers.txt.
 #
 # ICON: each seat_of_<X>_jurists uses its madhhab's religious-school
 # icon, supplied as main_menu/gfx/interface/icons/buildings/
@@ -57,14 +68,14 @@ seat_of_hanafi_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:sunni }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 
@@ -94,14 +105,14 @@ seat_of_hanbali_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:sunni }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 
@@ -131,14 +142,14 @@ seat_of_maliki_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:sunni }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 
@@ -168,14 +179,14 @@ seat_of_shafii_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:sunni }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 
@@ -205,14 +216,14 @@ seat_of_zahiri_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:sunni }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 
@@ -242,14 +253,14 @@ seat_of_ismaili_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:shia }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 
@@ -279,14 +290,14 @@ seat_of_jafari_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:shia }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 
@@ -316,14 +327,14 @@ seat_of_zaidi_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:shia }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 
@@ -353,14 +364,14 @@ seat_of_ibadi_jurists = {
 	max_levels = estate_building_single_level
 
 	rural_settlement = no
-	town = yes
+	town = no
 	city = yes
 	megalopolis = yes
 
 	build_time = estate_build_time
 	construction_demand = estate_construct_building
 
-	country_potential = { religion = religion:ibadi }
+	country_potential = { always = no }
 	allow = { always = no }
 	can_destroy = { always = no }
 

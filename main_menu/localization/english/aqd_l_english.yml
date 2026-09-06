@@ -15,12 +15,13 @@
  aqd_change_madhhab: "Change the Madhhab"
  aqd_change_madhhab_desc: "Adopt a different school of jurisprudence for your realm's courts. A deliberate act, paid for in stability."
  aqd_madhhab_select: "Which madhhab?"
- aqd_madhhab_none: "No other madhhab is open to your confession."
+ aqd_madhhab_none: "@trigger_no! No other madhhab is open to your confession."
 
  aqd_crackdown_madhhab: "Crack Down on Jurists"
  aqd_crackdown_madhhab_desc: "Move against a rival madhhab's institutions in your realm - closing courts, and if need be a seat itself, until its standing is broken back by one degree. The Ulema will not forget it quickly."
+ aqd_crackdown_gold_tt: "Seize up to #Y [SCOPE.sCountry('aqd_crackdown_actor').MakeScope.GetVariable('aqd_crackdown_gold_est').GetValue|V0]@gold!#! in confiscated endowments"
  aqd_crackdown_select: "Crack down on which madhhab?"
- aqd_crackdown_none: "No rival madhhab has enough of a foothold in your realm to crack down on."
+ aqd_crackdown_none: "@trigger_no! No rival madhhab has enough of a foothold in your realm to crack down on."
 
  # ---- Ulema Institutions: Jurist Seats ----
  seat_of_hanafi_jurists: "Seat of Hanafi Jurists"
@@ -63,50 +64,59 @@
  madrasa_of_ibadi_fiqh_desc: "A local college of Ibadi fiqh, endowed by the district's notables, where students read the school's law under resident jurists. It is buildable for your realm's own madhhab anywhere its people are numerous; for any other, only in an area where your realm already holds a Seat of that school. Where three take root in one province beside a working mosque, and a city to house it, its jurists may petition to found a standing Seat."
 
  # ---- Ulema Institutions: madhhab presence tiers ----
- aqd_hanafi_presence: "Hanafi School Presence"
- aqd_hanafi_noteworthy: "Hanafi School Noteworthy"
- aqd_hanafi_plurality: "Hanafi School Plurality"
- aqd_hanafi_predominance: "Hanafi School Predominance"
- aqd_hanbali_presence: "Hanbali School Presence"
- aqd_hanbali_noteworthy: "Hanbali School Noteworthy"
- aqd_hanbali_plurality: "Hanbali School Plurality"
- aqd_hanbali_predominance: "Hanbali School Predominance"
- aqd_maliki_presence: "Maliki School Presence"
- aqd_maliki_noteworthy: "Maliki School Noteworthy"
- aqd_maliki_plurality: "Maliki School Plurality"
- aqd_maliki_predominance: "Maliki School Predominance"
- aqd_shafii_presence: "Shafi'i School Presence"
- aqd_shafii_noteworthy: "Shafi'i School Noteworthy"
- aqd_shafii_plurality: "Shafi'i School Plurality"
- aqd_shafii_predominance: "Shafi'i School Predominance"
- aqd_zahiri_presence: "Zahiri School Presence"
- aqd_zahiri_noteworthy: "Zahiri School Noteworthy"
- aqd_zahiri_plurality: "Zahiri School Plurality"
- aqd_zahiri_predominance: "Zahiri School Predominance"
- aqd_ismaili_presence: "Ismaili School Presence"
- aqd_ismaili_noteworthy: "Ismaili School Noteworthy"
- aqd_ismaili_plurality: "Ismaili School Plurality"
- aqd_ismaili_predominance: "Ismaili School Predominance"
- aqd_jafari_presence: "Jafari School Presence"
- aqd_jafari_noteworthy: "Jafari School Noteworthy"
- aqd_jafari_plurality: "Jafari School Plurality"
- aqd_jafari_predominance: "Jafari School Predominance"
- aqd_zaidi_presence: "Zaidi School Presence"
- aqd_zaidi_noteworthy: "Zaidi School Noteworthy"
- aqd_zaidi_plurality: "Zaidi School Plurality"
- aqd_zaidi_predominance: "Zaidi School Predominance"
- aqd_ibadi_presence: "Ibadi School Presence"
- aqd_ibadi_noteworthy: "Ibadi School Noteworthy"
- aqd_ibadi_plurality: "Ibadi School Plurality"
- aqd_ibadi_predominance: "Ibadi School Predominance"
+ # Auto-modifier display names: the engine resolves an auto_modifier
+ # block's name only via the AUTO_MODIFIER_NAME_<block> key (a bare
+ # <block> key is never read). Block names live in
+ # in_game/common/auto_modifiers/z_aqd_madhhab_tiers.txt.
+ AUTO_MODIFIER_NAME_aqd_hanafi_presence: "Hanafi School Presence"
+ AUTO_MODIFIER_NAME_aqd_hanafi_noteworthy: "Hanafi School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_hanafi_plurality: "Hanafi School Plurality"
+ AUTO_MODIFIER_NAME_aqd_hanafi_predominance: "Hanafi School Predominance"
+ AUTO_MODIFIER_NAME_aqd_hanbali_presence: "Hanbali School Presence"
+ AUTO_MODIFIER_NAME_aqd_hanbali_noteworthy: "Hanbali School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_hanbali_plurality: "Hanbali School Plurality"
+ AUTO_MODIFIER_NAME_aqd_hanbali_predominance: "Hanbali School Predominance"
+ AUTO_MODIFIER_NAME_aqd_maliki_presence: "Maliki School Presence"
+ AUTO_MODIFIER_NAME_aqd_maliki_noteworthy: "Maliki School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_maliki_plurality: "Maliki School Plurality"
+ AUTO_MODIFIER_NAME_aqd_maliki_predominance: "Maliki School Predominance"
+ AUTO_MODIFIER_NAME_aqd_shafii_presence: "Shafi'i School Presence"
+ AUTO_MODIFIER_NAME_aqd_shafii_noteworthy: "Shafi'i School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_shafii_plurality: "Shafi'i School Plurality"
+ AUTO_MODIFIER_NAME_aqd_shafii_predominance: "Shafi'i School Predominance"
+ AUTO_MODIFIER_NAME_aqd_zahiri_presence: "Zahiri School Presence"
+ AUTO_MODIFIER_NAME_aqd_zahiri_noteworthy: "Zahiri School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_zahiri_plurality: "Zahiri School Plurality"
+ AUTO_MODIFIER_NAME_aqd_zahiri_predominance: "Zahiri School Predominance"
+ AUTO_MODIFIER_NAME_aqd_ismaili_presence: "Ismaili School Presence"
+ AUTO_MODIFIER_NAME_aqd_ismaili_noteworthy: "Ismaili School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_ismaili_plurality: "Ismaili School Plurality"
+ AUTO_MODIFIER_NAME_aqd_ismaili_predominance: "Ismaili School Predominance"
+ AUTO_MODIFIER_NAME_aqd_jafari_presence: "Jafari School Presence"
+ AUTO_MODIFIER_NAME_aqd_jafari_noteworthy: "Jafari School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_jafari_plurality: "Jafari School Plurality"
+ AUTO_MODIFIER_NAME_aqd_jafari_predominance: "Jafari School Predominance"
+ AUTO_MODIFIER_NAME_aqd_zaidi_presence: "Zaidi School Presence"
+ AUTO_MODIFIER_NAME_aqd_zaidi_noteworthy: "Zaidi School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_zaidi_plurality: "Zaidi School Plurality"
+ AUTO_MODIFIER_NAME_aqd_zaidi_predominance: "Zaidi School Predominance"
+ AUTO_MODIFIER_NAME_aqd_ibadi_presence: "Ibadi School Presence"
+ AUTO_MODIFIER_NAME_aqd_ibadi_noteworthy: "Ibadi School Noteworthy"
+ AUTO_MODIFIER_NAME_aqd_ibadi_plurality: "Ibadi School Plurality"
+ AUTO_MODIFIER_NAME_aqd_ibadi_predominance: "Ibadi School Predominance"
 
  # ---- Ulema Institutions: crackdown modifiers ----
- # Key kept as z_aqd_jurist_evicted; displayed as "Legal School Persecuted".
+ # Static-modifier display names: the engine resolves these only via the
+ # STATIC_MODIFIER_NAME_<key> loc key (a bare <key> is never read - see
+ # STATIC_MODIFIER_NAME_muslim_madrassa etc. below). Bare keys kept for
+ # any custom_tooltip/prose reference.
  z_aqd_jurist_evicted: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted: "Legal School Persecuted"
  z_aqd_jurist_evicted_desc: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
  # Moving against a fellow school of law now grants the base-game
  # modifier ulema_displeased ("'Ulamā' Privileges Infringed").
  z_aqd_heretics_suppressed: "Heretical School Suppressed"
+ STATIC_MODIFIER_NAME_z_aqd_heretics_suppressed: "Heretical School Suppressed"
  z_aqd_heretics_suppressed_desc: "The state has broken up the colleges of a heretical school of law. The ulema applaud the piety of it, and the realm's heretics are watched more closely."
  z_aqd_crackdown_on_our_school: "Persecuted our school of law"
 
@@ -121,7 +131,9 @@
  z_aqd_establishment.1.desc: "The madrasas of one school of jurisprudence have multiplied across a province of the realm, and now stand in strength beside its mosques. Its jurists ask leave to raise a permanent Seat in one of the province's cities - a standing authority to train and appoint the qadis of their school. Grant it, and the school is anchored in your realm for good. Refuse, and your officers must move against its colleges instead."
  z_aqd_establishment.1.allow: "Let them raise their Seat"
  z_aqd_establishment.1.crackdown: "Move against the school"
+ aqd_crackdown_gold_result_tt: "Seize up to #Y [ROOT.GetVariable('aqd_crackdown_gold_est').GetValue|V0]@gold!#! in confiscated endowments"
  z_aqd_establishment_pending: "Jurists Petitioning"
+ STATIC_MODIFIER_NAME_z_aqd_establishment_pending: "Jurists Petitioning"
  z_aqd_establishment_pending_desc: "The question of a jurists' Seat here has recently been settled. It will not be raised again for some years."
 
  # ---- Ulema Institutions: exiled jurists find refuge ----

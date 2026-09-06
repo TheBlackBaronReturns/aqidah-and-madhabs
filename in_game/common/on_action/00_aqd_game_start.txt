@@ -28,6 +28,12 @@ aqd_on_game_start = {
 		# aqd_set_starting_schools so the sharia_law policies are in
 		# place. No starting madrasas are seeded - those grow from play.
 		aqd_seed_starting_seats = yes
+		# Seed the cached tier denominator (var:aqd_realm_jurist_total)
+		# for every Muslim sharia realm now that the starting seats
+		# exist - otherwise the share bands read a 0 total for the first
+		# month. Refreshed monthly by aqd_recount_jurist_total_pulse and
+		# after every jurist building placed/razed.
+		aqd_recount_all_jurist_totals = yes
 	}
 }
 
@@ -50,14 +56,15 @@ four_yearly_country_pulse = {
 	on_actions = { aqd_migrate_pulse  aqd_seat_establishment_pulse }
 }
 
-# Ulema Institutions - seat establishment. For a Muslim realm that
-# already has some madhhab at Noteworthy (institution_score >= 3), scan
-# its provinces for one holding 3 madrasas of that madhhab + a mosque
-# and no seat yet, and offer to raise a seat (or crack down). See
+# Ulema Institutions - seat establishment. The 9-way `>= 3` check below
+# is a cheap raw-footprint prefilter (>=3 madrasas, or >=1 seat, of some
+# madhhab) that just avoids the per-province scan for realms with no
+# jurist footprint. Under the share-based tier model it is NOT a tier
+# threshold and is intentionally decoupled from auto_modifiers/
+# z_aqd_madhhab_tiers.txt. The real gate is aqd_province_has_madhhab_density
+# (scripted_triggers/z_aqd_jurist_triggers.txt). See also
 # scripted_effects/z_aqd_establishment_effects.txt and events/religion/
-# z_aqd_establishment_events.txt. The 9-way `>= 3` pre-filter below is
-# the Noteworthy lower bound - keep in sync with auto_modifiers/
-# z_aqd_madhhab_tiers.txt.
+# z_aqd_establishment_events.txt.
 aqd_seat_establishment_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
@@ -85,7 +92,24 @@ aqd_seat_establishment_pulse = {
 # subscribers - same merge-not-override guarantee documented above for
 # on_game_start.
 monthly_country_pulse = {
-	on_actions = { aqd_jurist_migration_pulse }
+	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse }
+}
+
+# Ulema Institutions - refresh the cached tier denominator
+# (var:aqd_realm_jurist_total) once a month for every Muslim sharia
+# realm, so the share-based tiers in auto_modifiers/z_aqd_madhhab_tiers.txt
+# are not driven by a 9-way sum recomputed inside every auto_modifier
+# block. Sharp changes (crackdown, seat grant, exile grant,
+# foreign-jurist accept) refresh it immediately via
+# aqd_recount_jurist_total; this pulse catches organic construction.
+aqd_recount_jurist_total_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		has_policy = sharia_law_policy
+	}
+	effect = {
+		aqd_recount_jurist_total = yes
+	}
 }
 aqd_jurist_migration_pulse = {
 	trigger = {

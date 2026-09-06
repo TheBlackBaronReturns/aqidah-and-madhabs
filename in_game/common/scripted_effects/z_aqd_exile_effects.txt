@@ -73,6 +73,9 @@ aqd_exile_plant_seat = {
 	scope:aqd_exile_loc = {
 		change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
 	}
+	# The new Seat changed this realm's jurist footprint - refresh the
+	# cached tier denominator so tiers update at once, not next month.
+	root = { aqd_recount_jurist_total = yes }
 }
 
 # Runs on every option path. aqd_compat_madhhab is set in the event's

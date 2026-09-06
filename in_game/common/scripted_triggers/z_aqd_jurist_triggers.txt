@@ -6,82 +6,103 @@
 # receiving country)? A candidate qualifies for a given madhhab if it
 # holds that madhhab as its own current law, root does NOT already
 # hold that same madhhab as its own current law (never offer your own
-# madhhab as "foreign"), root's institution score for that madhhab has
-# not already reached Plurality (see auto_modifiers/
-# z_aqd_madhhab_tiers.txt - the "5" threshold below must match that
-# file's Plurality lower bound for every madhhab), AND root actually
-# has a location whose population meets the population threshold for
-# the CANDIDATE's own religion (sunni/shia/ibadi per madhhab) - so the
-# event is never offered when accepting it could never actually place
-# a seat anywhere (e.g. a wholly-Sunni root has no province any Shia
-# jurists could realistically settle in). The 0.25 threshold here must
-# match building_types/z_aqd_madrasas.txt and scripted_effects/
-# z_aqd_jurist_effects.txt's aqd_build_madrasas_of_madhhab_from exactly.
+# madhhab as "foreign"), that madhhab's tier in root has not already
+# reached Plurality (root.<X>_institution_tier < 3 - see
+# script_values/z_aqd_madhhab_counts.txt; tier 3 = Plurality), AND
+# root actually has a location whose population meets the population
+# threshold for the CANDIDATE's own religion (sunni/shia/ibadi per
+# madhhab) - so the event is never offered when accepting it could
+# never actually place a seat anywhere (e.g. a wholly-Sunni root has
+# no province any Shia jurists could realistically settle in). The
+# 0.25 threshold here must match building_types/z_aqd_madrasas.txt and
+# scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_build_madrasas_of_madhhab_from exactly.
 #
 # aqd_province_has_madhhab_density = { MADHHAB SECT }: does 'this' (a
 # country, = root here) own a province_definition holding >= 3 of its
 # own madrasas of MADHHAB plus >= 1 mosque (temple), with no seat of
 # MADHHAB and whose capital carries no z_aqd_establishment_pending
 # marker? Drives the establishment pulse in on_action/00_aqd_game_start.txt.
-# The "3" is the Noteworthy threshold - keep in sync with
-# auto_modifiers/z_aqd_madhhab_tiers.txt.
+# This is a province-granularity STRUCTURAL gate. Under the share-based
+# tier model it does NOT imply any realm-wide tier - it and the pulse
+# prefilter in 00_aqd_game_start.txt are independent constraints; do
+# not try to re-sync them.
 # =====================================================================
+
+# One fiqh madrasa per location, whatever the madhhab: a location that
+# already holds any madrasa_of_<X>_fiqh takes no other. Used by the
+# madrasa location_potential (building_types/z_aqd_madrasas.txt) and by
+# the foreign-jurist placement (scripted_effects/z_aqd_jurist_effects.txt
+# aqd_build_madrasas_of_madhhab_from). Location-scoped.
+aqd_location_has_fiqh_madrasa = {
+	OR = {
+		has_building = building_type:madrasa_of_hanafi_fiqh
+		has_building = building_type:madrasa_of_hanbali_fiqh
+		has_building = building_type:madrasa_of_maliki_fiqh
+		has_building = building_type:madrasa_of_shafii_fiqh
+		has_building = building_type:madrasa_of_zahiri_fiqh
+		has_building = building_type:madrasa_of_ismaili_fiqh
+		has_building = building_type:madrasa_of_jafari_fiqh
+		has_building = building_type:madrasa_of_zaidi_fiqh
+		has_building = building_type:madrasa_of_ibadi_fiqh
+	}
+}
 
 aqd_is_eligible_jurist_source = {
 	OR = {
 		AND = {
 			this = { has_policy = hanafi_policy }
 			NOT = { root = { has_policy = hanafi_policy } }
-			root.hanafi_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+			root.hanafi_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
 		}
 		AND = {
 			this = { has_policy = hanbali_policy }
 			NOT = { root = { has_policy = hanbali_policy } }
-			root.hanbali_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+			root.hanbali_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
 		}
 		AND = {
 			this = { has_policy = maliki_policy }
 			NOT = { root = { has_policy = maliki_policy } }
-			root.maliki_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+			root.maliki_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
 		}
 		AND = {
 			this = { has_policy = shafii_policy }
 			NOT = { root = { has_policy = shafii_policy } }
-			root.shafii_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+			root.shafii_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
 		}
 		AND = {
 			this = { has_policy = zahiri_policy }
 			NOT = { root = { has_policy = zahiri_policy } }
-			root.zahiri_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:sunni)" >= 0.25 } }
+			root.zahiri_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
 		}
 		AND = {
 			this = { has_policy = ismaili_policy }
 			NOT = { root = { has_policy = ismaili_policy } }
-			root.ismaili_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:shia)" >= 0.25 } }
+			root.ismaili_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:shia)" >= 0.25 } }
 		}
 		AND = {
 			this = { has_policy = jafari_policy }
 			NOT = { root = { has_policy = jafari_policy } }
-			root.jafari_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:shia)" >= 0.25 } }
+			root.jafari_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:shia)" >= 0.25 } }
 		}
 		AND = {
 			this = { has_policy = zaidi_policy }
 			NOT = { root = { has_policy = zaidi_policy } }
-			root.zaidi_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:shia)" >= 0.25 } }
+			root.zaidi_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:shia)" >= 0.25 } }
 		}
 		AND = {
 			this = { has_policy = ibadi_policy }
 			NOT = { root = { has_policy = ibadi_policy } }
-			root.ibadi_institution_score < 5
-			root = { any_owned_location = { "religion_percentage(religion:ibadi)" >= 0.25 } }
+			root.ibadi_institution_tier < 3
+			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:ibadi)" >= 0.25 } }
 		}
 	}
 }

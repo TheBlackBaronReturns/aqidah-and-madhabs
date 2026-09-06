@@ -8,12 +8,17 @@
 # seat of jurists - or crack down on the school.
 #
 # Fired from on_action/00_aqd_game_start.txt's aqd_seat_establishment_pulse
-# (four_yearly_country_pulse), pre-filtered there by <X>_institution_score
-# >= 3 so only a realm with a madhhab already at Noteworthy is scanned.
+# (four_yearly_country_pulse), pre-filtered there by a cheap 9-way
+# <X>_institution_score >= 3 raw-footprint gate (>=3 madrasas, or a
+# seat, of some madhhab). Under the share-based tier model that gate and
+# the province density check below are INDEPENDENT constraints - the
+# prefilter no longer "implies Noteworthy", it just avoids the province
+# scan for realms with no jurist footprint at all.
 #
-# The "3" and ">= 3" here are the Noteworthy threshold and MUST be kept
-# in sync with auto_modifiers/z_aqd_madhhab_tiers.txt (see that file's
-# header for the full list of sites).
+# The literal "3" in aqd_province_has_madhhab_density
+# (scripted_triggers/z_aqd_jurist_triggers.txt) is a province-density
+# requirement (3 own madrasas in one province), unrelated to any
+# realm-wide tier.
 #
 # Canonical madhhab index (var:aqd_establish_madhhab): 1 hanafi
 # 2 hanbali 3 maliki 4 shafii 5 zahiri 6 ismaili 7 jafari 8 zaidi
@@ -41,10 +46,11 @@ aqd_try_seat_establishment = {
 }
 
 aqd_establish_scan_one = {
-	# The density trigger already implies institution_score >= 3 (3
-	# madrasas = weight 3), so no separate score check is needed here -
-	# the cheap 9-way score pre-filter lives on the pulse's own trigger
-	# in on_action/00_aqd_game_start.txt.
+	# aqd_province_has_madhhab_density is the sole gate here (3 own
+	# madrasas of the madhhab in one province + a mosque + a city + no
+	# seat yet). Under the share model it does NOT imply any realm-wide
+	# tier; the pulse's 9-way score >= 3 prefilter in
+	# on_action/00_aqd_game_start.txt is a separate raw-footprint gate.
 	if = {
 		limit = {
 			var:aqd_establish_fired = 0
@@ -154,19 +160,24 @@ aqd_establish_plant_seat = {
 	scope:aqd_establish_loc = {
 		change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
 	}
+	# The new Seat changed the realm's jurist footprint - refresh the
+	# cached tier denominator so tiers update at once, not next month.
+	root = { aqd_recount_jurist_total = yes }
 }
 
-# CRACK DOWN option - knock the madhhab down one institutional tier.
+# CRACK DOWN option - see aqd_crackdown_effect in
+# scripted_effects/z_aqd_jurist_effects.txt (< 3 buildings -> wipeout,
+# else knock down one tier capped at half the school's strength).
 aqd_establishment_crackdown = {
-	if      = { limit = { var:aqd_establish_madhhab = 1 } aqd_crackdown_effect = { MADHHAB = hanafi   SECT = sunni  SCORE = hanafi_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 2 } aqd_crackdown_effect = { MADHHAB = hanbali  SECT = sunni  SCORE = hanbali_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 3 } aqd_crackdown_effect = { MADHHAB = maliki   SECT = sunni  SCORE = maliki_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 4 } aqd_crackdown_effect = { MADHHAB = shafii   SECT = sunni  SCORE = shafii_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 5 } aqd_crackdown_effect = { MADHHAB = zahiri   SECT = sunni  SCORE = zahiri_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 6 } aqd_crackdown_effect = { MADHHAB = ismaili  SECT = shia   SCORE = ismaili_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 7 } aqd_crackdown_effect = { MADHHAB = jafari   SECT = shia   SCORE = jafari_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 8 } aqd_crackdown_effect = { MADHHAB = zaidi    SECT = shia   SCORE = zaidi_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 9 } aqd_crackdown_effect = { MADHHAB = ibadi    SECT = ibadi  SCORE = ibadi_institution_score } }
+	if      = { limit = { var:aqd_establish_madhhab = 1 } aqd_crackdown_effect = { MADHHAB = hanafi   SECT = sunni  SCORE = hanafi_institution_score   TIER = hanafi_institution_tier } }
+	else_if = { limit = { var:aqd_establish_madhhab = 2 } aqd_crackdown_effect = { MADHHAB = hanbali  SECT = sunni  SCORE = hanbali_institution_score  TIER = hanbali_institution_tier } }
+	else_if = { limit = { var:aqd_establish_madhhab = 3 } aqd_crackdown_effect = { MADHHAB = maliki   SECT = sunni  SCORE = maliki_institution_score   TIER = maliki_institution_tier } }
+	else_if = { limit = { var:aqd_establish_madhhab = 4 } aqd_crackdown_effect = { MADHHAB = shafii   SECT = sunni  SCORE = shafii_institution_score   TIER = shafii_institution_tier } }
+	else_if = { limit = { var:aqd_establish_madhhab = 5 } aqd_crackdown_effect = { MADHHAB = zahiri   SECT = sunni  SCORE = zahiri_institution_score   TIER = zahiri_institution_tier } }
+	else_if = { limit = { var:aqd_establish_madhhab = 6 } aqd_crackdown_effect = { MADHHAB = ismaili  SECT = shia   SCORE = ismaili_institution_score  TIER = ismaili_institution_tier } }
+	else_if = { limit = { var:aqd_establish_madhhab = 7 } aqd_crackdown_effect = { MADHHAB = jafari   SECT = shia   SCORE = jafari_institution_score   TIER = jafari_institution_tier } }
+	else_if = { limit = { var:aqd_establish_madhhab = 8 } aqd_crackdown_effect = { MADHHAB = zaidi    SECT = shia   SCORE = zaidi_institution_score    TIER = zaidi_institution_tier } }
+	else_if = { limit = { var:aqd_establish_madhhab = 9 } aqd_crackdown_effect = { MADHHAB = ibadi    SECT = ibadi  SCORE = ibadi_institution_score    TIER = ibadi_institution_tier } }
 }
 
 # Apply the pending marker to the province capital (or the fallback

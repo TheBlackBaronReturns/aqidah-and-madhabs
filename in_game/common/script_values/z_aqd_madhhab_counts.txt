@@ -1,58 +1,262 @@
 # =====================================================================
 # AQIDAH SCHOOLS OF CREED - Ulema Institutions: per-madhhab institution
-# score. A seat counts for 2, a madrasa for 1 - the madrasa
-# (building_types/z_aqd_madrasas.txt) is the grassroots unit, the seat
-# (building_types/z_aqd_jurist_seats.txt) its consolidated authority.
-# Drives the tiered auto_modifiers in auto_modifiers/
-# z_aqd_madhhab_tiers.txt, the foreign-jurist event's eligibility
-# trigger in scripted_triggers/z_aqd_jurist_triggers.txt, the
-# establishment pulse's pre-filter in on_action/00_aqd_game_start.txt,
-# and the crackdown effect's tier-detection in scripted_effects/
-# z_aqd_jurist_effects.txt. All must be kept in sync with the tier
-# thresholds defined in auto_modifiers/z_aqd_madhhab_tiers.txt.
+# STRENGTH, the realm total, and the 0-4 tier.
+#
+# MODEL: a madhhab's tier is its SHARE of the realm's total jurist
+# strength, not an absolute count. A seat is worth 4 strength, a
+# madrasa 1 (seat = 4x madrasa). Bands, as a fraction of the realm
+# total (all 9 madhhabs, INCLUDING the realm's own official one):
+#   Plurality   >= 0.60      Noteworthy  >= 0.35      Presence >= 0.15
+# Predominance is NOT a share band - it is exactly the realm's own
+# official sharia_law madhhab, always, alone. Rival schools cap at
+# Plurality. A standing Seat floors its madhhab at Presence however
+# diluted its share (a permanent institution is never invisible);
+# madrasas-only schools can still fall to tier 0.
+#
+# <X>_institution_score  - raw weighted footprint (seat 4, madrasa 1).
+#     Kept for the establishment-pulse prefilter (on_action/
+#     00_aqd_game_start.txt) and the crackdown's half-strength cap
+#     (scripted_effects/z_aqd_jurist_effects.txt). NOT a tier.
+# aqd_realm_jurist_total_recount - sum of all 9 scores. Evaluated ONLY
+#     by the recount pulse/seed; the tiers read the CACHED result in
+#     var:aqd_realm_jurist_total (refreshed monthly, at game start, and
+#     immediately after any jurist building is placed or razed) so the
+#     9-way sum is not recomputed inside every auto_modifier block.
+# aqd_realm_jurist_*_floor - the three band edges as fractions of the
+#     cached total. Compared as `score >= total * frac` so there is no
+#     division anywhere.
+# <X>_institution_tier - the clean 0-4 integer every consumer reads:
+#     auto_modifiers/z_aqd_madhhab_tiers.txt (tier = N per block),
+#     scripted_triggers/z_aqd_jurist_triggers.txt (< 3 = below
+#     Plurality), scripted_effects/z_aqd_jurist_effects.txt and
+#     generic_actions/z_aqd_piety.txt (crackdown gate / target list).
+#
+# The 0.25 population threshold used elsewhere for seat placement is
+# unrelated to these values - see building_types/z_aqd_madrasas.txt.
 # =====================================================================
 
 hanafi_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_hanafi_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_hanafi_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_hanafi_fiqh }   add = 1 }
 }
 
 hanbali_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_hanbali_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_hanbali_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_hanbali_fiqh }   add = 1 }
 }
 
 maliki_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_maliki_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_maliki_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_maliki_fiqh }   add = 1 }
 }
 
 shafii_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_shafii_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_shafii_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_shafii_fiqh }   add = 1 }
 }
 
 zahiri_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_zahiri_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_zahiri_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_zahiri_fiqh }   add = 1 }
 }
 
 ismaili_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_ismaili_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_ismaili_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_ismaili_fiqh }   add = 1 }
 }
 
 jafari_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_jafari_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_jafari_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_jafari_fiqh }   add = 1 }
 }
 
 zaidi_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_zaidi_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_zaidi_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_zaidi_fiqh }   add = 1 }
 }
 
 ibadi_institution_score = {
-	every_owned_location = { limit = { has_building = building_type:seat_of_ibadi_jurists }  add = 2 }
+	every_owned_location = { limit = { has_building = building_type:seat_of_ibadi_jurists }  add = 4 }
 	every_owned_location = { limit = { has_building = building_type:madrasa_of_ibadi_fiqh }   add = 1 }
+}
+
+# Live sum of all 9. Evaluated only by aqd_recount_jurist_total /
+# aqd_recount_all_jurist_totals (scripted_effects/z_aqd_jurist_effects.txt);
+# everything else reads the cached var:aqd_realm_jurist_total.
+aqd_realm_jurist_total_recount = {
+	value = hanafi_institution_score
+	add   = hanbali_institution_score
+	add   = maliki_institution_score
+	add   = shafii_institution_score
+	add   = zahiri_institution_score
+	add   = ismaili_institution_score
+	add   = jafari_institution_score
+	add   = zaidi_institution_score
+	add   = ibadi_institution_score
+}
+
+# Band edges as a fraction of last recount's cached realm total.
+# GUARDED: var:aqd_realm_jurist_total is only ever set for Muslim sharia
+# realms, but <X>_institution_tier (and through it the 36 auto_modifier
+# potential_triggers) is evaluated for EVERY country - so an unguarded
+# var: read here errors on every non-Muslim realm, every recompute.
+# Unset -> 0; the tier's own `exists = var:` guard keeps such a realm at
+# tier 0 regardless (a 0 floor would otherwise pass every `score >= floor`).
+aqd_realm_jurist_plurality_floor = {
+	value = 0
+	if = { limit = { exists = var:aqd_realm_jurist_total }
+		value = var:aqd_realm_jurist_total
+		multiply = 0.60
+	}
+}
+aqd_realm_jurist_noteworthy_floor = {
+	value = 0
+	if = { limit = { exists = var:aqd_realm_jurist_total }
+		value = var:aqd_realm_jurist_total
+		multiply = 0.35
+	}
+}
+aqd_realm_jurist_presence_floor = {
+	value = 0
+	if = { limit = { exists = var:aqd_realm_jurist_total }
+		value = var:aqd_realm_jurist_total
+		multiply = 0.15
+	}
+}
+
+# 0 none / 1 Presence / 2 Noteworthy / 3 Plurality / 4 Predominance.
+# Ordered if / else_if / else, highest tier first (base idiom - never a
+# sequential bare-if value ladder):
+#   official sharia_law madhhab            -> 4, always, alone
+#   share >= plurality/noteworthy/presence -> 3 / 2 / 1  (only while
+#       var:aqd_realm_jurist_total exists - the `exists` guard is FIRST
+#       in each band limit so the floor script_value is never read on a
+#       realm that has no cached total; `score > 0` covers a 0 total)
+#   a standing Seat of the madhhab         -> 1  (seat floor: a permanent
+#       institution is never invisible, however diluted its share)
+#   otherwise                              -> 0
+# Evaluated for EVERY country by the 36 auto_modifier potential_triggers,
+# so it must not error on a non-Muslim realm (no var:aqd_realm_jurist_total).
+hanafi_institution_tier = {
+	if      = { limit = { has_policy = hanafi_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  hanafi_institution_score > 0  hanafi_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  hanafi_institution_score > 0  hanafi_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  hanafi_institution_score > 0  hanafi_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_hanafi_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+hanbali_institution_tier = {
+	if      = { limit = { has_policy = hanbali_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  hanbali_institution_score > 0  hanbali_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  hanbali_institution_score > 0  hanbali_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  hanbali_institution_score > 0  hanbali_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_hanbali_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+maliki_institution_tier = {
+	if      = { limit = { has_policy = maliki_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  maliki_institution_score > 0  maliki_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  maliki_institution_score > 0  maliki_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  maliki_institution_score > 0  maliki_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_maliki_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+shafii_institution_tier = {
+	if      = { limit = { has_policy = shafii_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  shafii_institution_score > 0  shafii_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  shafii_institution_score > 0  shafii_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  shafii_institution_score > 0  shafii_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_shafii_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+zahiri_institution_tier = {
+	if      = { limit = { has_policy = zahiri_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  zahiri_institution_score > 0  zahiri_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  zahiri_institution_score > 0  zahiri_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  zahiri_institution_score > 0  zahiri_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_zahiri_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+ismaili_institution_tier = {
+	if      = { limit = { has_policy = ismaili_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  ismaili_institution_score > 0  ismaili_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  ismaili_institution_score > 0  ismaili_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  ismaili_institution_score > 0  ismaili_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_ismaili_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+jafari_institution_tier = {
+	if      = { limit = { has_policy = jafari_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  jafari_institution_score > 0  jafari_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  jafari_institution_score > 0  jafari_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  jafari_institution_score > 0  jafari_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_jafari_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+zaidi_institution_tier = {
+	if      = { limit = { has_policy = zaidi_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  zaidi_institution_score > 0  zaidi_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  zaidi_institution_score > 0  zaidi_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  zaidi_institution_score > 0  zaidi_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_zaidi_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+ibadi_institution_tier = {
+	if      = { limit = { has_policy = ibadi_policy }  value = 4 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  ibadi_institution_score > 0  ibadi_institution_score >= aqd_realm_jurist_plurality_floor  }  value = 3 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  ibadi_institution_score > 0  ibadi_institution_score >= aqd_realm_jurist_noteworthy_floor }  value = 2 }
+	else_if = { limit = { exists = var:aqd_realm_jurist_total  ibadi_institution_score > 0  ibadi_institution_score >= aqd_realm_jurist_presence_floor   }  value = 1 }
+	else_if = { limit = { any_owned_location = { has_building = building_type:seat_of_ibadi_jurists } }  value = 1 }
+	else    = { value = 0 }
+}
+
+# ---------------------------------------------------------------------
+# Projected confiscation gold from a crackdown, shown in the event /
+# action choice text. The razing loop in scripted_effects/
+# z_aqd_jurist_effects.txt pays monthly_income_trade_and_tax * 0.25 per
+# razed madrasa and * 1.0 per razed seat; since a madrasa is strength 1
+# and a seat strength 4, that is exactly strength_razed * 0.25 * income.
+# This estimate uses the FULL score (the wipeout ceiling) - the
+# tier-drop branch seizes less, so the text says "up to".
+#   _establish : branches on var:aqd_establish_madhhab (1..9), used by
+#                z_aqd_establishment.1's crack-down option.
+#   _target    : branches on scope:target (a sharia_law policy), used by
+#                the aqd_crackdown_madhhab generic action.
+# ---------------------------------------------------------------------
+aqd_crackdown_gold_estimate_establish = {
+	if      = { limit = { var:aqd_establish_madhhab = 1 }  value = hanafi_institution_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 2 }  value = hanbali_institution_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 3 }  value = maliki_institution_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 4 }  value = shafii_institution_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 5 }  value = zahiri_institution_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 6 }  value = ismaili_institution_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 7 }  value = jafari_institution_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 8 }  value = zaidi_institution_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 9 }  value = ibadi_institution_score }
+	else    = { value = 0 }
+	multiply = 0.25
+	multiply = monthly_income_trade_and_tax
+}
+
+aqd_crackdown_gold_estimate_target = {
+	if      = { limit = { scope:target = policy:hanafi_policy }  value = hanafi_institution_score }
+	else_if = { limit = { scope:target = policy:hanbali_policy } value = hanbali_institution_score }
+	else_if = { limit = { scope:target = policy:maliki_policy }  value = maliki_institution_score }
+	else_if = { limit = { scope:target = policy:shafii_policy }  value = shafii_institution_score }
+	else_if = { limit = { scope:target = policy:zahiri_policy }  value = zahiri_institution_score }
+	else_if = { limit = { scope:target = policy:ismaili_policy } value = ismaili_institution_score }
+	else_if = { limit = { scope:target = policy:jafari_policy }  value = jafari_institution_score }
+	else_if = { limit = { scope:target = policy:zaidi_policy }   value = zaidi_institution_score }
+	else_if = { limit = { scope:target = policy:ibadi_policy }   value = ibadi_institution_score }
+	else    = { value = 0 }
+	multiply = 0.25
+	multiply = monthly_income_trade_and_tax
 }
