@@ -126,8 +126,20 @@ aqd_change_madhhab = {
 # current madhhab. Knocks the target down exactly one institutional
 # tier (scripted_effects/z_aqd_jurist_effects.txt's aqd_crackdown_effect,
 # madrasas destroyed before the seat) rather than wiping it out - the
-# cooldown below is what prevents repeated use from erasing a school in
-# one sitting.
+# 60-month cooldown is what prevents repeated use from erasing a school
+# in one sitting.
+#
+# The action itself has no price. aqd_crackdown_effect applies the cost:
+#  - confiscation gold GAINED, scaled to the number of buildings razed
+#  - a stability hit scaled to how widespread the school was
+#  - "Legal School Persecuted" (z_aqd_jurist_evicted) on every location
+#    nationwide that holds the school's buildings - significant unrest
+#  - a national modifier: base game's ulema_displeased for a fellow
+#    school, or z_aqd_heretics_suppressed if the school is a heresy of
+#    the state religion (SECT param differs from root.religion)
+#  - the existing tier-scaled clergy estate satisfaction penalty
+# plus the shared aqidah-madhhab relations reaction (OUTCOME = refuse),
+# exactly as declining a seat establishment does.
 # =====================================================================
 aqd_crackdown_madhhab = {
 	show_message = yes
@@ -146,7 +158,6 @@ aqd_crackdown_madhhab = {
 	}
 	allow = { }
 	cooldown = { type = aqd_crackdown_madhhab  months = 60 }
-	price = price:aqd_crackdown_madhhab
 
 	select_trigger = {
 		looking_for_a = policy
@@ -183,31 +194,31 @@ aqd_crackdown_madhhab = {
 		aqd_set_compat_madhhab_from_target = { COUNTRY = scope:actor }
 		scope:actor = {
 			if = { limit = { scope:target = policy:hanafi_policy }
-				aqd_crackdown_effect = { MADHHAB = hanafi  SCORE = hanafi_institution_score }
+				aqd_crackdown_effect = { MADHHAB = hanafi  SECT = sunni  SCORE = hanafi_institution_score }
 			}
 			else_if = { limit = { scope:target = policy:hanbali_policy }
-				aqd_crackdown_effect = { MADHHAB = hanbali  SCORE = hanbali_institution_score }
+				aqd_crackdown_effect = { MADHHAB = hanbali  SECT = sunni  SCORE = hanbali_institution_score }
 			}
 			else_if = { limit = { scope:target = policy:maliki_policy }
-				aqd_crackdown_effect = { MADHHAB = maliki  SCORE = maliki_institution_score }
+				aqd_crackdown_effect = { MADHHAB = maliki  SECT = sunni  SCORE = maliki_institution_score }
 			}
 			else_if = { limit = { scope:target = policy:shafii_policy }
-				aqd_crackdown_effect = { MADHHAB = shafii  SCORE = shafii_institution_score }
+				aqd_crackdown_effect = { MADHHAB = shafii  SECT = sunni  SCORE = shafii_institution_score }
 			}
 			else_if = { limit = { scope:target = policy:zahiri_policy }
-				aqd_crackdown_effect = { MADHHAB = zahiri  SCORE = zahiri_institution_score }
+				aqd_crackdown_effect = { MADHHAB = zahiri  SECT = sunni  SCORE = zahiri_institution_score }
 			}
 			else_if = { limit = { scope:target = policy:ismaili_policy }
-				aqd_crackdown_effect = { MADHHAB = ismaili  SCORE = ismaili_institution_score }
+				aqd_crackdown_effect = { MADHHAB = ismaili  SECT = shia  SCORE = ismaili_institution_score }
 			}
 			else_if = { limit = { scope:target = policy:jafari_policy }
-				aqd_crackdown_effect = { MADHHAB = jafari  SCORE = jafari_institution_score }
+				aqd_crackdown_effect = { MADHHAB = jafari  SECT = shia  SCORE = jafari_institution_score }
 			}
 			else_if = { limit = { scope:target = policy:zaidi_policy }
-				aqd_crackdown_effect = { MADHHAB = zaidi  SCORE = zaidi_institution_score }
+				aqd_crackdown_effect = { MADHHAB = zaidi  SECT = shia  SCORE = zaidi_institution_score }
 			}
 			else_if = { limit = { scope:target = policy:ibadi_policy }
-				aqd_crackdown_effect = { MADHHAB = ibadi  SCORE = ibadi_institution_score }
+				aqd_crackdown_effect = { MADHHAB = ibadi  SECT = ibadi  SCORE = ibadi_institution_score }
 			}
 		}
 		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = scope:actor }

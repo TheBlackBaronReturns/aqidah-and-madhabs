@@ -39,9 +39,14 @@
 # institution score (weight 2, vs. 1 for a madrasa), which drives the
 # tiered auto_modifiers in auto_modifiers/z_aqd_madhhab_tiers.txt.
 #
-# ICON: placeholder - intended to reuse each madhhab's religious-school
-# / <X>_policy sprite via an interface/*.gfx mapping. Not yet wired;
-# the seats currently fall back to the default estate-building icon.
+# ICON: each seat_of_<X>_jurists uses its madhhab's religious-school
+# icon, supplied as main_menu/gfx/interface/icons/buildings/
+# seat_of_<X>_jurists.dds - the path the engine's GetBuildingIcon()
+# resolves by convention (no interface/*.gfx entry needed). The eight
+# non-Ibadi seats copy the matching gfx/interface/icons/religious_schools/
+# <X>_school.dds; base has no ibadi_school icon, so seat_of_ibadi_jurists
+# uses gfx/interface/icons/religion/ibadi.dds instead. Placeholder art -
+# real seat icons can drop in at the same paths later.
 # =====================================================================
 
 seat_of_hanafi_jurists = {

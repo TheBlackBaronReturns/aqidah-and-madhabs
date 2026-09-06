@@ -1,0 +1,16 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - opinion modifiers.
+#
+# z_aqd_crackdown_on_our_school: applied by scripted_effects/
+# z_aqd_jurist_effects.txt's aqd_crackdown_effect to every Muslim
+# country within diplomatic range whose sharia_law policy IS the madhhab
+# that was just cracked down on - their opinion of the persecuting realm
+# drops.
+# Between base's commented mild (-25) and severe (-50) penalties;
+# decays over roughly fifteen years.
+# =====================================================================
+
+z_aqd_crackdown_on_our_school = {
+	value = -30
+	yearly_decay = 2
+}

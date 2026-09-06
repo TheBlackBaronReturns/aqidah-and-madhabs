@@ -542,9 +542,22 @@ aqd_jurist_reaction_refuse_opposed = {
 # scripted_effects/z_aqd_establishment_effects.txt exactly. Called from
 # generic_actions/z_aqd_piety.txt's aqd_crackdown_madhhab and from the
 # establishment event's crackdown option (via
-# z_aqd_establishment_effects.txt's aqd_establishment_crackdown) with
-# MADHHAB (a bare identifier, e.g. "hanafi") and SCORE bound to that
-# madhhab's institution score.
+# z_aqd_establishment_effects.txt's aqd_establishment_crackdown) at the
+# acting country's scope, with:
+#   MADHHAB - bare identifier, e.g. "hanafi"
+#   SECT    - bare religion id: sunni / shia / ibadi (used to decide
+#             whether this is a heresy of the realm's own religion)
+#   SCORE   - that madhhab's institution score
+#
+# Beyond the tier knockdown the effect also: gains confiscation gold per
+# razed building; applies a footprint-scaled stability hit; stamps the
+# nationwide "Legal School Persecuted" location modifier
+# (z_aqd_jurist_evicted) on every location holding the school's
+# buildings; adds a national modifier - z_aqd_heretics_suppressed if
+# SECT differs from the realm's religion, else base game's
+# ulema_displeased; and drops the opinion of every Muslim realm within
+# diplomatic range whose own law is this madhhab
+# (common/biases/z_aqd_opinion.txt).
 #
 # NOTE: destroy_building's "building(X|Y)" target-link string does NOT
 # tolerate a $param$ substituted inside the quotes - confirmed broken
@@ -557,6 +570,13 @@ aqd_jurist_reaction_refuse_opposed = {
 # aqd_jurist_reaction_$OUTCOME$_favored/_opposed dispatch above.
 # ---------------------------------------------------------------------
 aqd_crackdown_effect = {
+	# Current scope is the acting country at both call sites
+	# (z_aqd_piety.txt wraps this in scope:actor = { }, the establishment
+	# event runs it at root). Save it so the location sweep below can
+	# write back to a country variable without relying on root, which is
+	# unreliable inside a generic_action.
+	save_scope_as = aqd_crackdown_country
+
 	if      = { limit = { $SCORE$ >= 8 } set_variable = { name = aqd_crackdown_ceiling  value = 8 } }
 	else_if = { limit = { $SCORE$ >= 5 } set_variable = { name = aqd_crackdown_ceiling  value = 5 } }
 	else_if = { limit = { $SCORE$ >= 3 } set_variable = { name = aqd_crackdown_ceiling  value = 3 } }
@@ -567,19 +587,72 @@ aqd_crackdown_effect = {
 	else_if = { limit = { var:aqd_crackdown_ceiling = 3 } set_variable = { name = aqd_crackdown_tier_before  value = 2 } }
 	else    = { set_variable = { name = aqd_crackdown_tier_before  value = 1 } }
 
+	# Nationwide backlash: BEFORE any building is razed, stamp "Legal
+	# School Persecuted" (z_aqd_jurist_evicted) on every owned location
+	# that holds a madrasa or seat of this madhhab - locations about to
+	# be razed still hold their building here, so they are covered too -
+	# and count them into var:aqd_crackdown_footprint for the stability
+	# hit below. One linear pass over owned locations, run once per
+	# crackdown (60-month cooldown / 4-yearly-gated event): no tick cost.
+	set_variable = { name = aqd_crackdown_footprint  value = 0 }
+	every_owned_location = {
+		limit = {
+			OR = {
+				has_building = building_type:madrasa_of_$MADHHAB$_fiqh
+				has_building = building_type:seat_of_$MADHHAB$_jurists
+			}
+		}
+		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+		scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_footprint  add = 1 } }
+	}
+
+	# Diplomatic backlash: every Muslim realm within diplomatic range
+	# whose own law is this madhhab takes the persecution of their school
+	# personally - their opinion of us drops (common/biases/z_aqd_opinion.txt).
+	every_country_in_diplomatic_range = {
+		limit = {
+			NOT = { this = scope:aqd_crackdown_country }
+			religion.group = religion_group:muslim
+			has_policy = $MADHHAB$_policy
+		}
+		add_opinion = { target = scope:aqd_crackdown_country  modifier = z_aqd_crackdown_on_our_school }
+	}
+
 	while = {
 		limit = { $SCORE$ >= var:aqd_crackdown_ceiling }
 		if = {
 			limit = { any_owned_location = { has_building = building_type:madrasa_of_$MADHHAB$_fiqh } }
 			aqd_crackdown_destroy_$MADHHAB$_madrasa = yes
+			# Confiscation of the college's endowed property - gold gained.
+			add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 0.25 }
 		}
 		else_if = {
 			limit = { any_owned_location = { has_building = building_type:seat_of_$MADHHAB$_jurists } }
 			aqd_crackdown_destroy_$MADHHAB$_seat = yes
+			# A seat's waqf endowment is worth far more than a madrasa's.
+			add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 1 }
 		}
 		else = {
 			set_variable = { name = aqd_crackdown_ceiling  value = 0 }
 		}
+	}
+
+	# Stability hit, scaled to how widespread the school was - so the
+	# cost depends on which madhhab was targeted.
+	if      = { limit = { var:aqd_crackdown_footprint >= 6 } add_stability = stability_mild_penalty }
+	else_if = { limit = { var:aqd_crackdown_footprint >= 1 } add_stability = stability_weak_penalty }
+
+	# National reaction. If the school is a heresy of the state religion
+	# (its sect differs from the realm's religion) the ulema treat the
+	# suppression as righteous (z_aqd_heretics_suppressed); moving against
+	# a fellow school of law instead aggrieves them (base game's
+	# ulema_displeased).
+	if = {
+		limit = { NOT = { religion = religion:$SECT$ } }
+		add_country_modifier = { modifier = z_aqd_heretics_suppressed  years = 10  mode = add_and_extend }
+	}
+	else = {
+		add_country_modifier = { modifier = ulema_displeased  years = 10  mode = add_and_extend }
 	}
 
 	if      = { limit = { var:aqd_crackdown_tier_before = 1 } add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_weak_penalty } }

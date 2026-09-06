@@ -1,13 +1,20 @@
 # =====================================================================
-# AQIDAH SCHOOLS OF CREED - applied by scripted_effects/
-# z_aqd_jurist_effects.txt's aqd_crackdown_effect to every location
-# that loses a jurist seat or a madrasa to a crackdown.
+# AQIDAH SCHOOLS OF CREED - "Legal School Persecuted" (key kept as
+# z_aqd_jurist_evicted so existing references need no churn; display
+# name is in localisation/english/aqd_l_english.yml).
+#
+# Applied by scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_crackdown_effect to EVERY owned location that holds a madrasa or
+# seat of the cracked-down madhhab across the whole realm - not only the
+# locations that lost a building - representing the nationwide backlash
+# when the state moves against a school of law. Significant unrest and
+# raised revolt risk for the duration.
 # =====================================================================
 
 z_aqd_jurist_evicted = {
 	game_data = {
 		category = location
 	}
-	local_unrest = 0.2
-	local_pop_join_rebel_threshold = -0.05
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
 }

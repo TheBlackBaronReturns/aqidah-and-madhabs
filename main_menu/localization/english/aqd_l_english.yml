@@ -100,9 +100,15 @@
  aqd_ibadi_plurality: "Ibadi School Plurality"
  aqd_ibadi_predominance: "Ibadi School Predominance"
 
- # ---- Ulema Institutions: crackdown province modifier ----
- z_aqd_jurist_evicted: "Jurist Evicted"
- z_aqd_jurist_evicted_desc: "A madhhab's jurists were driven out of this province by force. The unrest has not settled."
+ # ---- Ulema Institutions: crackdown modifiers ----
+ # Key kept as z_aqd_jurist_evicted; displayed as "Legal School Persecuted".
+ z_aqd_jurist_evicted: "Legal School Persecuted"
+ z_aqd_jurist_evicted_desc: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ # Moving against a fellow school of law now grants the base-game
+ # modifier ulema_displeased ("'Ulamā' Privileges Infringed").
+ z_aqd_heretics_suppressed: "Heretical School Suppressed"
+ z_aqd_heretics_suppressed_desc: "The state has broken up the colleges of a heretical school of law. The ulema applaud the piety of it, and the realm's heretics are watched more closely."
+ z_aqd_crackdown_on_our_school: "Persecuted our school of law"
 
  # ---- Ulema Institutions: foreign jurists event ----
  z_aqd_jurists.1.title: "Foreign Jurists at the Gate"

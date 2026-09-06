@@ -158,15 +158,15 @@ aqd_establish_plant_seat = {
 
 # CRACK DOWN option - knock the madhhab down one institutional tier.
 aqd_establishment_crackdown = {
-	if      = { limit = { var:aqd_establish_madhhab = 1 } aqd_crackdown_effect = { MADHHAB = hanafi   SCORE = hanafi_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 2 } aqd_crackdown_effect = { MADHHAB = hanbali  SCORE = hanbali_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 3 } aqd_crackdown_effect = { MADHHAB = maliki   SCORE = maliki_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 4 } aqd_crackdown_effect = { MADHHAB = shafii   SCORE = shafii_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 5 } aqd_crackdown_effect = { MADHHAB = zahiri   SCORE = zahiri_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 6 } aqd_crackdown_effect = { MADHHAB = ismaili  SCORE = ismaili_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 7 } aqd_crackdown_effect = { MADHHAB = jafari   SCORE = jafari_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 8 } aqd_crackdown_effect = { MADHHAB = zaidi    SCORE = zaidi_institution_score } }
-	else_if = { limit = { var:aqd_establish_madhhab = 9 } aqd_crackdown_effect = { MADHHAB = ibadi    SCORE = ibadi_institution_score } }
+	if      = { limit = { var:aqd_establish_madhhab = 1 } aqd_crackdown_effect = { MADHHAB = hanafi   SECT = sunni  SCORE = hanafi_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 2 } aqd_crackdown_effect = { MADHHAB = hanbali  SECT = sunni  SCORE = hanbali_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 3 } aqd_crackdown_effect = { MADHHAB = maliki   SECT = sunni  SCORE = maliki_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 4 } aqd_crackdown_effect = { MADHHAB = shafii   SECT = sunni  SCORE = shafii_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 5 } aqd_crackdown_effect = { MADHHAB = zahiri   SECT = sunni  SCORE = zahiri_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 6 } aqd_crackdown_effect = { MADHHAB = ismaili  SECT = shia   SCORE = ismaili_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 7 } aqd_crackdown_effect = { MADHHAB = jafari   SECT = shia   SCORE = jafari_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 8 } aqd_crackdown_effect = { MADHHAB = zaidi    SECT = shia   SCORE = zaidi_institution_score } }
+	else_if = { limit = { var:aqd_establish_madhhab = 9 } aqd_crackdown_effect = { MADHHAB = ibadi    SECT = ibadi  SCORE = ibadi_institution_score } }
 }
 
 # Apply the pending marker to the province capital (or the fallback

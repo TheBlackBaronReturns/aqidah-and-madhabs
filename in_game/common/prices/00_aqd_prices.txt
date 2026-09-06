@@ -5,8 +5,8 @@ aqd_change_madhhab = {
 	stability = 50
 }
 
-# Realm cracks down on a rival madhhab's institutions.
-aqd_crackdown_madhhab = {
-	stability = 25
-	gold = 50
-}
+# Note: aqd_crackdown_madhhab has no action price. Its cost is applied
+# inside the effect (scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_crackdown_effect): a stability hit scaled to how widespread the
+# school was, plus the nationwide unrest of the "Legal School
+# Persecuted" modifier - and confiscation gold is gained, not spent.

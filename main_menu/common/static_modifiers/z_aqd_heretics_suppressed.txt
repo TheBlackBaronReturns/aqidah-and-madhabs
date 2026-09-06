@@ -1,0 +1,23 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - national modifier applied by
+# scripted_effects/z_aqd_jurist_effects.txt's aqd_crackdown_effect when
+# a realm cracks down on a madhhab that IS a heresy of the state
+# religion (its sect - sunni / shia / ibadi - differs from the state
+# religion). A righteous suppression: the ulema approve, and heretics
+# are held in tighter check for a while.
+#
+# For a crackdown on a fellow (non-heretical) school the effect grants
+# the base-game ulema_displeased modifier instead.
+#
+# Payload is base game's nationwide_witch_hunts, minus its conversion-
+# speed line and its spiritualist societal push, and with the estate
+# satisfaction narrowed from all estates to the clergy alone.
+# =====================================================================
+
+z_aqd_heretics_suppressed = {
+	game_data = {
+		category = country
+	}
+	clergy_estate_target_satisfaction = small_permanent_target_satisfaction
+	tolerance_heretic = -2
+}
