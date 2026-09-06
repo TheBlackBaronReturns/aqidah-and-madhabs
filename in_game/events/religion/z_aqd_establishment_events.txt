@@ -41,13 +41,13 @@ z_aqd_establishment.1 = {
 		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
 		aqd_establish_save_target_dispatch = yes
 		set_variable = { name = aqd_compat_madhhab  value = var:aqd_establish_madhhab }
-		aqd_classify_madhhab_compatibility = yes
+		aqd_classify_madhhab_compatibility = { COUNTRY = root }
 	}
 
 	option = {
 		name = z_aqd_establishment.1.allow
 		aqd_establishment_place_seat = yes
-		aqd_apply_jurist_reaction = { OUTCOME = accept }
+		aqd_apply_jurist_reaction = { OUTCOME = accept  COUNTRY = root }
 		aqd_establishment_mark_pending = yes
 		ai_chance = { base = 90 }
 	}
@@ -55,7 +55,7 @@ z_aqd_establishment.1 = {
 	option = {
 		name = z_aqd_establishment.1.crackdown
 		aqd_establishment_crackdown = yes
-		aqd_apply_jurist_reaction = { OUTCOME = refuse }
+		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = root }
 		aqd_establishment_mark_pending = yes
 		ai_chance = {
 			base = 6

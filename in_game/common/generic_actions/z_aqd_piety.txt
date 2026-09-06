@@ -176,6 +176,11 @@ aqd_crackdown_madhhab = {
 	}
 
 	effect = {
+		# Same aqidah-madhhab relations reaction as declining a seat
+		# establishment: cracking down on a school your creed favours
+		# costs clergy standing + legitimacy; cracking down on one it
+		# opposes is rewarded. (scripted_effects/z_aqd_jurist_effects.txt)
+		aqd_set_compat_madhhab_from_target = { COUNTRY = scope:actor }
 		scope:actor = {
 			if = { limit = { scope:target = policy:hanafi_policy }
 				aqd_crackdown_effect = { MADHHAB = hanafi  SCORE = hanafi_institution_score }
@@ -205,6 +210,7 @@ aqd_crackdown_madhhab = {
 				aqd_crackdown_effect = { MADHHAB = ibadi  SCORE = ibadi_institution_score }
 			}
 		}
+		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = scope:actor }
 	}
 	ai_will_do = { add = 0 }
 }

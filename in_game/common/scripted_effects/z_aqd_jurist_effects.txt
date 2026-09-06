@@ -274,13 +274,20 @@ aqd_build_madrasas_of_madhhab_from = {
 }
 
 # ---------------------------------------------------------------------
-# Set var:aqd_compat_madhhab (canonical index 1..9) on root from a
-# source country's held sharia_law madhhab policy. Used by the
-# foreign-jurist event before aqd_apply_jurist_reaction. The
-# establishment event sets the var directly from var:aqd_establish_madhhab.
+# Set var:aqd_compat_madhhab (canonical index 1..9) on $COUNTRY$.
+#
+#  ..._from_country { SOURCE COUNTRY } - from a source country's held
+#     sharia_law madhhab policy (foreign-jurist event).
+#  ..._from_target  { COUNTRY }        - from scope:target, the policy
+#     picked in a generic_action's select_trigger (crackdown action).
+#
+# The establishment event sets the var directly from
+# var:aqd_establish_madhhab. All callers then run
+# aqd_apply_jurist_reaction { OUTCOME COUNTRY } so the aqidah-judged
+# clergy/legitimacy reaction is identical across every path.
 # ---------------------------------------------------------------------
 aqd_set_compat_madhhab_from_country = {
-	root = {
+	$COUNTRY$ = {
 		if      = { limit = { $SOURCE$ = { has_policy = hanafi_policy } }  set_variable = { name = aqd_compat_madhhab  value = 1 } }
 		else_if = { limit = { $SOURCE$ = { has_policy = hanbali_policy } } set_variable = { name = aqd_compat_madhhab  value = 2 } }
 		else_if = { limit = { $SOURCE$ = { has_policy = maliki_policy } }  set_variable = { name = aqd_compat_madhhab  value = 3 } }
@@ -293,17 +300,31 @@ aqd_set_compat_madhhab_from_country = {
 	}
 }
 
+aqd_set_compat_madhhab_from_target = {
+	$COUNTRY$ = {
+		if      = { limit = { scope:target = policy:hanafi_policy }  set_variable = { name = aqd_compat_madhhab  value = 1 } }
+		else_if = { limit = { scope:target = policy:hanbali_policy } set_variable = { name = aqd_compat_madhhab  value = 2 } }
+		else_if = { limit = { scope:target = policy:maliki_policy }  set_variable = { name = aqd_compat_madhhab  value = 3 } }
+		else_if = { limit = { scope:target = policy:shafii_policy }  set_variable = { name = aqd_compat_madhhab  value = 4 } }
+		else_if = { limit = { scope:target = policy:zahiri_policy }  set_variable = { name = aqd_compat_madhhab  value = 5 } }
+		else_if = { limit = { scope:target = policy:ismaili_policy } set_variable = { name = aqd_compat_madhhab  value = 6 } }
+		else_if = { limit = { scope:target = policy:jafari_policy }  set_variable = { name = aqd_compat_madhhab  value = 7 } }
+		else_if = { limit = { scope:target = policy:zaidi_policy }   set_variable = { name = aqd_compat_madhhab  value = 8 } }
+		else_if = { limit = { scope:target = policy:ibadi_policy }   set_variable = { name = aqd_compat_madhhab  value = 9 } }
+	}
+}
+
 # ---------------------------------------------------------------------
-# Aqidah reaction classification. Sets var:aqd_jurist_compat on root to
-# 1 (favored), -1 (opposed), or leaves it 0 (neutral - no branch below
-# matches, which is also din_i_ilahi's permanent state: a syncretic
-# creed with no fiqh loyalty, deliberately given no branch at all).
-# Reads var:aqd_compat_madhhab (canonical index of the madhhab in
-# question) - callers set it first (aqd_set_compat_madhhab_from_country,
-# or a direct set_variable from var:aqd_establish_madhhab).
+# Aqidah reaction classification. Sets var:aqd_jurist_compat on
+# $COUNTRY$ to 1 (favored), -1 (opposed), or leaves it 0 (neutral - no
+# branch below matches, which is also din_i_ilahi's permanent state: a
+# syncretic creed with no fiqh loyalty, deliberately given no branch at
+# all). Reads var:aqd_compat_madhhab (canonical index of the madhhab in
+# question) - callers set it first (aqd_set_compat_madhhab_from_country
+# / _from_target, or a direct set_variable from var:aqd_establish_madhhab).
 # ---------------------------------------------------------------------
 aqd_classify_madhhab_compatibility = {
-	root = {
+	$COUNTRY$ = {
 		set_variable = { name = aqd_jurist_compat  value = 0 }
 
 		if = {
@@ -459,44 +480,54 @@ aqd_classify_madhhab_compatibility = {
 }
 
 # ---------------------------------------------------------------------
-# Apply the accept/refuse consequence. $OUTCOME$ = accept or refuse
-# (text-substituted into the effect name below, per base game's own
-# scripted_effects/readme.txt "argumented effect" idiom). Reads
-# var:aqd_compat_madhhab (set by the caller) via
+# Apply the accept/refuse consequence on $COUNTRY$. $OUTCOME$ = accept
+# or refuse (text-substituted into the effect name below, per base
+# game's own scripted_effects/readme.txt "argumented effect" idiom).
+# Reads var:aqd_compat_madhhab (set by the caller) via
 # aqd_classify_madhhab_compatibility.
+#
+#   accept + favored : you welcomed a school your creed favours   -> clergy + legitimacy bonus
+#   accept + opposed : you welcomed a school your creed opposes    -> clergy + legitimacy penalty
+#   refuse + favored : you moved against a school your creed favours -> clergy + legitimacy penalty
+#   refuse + opposed : you moved against a school your creed opposes  -> clergy + legitimacy bonus
+#
+# Both the foreign-jurist event (accept/refuse), the establishment
+# event (allow = accept / crack down = refuse) and the crackdown
+# generic action (refuse) run this, so the aqidah-judged reaction is
+# identical on every hostile-or-welcoming act toward a madhhab.
 # ---------------------------------------------------------------------
 aqd_apply_jurist_reaction = {
-	aqd_classify_madhhab_compatibility = yes
+	aqd_classify_madhhab_compatibility = { COUNTRY = $COUNTRY$ }
 	if = {
-		limit = { root = { var:aqd_jurist_compat = 1 } }
-		aqd_jurist_reaction_$OUTCOME$_favored = yes
+		limit = { $COUNTRY$ = { var:aqd_jurist_compat = 1 } }
+		aqd_jurist_reaction_$OUTCOME$_favored = { COUNTRY = $COUNTRY$ }
 	}
 	else_if = {
-		limit = { root = { var:aqd_jurist_compat = -1 } }
-		aqd_jurist_reaction_$OUTCOME$_opposed = yes
+		limit = { $COUNTRY$ = { var:aqd_jurist_compat = -1 } }
+		aqd_jurist_reaction_$OUTCOME$_opposed = { COUNTRY = $COUNTRY$ }
 	}
 }
 
 aqd_jurist_reaction_accept_favored = {
-	root = {
+	$COUNTRY$ = {
 		add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_weak_bonus }
 		add_legitimacy = legitimacy_weak_bonus
 	}
 }
 aqd_jurist_reaction_accept_opposed = {
-	root = {
+	$COUNTRY$ = {
 		add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_weak_penalty }
 		add_legitimacy = legitimacy_weak_penalty
 	}
 }
 aqd_jurist_reaction_refuse_favored = {
-	root = {
+	$COUNTRY$ = {
 		add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_weak_penalty }
 		add_legitimacy = legitimacy_weak_penalty
 	}
 }
 aqd_jurist_reaction_refuse_opposed = {
-	root = {
+	$COUNTRY$ = {
 		add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_weak_bonus }
 		add_legitimacy = legitimacy_weak_bonus
 	}

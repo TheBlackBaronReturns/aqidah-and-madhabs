@@ -49,13 +49,13 @@ z_aqd_jurists.1 = {
 	option = {
 		name = z_aqd_jurists.1.accept
 		aqd_build_madrasas_of_madhhab_from = { SOURCE = scope:z_aqd_jurist_source }
-		aqd_set_compat_madhhab_from_country = { SOURCE = scope:z_aqd_jurist_source }
-		aqd_apply_jurist_reaction = { OUTCOME = accept }
+		aqd_set_compat_madhhab_from_country = { SOURCE = scope:z_aqd_jurist_source  COUNTRY = root }
+		aqd_apply_jurist_reaction = { OUTCOME = accept  COUNTRY = root }
 	}
 
 	option = {
 		name = z_aqd_jurists.1.refuse
-		aqd_set_compat_madhhab_from_country = { SOURCE = scope:z_aqd_jurist_source }
-		aqd_apply_jurist_reaction = { OUTCOME = refuse }
+		aqd_set_compat_madhhab_from_country = { SOURCE = scope:z_aqd_jurist_source  COUNTRY = root }
+		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = root }
 	}
 }
