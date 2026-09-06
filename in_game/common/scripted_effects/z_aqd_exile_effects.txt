@@ -1,0 +1,84 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: exiled jurists find
+# refuge. Event-side plumbing for z_aqd_exile.1 (events/religion/
+# z_aqd_exile_events.txt).
+#
+# The selection half lives in scripted_effects/z_aqd_jurist_effects.txt
+# (aqd_crackdown_exile_offer / aqd_crackdown_exile_pick), hooked at the
+# end of aqd_crackdown_effect. That code picks ONE bordering realm and
+# fires z_aqd_exile.1 on it with the numeric var:aqd_exile_madhhab set
+# (canonical 1-9 index; see z_aqd_jurist_effects.txt's header).
+#
+# Everything below runs at that neighbour's scope, inside the event.
+# scope:aqd_exile_loc may legitimately not exist (the realm's map or
+# religion shifted in the 3 days between selection and firing) - every
+# consumer guards with exists =, mirroring z_aqd_establishment_effects.txt.
+# =====================================================================
+
+# Called from z_aqd_exile.1's immediate. Re-derives a seat target in the
+# sheltering realm and saves scope:aqd_exile_loc (an owned city+ with
+# the sect present and no seat of this madhhab yet).
+aqd_exile_save_target_dispatch = {
+	if      = { limit = { var:aqd_exile_madhhab = 1 } aqd_exile_save_target = { MADHHAB = hanafi   SECT = sunni } }
+	else_if = { limit = { var:aqd_exile_madhhab = 2 } aqd_exile_save_target = { MADHHAB = hanbali  SECT = sunni } }
+	else_if = { limit = { var:aqd_exile_madhhab = 3 } aqd_exile_save_target = { MADHHAB = maliki   SECT = sunni } }
+	else_if = { limit = { var:aqd_exile_madhhab = 4 } aqd_exile_save_target = { MADHHAB = shafii   SECT = sunni } }
+	else_if = { limit = { var:aqd_exile_madhhab = 5 } aqd_exile_save_target = { MADHHAB = zahiri   SECT = sunni } }
+	else_if = { limit = { var:aqd_exile_madhhab = 6 } aqd_exile_save_target = { MADHHAB = ismaili  SECT = shia } }
+	else_if = { limit = { var:aqd_exile_madhhab = 7 } aqd_exile_save_target = { MADHHAB = jafari   SECT = shia } }
+	else_if = { limit = { var:aqd_exile_madhhab = 8 } aqd_exile_save_target = { MADHHAB = zaidi    SECT = shia } }
+	else_if = { limit = { var:aqd_exile_madhhab = 9 } aqd_exile_save_target = { MADHHAB = ibadi    SECT = ibadi } }
+}
+
+# Same location test as scripted_triggers/z_aqd_jurist_triggers.txt's
+# aqd_can_host_exile_seat any_owned_location block - the selection phase
+# already confirmed at least one such location exists.
+aqd_exile_save_target = {
+	random_owned_location = {
+		limit = {
+			"religion_percentage(religion:$SECT$)" >= 0.25
+			OR = {
+				location_rank ?= location_rank:city
+				location_rank ?= location_rank:megalopolis
+			}
+			NOT = { has_building = building_type:seat_of_$MADHHAB$_jurists }
+			NOT = { has_location_modifier = z_aqd_establishment_pending }
+		}
+		save_scope_as = aqd_exile_loc
+	}
+}
+
+# ACCEPT option - raise the seat at scope:aqd_exile_loc.
+aqd_exile_place_seat = {
+	if = {
+		limit = { exists = scope:aqd_exile_loc }
+		if      = { limit = { var:aqd_exile_madhhab = 1 } aqd_exile_plant_seat = { MADHHAB = hanafi } }
+		else_if = { limit = { var:aqd_exile_madhhab = 2 } aqd_exile_plant_seat = { MADHHAB = hanbali } }
+		else_if = { limit = { var:aqd_exile_madhhab = 3 } aqd_exile_plant_seat = { MADHHAB = maliki } }
+		else_if = { limit = { var:aqd_exile_madhhab = 4 } aqd_exile_plant_seat = { MADHHAB = shafii } }
+		else_if = { limit = { var:aqd_exile_madhhab = 5 } aqd_exile_plant_seat = { MADHHAB = zahiri } }
+		else_if = { limit = { var:aqd_exile_madhhab = 6 } aqd_exile_plant_seat = { MADHHAB = ismaili } }
+		else_if = { limit = { var:aqd_exile_madhhab = 7 } aqd_exile_plant_seat = { MADHHAB = jafari } }
+		else_if = { limit = { var:aqd_exile_madhhab = 8 } aqd_exile_plant_seat = { MADHHAB = zaidi } }
+		else_if = { limit = { var:aqd_exile_madhhab = 9 } aqd_exile_plant_seat = { MADHHAB = ibadi } }
+	}
+}
+
+# change_building_level_in_location (not construct_building): seats are
+# allow = { always = no }; the raw level-delta bypasses allow /
+# location_potential / country_potential, exactly as
+# z_aqd_establishment_effects.txt's aqd_establish_plant_seat and
+# z_aqd_starting_schools.txt's aqd_seed_seat.
+aqd_exile_plant_seat = {
+	scope:aqd_exile_loc = {
+		change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
+	}
+}
+
+# Runs on every option path. aqd_compat_madhhab is set in the event's
+# immediate (mirroring z_aqd_establishment.1); clear both so the
+# sheltering realm carries nothing forward.
+aqd_exile_cleanup = {
+	remove_variable = aqd_exile_madhhab
+	remove_variable = aqd_compat_madhhab
+}

@@ -595,6 +595,9 @@ aqd_crackdown_effect = {
 	# hit below. One linear pass over owned locations, run once per
 	# crackdown (60-month cooldown / 4-yearly-gated event): no tick cost.
 	set_variable = { name = aqd_crackdown_footprint  value = 0 }
+	# Jurist Seats (not madrasas) razed by the while loop below - drives
+	# the exiled-jurists follow-up chance at the end of this effect.
+	set_variable = { name = aqd_crackdown_seats_razed  value = 0 }
 	every_owned_location = {
 		limit = {
 			OR = {
@@ -631,6 +634,7 @@ aqd_crackdown_effect = {
 			aqd_crackdown_destroy_$MADHHAB$_seat = yes
 			# A seat's waqf endowment is worth far more than a madrasa's.
 			add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 1 }
+			scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_seats_razed  add = 1 } }
 		}
 		else = {
 			set_variable = { name = aqd_crackdown_ceiling  value = 0 }
@@ -658,6 +662,28 @@ aqd_crackdown_effect = {
 	if      = { limit = { var:aqd_crackdown_tier_before = 1 } add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_weak_penalty } }
 	else_if = { limit = { var:aqd_crackdown_tier_before = 2 } add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_mild_penalty } }
 	else_if = { limit = { var:aqd_crackdown_tier_before >= 3 } add_estate_satisfaction = { type = estate_type:clergy_estate  value = estate_satisfaction_severe_penalty } }
+
+	# Exiled-jurists follow-up: a chance the broken school's jurists flee
+	# to ONE bordering realm (land border or across a single sea zone),
+	# which is then offered z_aqd_exile.1 - grant or deny a Seat of that
+	# school in one of its own cities. Only if the school stood at
+	# Noteworthy or higher before this crackdown (tier_before >= 2).
+	#
+	# This hook writes NOTHING on the acting country beyond the
+	# uniquely-named scratch vars set above (aqd_crackdown_seats_razed,
+	# alongside the effect's existing aqd_crackdown_* scratch vars) and
+	# defers every consequence to a 3-day event on the chosen neighbour,
+	# so the trailing actor-scope aqd_apply_jurist_reaction at both call
+	# sites (generic_actions/z_aqd_piety.txt, events/religion/
+	# z_aqd_establishment_events.txt) is untouched.
+	#
+	# $MADHHAB$ is a bare id and cannot be compared inside a trigger, so
+	# dispatch through a dynamic effect name - the same pattern used by
+	# aqd_crackdown_destroy_$MADHHAB$_madrasa/_seat below.
+	if = {
+		limit = { var:aqd_crackdown_tier_before >= 2 }
+		aqd_crackdown_exile_offer_$MADHHAB$ = yes
+	}
 }
 
 aqd_crackdown_destroy_hanafi_madrasa = {
@@ -784,5 +810,102 @@ aqd_crackdown_destroy_ibadi_seat = {
 		limit = { has_building = building_type:seat_of_ibadi_jurists }
 		destroy_building = "building(building_type:seat_of_ibadi_jurists|root)"
 		add_location_modifier = { modifier = z_aqd_jurist_evicted  years = 10  mode = add_and_extend }
+	}
+}
+
+# ---------------------------------------------------------------------
+# EXILED-JURISTS FOLLOW-UP to a crackdown. Entry point is the hook at
+# the end of aqd_crackdown_effect: aqd_crackdown_exile_offer_$MADHHAB$.
+#
+# These nine wrappers bind the canonical 1-9 index (see the file header)
+# that aqd_crackdown_effect itself never carries - it only has $MADHHAB$
+# and $SECT$. All run at the acting country's scope, where
+# scope:aqd_crackdown_country (saved at the top of aqd_crackdown_effect)
+# is live - use it, never root, which is unreliable inside a
+# generic_action.
+# ---------------------------------------------------------------------
+aqd_crackdown_exile_offer_hanafi  = { aqd_crackdown_exile_offer = { MADHHAB = hanafi   SECT = sunni  IDX = 1 } }
+aqd_crackdown_exile_offer_hanbali = { aqd_crackdown_exile_offer = { MADHHAB = hanbali  SECT = sunni  IDX = 2 } }
+aqd_crackdown_exile_offer_maliki  = { aqd_crackdown_exile_offer = { MADHHAB = maliki   SECT = sunni  IDX = 3 } }
+aqd_crackdown_exile_offer_shafii  = { aqd_crackdown_exile_offer = { MADHHAB = shafii   SECT = sunni  IDX = 4 } }
+aqd_crackdown_exile_offer_zahiri  = { aqd_crackdown_exile_offer = { MADHHAB = zahiri   SECT = sunni  IDX = 5 } }
+aqd_crackdown_exile_offer_ismaili = { aqd_crackdown_exile_offer = { MADHHAB = ismaili  SECT = shia   IDX = 6 } }
+aqd_crackdown_exile_offer_jafari  = { aqd_crackdown_exile_offer = { MADHHAB = jafari   SECT = shia   IDX = 7 } }
+aqd_crackdown_exile_offer_zaidi   = { aqd_crackdown_exile_offer = { MADHHAB = zaidi    SECT = shia   IDX = 8 } }
+aqd_crackdown_exile_offer_ibadi   = { aqd_crackdown_exile_offer = { MADHHAB = ibadi    SECT = ibadi  IDX = 9 } }
+
+# Fire chance = 30% + 10% per Jurist Seat razed by this crackdown,
+# capped at 75%. var:aqd_crackdown_seats_razed lives on the acting
+# country (= current scope here). A one-tier knockdown almost always
+# razes 0 or 1 seats, so in practice this is 30% / 40% - the event is
+# meant to stay rare. Discrete branches, not a computed `chance =`
+# (there is no base-game precedent for a dynamic chance in a random
+# effect block). The Noteworthy+ gate is already applied by the caller.
+aqd_crackdown_exile_offer = {
+	if = {
+		limit = { var:aqd_crackdown_seats_razed >= 3 }
+		random = { chance = 60  aqd_crackdown_exile_pick = { MADHHAB = $MADHHAB$  SECT = $SECT$  IDX = $IDX$ } }
+	}
+	else_if = {
+		limit = { var:aqd_crackdown_seats_razed = 2 }
+		random = { chance = 50  aqd_crackdown_exile_pick = { MADHHAB = $MADHHAB$  SECT = $SECT$  IDX = $IDX$ } }
+	}
+	else_if = {
+		limit = { var:aqd_crackdown_seats_razed = 1 }
+		random = { chance = 40  aqd_crackdown_exile_pick = { MADHHAB = $MADHHAB$  SECT = $SECT$  IDX = $IDX$ } }
+	}
+	else = {
+		random = { chance = 30  aqd_crackdown_exile_pick = { MADHHAB = $MADHHAB$  SECT = $SECT$  IDX = $IDX$ } }
+	}
+}
+
+# Two-pass weighted neighbour selection, run at the acting country's
+# scope. Pass 1 (70%) prefers a bordering realm whose OWN official
+# madhhab already matches the exiled school; pass 2 falls back to any
+# eligible bordering realm. "Bordering" = a land border OR across a
+# single sea zone (is_neighbor_of_country_or_across_one_seazone, an
+# engine trigger). Exactly one realm is ever picked, so "only one
+# neighbour asked at a time" holds by construction.
+#
+# Limit clauses run cheap -> expensive: random_country sweeps every
+# country, so the adjacency test comes before aqd_can_host_exile_seat's
+# owned-location scan. scope:aqd_exile_target is transient and is NOT
+# consumed by z_aqd_exile.1 (the event re-derives its own seat
+# location); the only cross-event handoff is the numeric
+# var:aqd_exile_madhhab set on the target.
+aqd_crackdown_exile_pick = {
+	random = {
+		chance = 70
+		random_country = {
+			limit = {
+				NOT = { this = scope:aqd_crackdown_country }
+				religion = religion:$SECT$
+				has_policy = sharia_law_policy
+				has_policy = $MADHHAB$_policy
+				is_neighbor_of_country_or_across_one_seazone = scope:aqd_crackdown_country
+				aqd_can_host_exile_seat = { MADHHAB = $MADHHAB$  SECT = $SECT$ }
+			}
+			save_scope_as = aqd_exile_target
+		}
+	}
+	if = {
+		limit = { NOT = { exists = scope:aqd_exile_target } }
+		random_country = {
+			limit = {
+				NOT = { this = scope:aqd_crackdown_country }
+				religion = religion:$SECT$
+				has_policy = sharia_law_policy
+				is_neighbor_of_country_or_across_one_seazone = scope:aqd_crackdown_country
+				aqd_can_host_exile_seat = { MADHHAB = $MADHHAB$  SECT = $SECT$ }
+			}
+			save_scope_as = aqd_exile_target
+		}
+	}
+	if = {
+		limit = { exists = scope:aqd_exile_target }
+		scope:aqd_exile_target = {
+			set_variable = { name = aqd_exile_madhhab  value = $IDX$ }
+			trigger_event_non_silently = { id = z_aqd_exile.1  days = 3 }
+		}
 	}
 }

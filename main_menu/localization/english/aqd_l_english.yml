@@ -124,6 +124,12 @@
  z_aqd_establishment_pending: "Jurists Petitioning"
  z_aqd_establishment_pending_desc: "The question of a jurists' Seat here has recently been settled. It will not be raised again for some years."
 
+ # ---- Ulema Institutions: exiled jurists find refuge ----
+ z_aqd_exile.1.title: "Jurists in Exile"
+ z_aqd_exile.1.desc: "Jurists of a school of law driven out of a neighboring realm have crossed into our lands, asking leave to raise a permanent Seat of their school in one of our cities - a standing authority to train and appoint the qadis of their method. Our own ulema are watching to see whether we will shelter them."
+ z_aqd_exile.1.accept: "Shelter them - let them raise a Seat"
+ z_aqd_exile.1.refuse: "Send them on their way"
+
  # ===================================================================
  # BASE-GAME "madrasa" -> "Maktab" (elementary Qur'an school / kuttab)
  #

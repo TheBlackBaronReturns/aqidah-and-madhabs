@@ -118,3 +118,38 @@ aqd_province_has_madhhab_density = {
 		}
 	}
 }
+
+# ---------------------------------------------------------------------
+# aqd_can_host_exile_seat = { MADHHAB SECT }: could 'this' country
+# shelter the jurists of MADHHAB exiled by a crackdown next door - i.e.
+# raise a Seat of that school in some city it owns? Deliberately WITHOUT
+# aqd_province_has_madhhab_density's 3-madrasa/mosque gate: the exiles
+# bring the school with them, so a bare city with the sect present is
+# enough.
+#
+# religion = religion:$SECT$ is the STATE religion (not the group), so
+# the seat building's country_potential (building_types/
+# z_aqd_jurist_seats.txt) can never later prune a seat placed this way.
+#
+# Scope-free by design: this trigger is reused by z_aqd_exile.1's own
+# target picker, and saved scopes do not survive trigger_event. The
+# "not the crackdown country itself" check therefore lives inline in the
+# selection-phase random_country limits in scripted_effects/
+# z_aqd_jurist_effects.txt, not here.
+#
+# The 0.25 threshold matches building_types/z_aqd_madrasas.txt and
+# aqd_province_has_madhhab_density above.
+# ---------------------------------------------------------------------
+aqd_can_host_exile_seat = {
+	religion = religion:$SECT$
+	has_policy = sharia_law_policy
+	any_owned_location = {
+		"religion_percentage(religion:$SECT$)" >= 0.25
+		OR = {
+			location_rank ?= location_rank:city
+			location_rank ?= location_rank:megalopolis
+		}
+		NOT = { has_building = building_type:seat_of_$MADHHAB$_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+	}
+}

@@ -1,0 +1,80 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: exiled jurists find
+# refuge.
+#
+# Fired by scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_crackdown_exile_pick (hooked at the end of aqd_crackdown_effect)
+# on ONE bordering realm - a land border or across a single sea zone -
+# after a crackdown broke a school that stood at Noteworthy or higher.
+# Selection is weighted toward realms whose own official madhhab already
+# matches the exiled school. Fire chance is 30% + 10% per Jurist Seat
+# razed, capped 75%.
+#
+# The sheltering realm is offered the choice to grant a permanent Seat
+# of that school in one of its own cities, or send the jurists on.
+# Structural sibling of z_aqd_jurists.1 ("Foreign Jurists at the Gate")
+# and z_aqd_establishment.1.
+#
+# The immediate re-derives the seat target (scope:aqd_exile_loc) and
+# classifies how this realm's creed judges the school
+# (var:aqd_jurist_compat), exactly as z_aqd_establishment.1 does.
+# =====================================================================
+
+namespace = z_aqd_exile
+
+z_aqd_exile.1 = {
+	type = country_event
+	title = z_aqd_exile.1.title
+	desc = z_aqd_exile.1.desc
+	outcome = neutral
+
+	trigger = {
+		has_variable = aqd_exile_madhhab
+	}
+
+	illustration_tags = {
+		10 = interior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+		aqd_exile_save_target_dispatch = yes
+		set_variable = { name = aqd_compat_madhhab  value = var:aqd_exile_madhhab }
+		aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	}
+
+	option = {
+		name = z_aqd_exile.1.accept
+		aqd_exile_place_seat = yes
+		aqd_apply_jurist_reaction = { OUTCOME = accept  COUNTRY = root }
+		aqd_exile_cleanup = yes
+		ai_chance = {
+			base = 70
+			modifier = {
+				factor = 3
+				var:aqd_jurist_compat = 1
+			}
+			modifier = {
+				factor = 0.2
+				var:aqd_jurist_compat = -1
+			}
+		}
+	}
+
+	option = {
+		name = z_aqd_exile.1.refuse
+		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = root }
+		aqd_exile_cleanup = yes
+		ai_chance = {
+			base = 30
+			modifier = {
+				factor = 5
+				var:aqd_jurist_compat = -1
+			}
+			modifier = {
+				factor = 0
+				var:aqd_jurist_compat = 1
+			}
+		}
+	}
+}
