@@ -6,7 +6,7 @@
 # trains and appoints its qadis.
 #
 # Seats are EVENT-ONLY. They are never buildable through the UI
-# (allow = { always = no }). They come to exist three ways:
+# (allow = { always = no }). They come to exist five ways:
 #
 #  - the establishment event (events/religion/z_aqd_establishment_events.txt
 #    via scripted_effects/z_aqd_establishment_effects.txt): a province
@@ -14,12 +14,19 @@
 #    plus at least one mosque, no seat of X yet, and an owned city (or
 #    larger) to house it, offers its owner the choice to raise a seat
 #    there - the province capital if eligible - or crack down;
+#  - the "Foreign Jurists at the Gate" event (events/religion/
+#    z_aqd_jurist_events.txt via aqd_jurists_accept): a neighbouring
+#    realm's madhhab is invited in and granted a seat in one of our
+#    cities directly, bypassing the grassroots chain above;
+#  - the "Jurists in Exile" event (events/religion/z_aqd_exile_events.txt
+#    via aqd_exile_plant_seat): jurists broken by a crackdown next door
+#    are sheltered and given a seat here;
 #  - the historically-seeded seats placed at game start for the
 #    prominent 1337 juristic centres (scripted_effects/
 #    z_aqd_starting_schools.txt's aqd_seed_starting_seats);
 #  - conquest of a location that already holds one.
 #
-# All three place the seat with change_building_level_in_location, which
+# All five place the seat with change_building_level_in_location, which
 # bypasses `allow` / `location_potential` / `country_potential`.
 #
 # country_potential = { always = no } is LOAD-BEARING. A seat is an
@@ -50,6 +57,13 @@
 # institution score (weight 4, vs. 1 for a madrasa), which drives the
 # share-based tier in auto_modifiers/z_aqd_madhhab_tiers.txt.
 #
+# ACTIVITY: the seat periodically throws a "ḥalqa" - a province-named
+# flavour event (events/religion/z_aqd_halqa_events.txt,
+# static_modifiers/z_aqd_halqa.txt) stamping a temporary province-wide
+# modifier whose character (state / orthodox / heterodox / tolerated)
+# depends on how the realm's aqidah judges the madhhab. One ḥalqa per
+# province at a time.
+#
 # ICON: each seat_of_<X>_jurists uses its madhhab's religious-school
 # icon, supplied as main_menu/gfx/interface/icons/buildings/
 # seat_of_<X>_jurists.dds - the path the engine's GetBuildingIcon()
@@ -67,8 +81,8 @@ seat_of_hanafi_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 
@@ -104,8 +118,8 @@ seat_of_hanbali_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 
@@ -141,8 +155,8 @@ seat_of_maliki_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 
@@ -178,8 +192,8 @@ seat_of_shafii_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 
@@ -215,8 +229,8 @@ seat_of_zahiri_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 
@@ -252,8 +266,8 @@ seat_of_ismaili_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 
@@ -289,8 +303,8 @@ seat_of_jafari_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 
@@ -326,8 +340,8 @@ seat_of_zaidi_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 
@@ -363,8 +377,8 @@ seat_of_ibadi_jurists = {
 	employment_size = large_religious_building_employment
 	max_levels = estate_building_single_level
 
-	rural_settlement = no
-	town = no
+	rural_settlement = yes  # TESTING: was no - revert before release
+	town = yes  # TESTING: was no - revert before release
 	city = yes
 	megalopolis = yes
 

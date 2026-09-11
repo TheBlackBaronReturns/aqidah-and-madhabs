@@ -92,7 +92,7 @@ aqd_seat_establishment_pulse = {
 # subscribers - same merge-not-override guarantee documented above for
 # on_game_start.
 monthly_country_pulse = {
-	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse }
+	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse }
 }
 
 # Ulema Institutions - refresh the cached tier denominator
@@ -124,6 +124,28 @@ aqd_jurist_migration_pulse = {
 		100 = z_aqd_jurists.1
 
 		chance_to_happen = 1
+	}
+}
+
+# Ulema Institutions - the Ḥalqa: the periodic "activity" of a jurist
+# seat (events/religion/z_aqd_halqa_events.txt). No sharia_law_policy
+# requirement - a Muslim realm that only conquered a seat still gets
+# ḥalaqāt (orthodox/heterodox only, never "state"). Trigger clauses run
+# cheap -> expensive: religion group first, then the cheap "owns any
+# seat" prefilter (most Muslim realms own none), then the province scan.
+aqd_halqa_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		aqd_country_owns_any_jurist_seat = yes
+		aqd_country_has_any_halqa_ready = yes
+	}
+	random_events = {
+		100 = z_aqd_halqa.1
+
+		# TESTING: chance_to_happen raised from 2 to 80 so the pulse fires
+		# almost every month instead of ~once per 4 years - revert before
+		# release.
+		chance_to_happen = 80
 	}
 }
 aqd_migrate_pulse = {

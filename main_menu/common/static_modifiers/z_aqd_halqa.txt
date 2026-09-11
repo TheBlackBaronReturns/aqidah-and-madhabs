@@ -1,0 +1,380 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: Ḥalqa modifiers.
+#
+# A ḥalqa (حلقة, a mudarris's teaching circle) is the periodic "activity"
+# of a jurist seat - no in-province madrasa count required.
+# events/religion/z_aqd_halqa_events.txt fires z_aqd_halqa.1, which
+# stamps ONE of these on every owned location of the seat's province for
+# ~4 years (scripted_effects/z_aqd_jurist_effects.txt's aqd_halqa_apply_*).
+#
+# NAMING: 27 concrete objects, one per (state/orthodox/heterodox) x (nine
+# madhhabs) - z_aqd_halqa_<class>_<madhhab>, e.g. z_aqd_halqa_state_hanafi
+# - so the display NAME always reads "<Madhhab> Madhhab Ḥalqa" (with
+# base-game's own diacritics, main_menu/localization/english/
+# religion_l_english.yml's hanafi_school etc.) regardless of whether that
+# seat's circle is currently state/orthodox/heterodox for the observing
+# realm - the CLASS distinction lives in the DESC text and the fields
+# below, not the name. tolerated stays ONE madhhab-agnostic object
+# (z_aqd_halqa_tolerated, unchanged) - a din-i-ilahi realm's circle reads
+# "Ṣulḥ-i Kul" (Akbar's own term for the doctrine, not the placeholder
+# "Tolerated") no matter which madhhab it is, since
+# tolerated is about the OBSERVING realm's syncretism, not the seat's own
+# school (see aqd_halqa_dispatch in z_aqd_jurist_effects.txt - din-i-ilahi
+# is checked first and unconditionally, before madhhab ever matters).
+#
+# All 28 keys still double as the one-ḥalqa-per-province occupancy marker
+# - scripted_triggers/z_aqd_jurist_triggers.txt's
+# aqd_location_has_active_halqa ORs across all 28 (no separate marker
+# object: a location modifier with no gameplay fields would still render
+# as its own row in the province panel's active-modifiers list - same
+# one-icon-per-modifier behaviour confirmed for the four original class
+# keys - so a fields-less marker would ADD a stray visible entry, not
+# remove one; the 28-way OR is evaluated only for the already-narrow set
+# of owned locations that hold a seat at all, on a monthly pulse gated
+# behind two cheaper prefilters first - negligible either way).
+#
+# PER-MADHHAB TUNING: each madhhab's nine fields (three per class) are
+# now genuinely different, grounded in that school's real history (see
+# the per-madhhab notes below each block). scripted_effects/
+# z_aqd_jurist_effects.txt's aqd_halqa_apply_state / _orthodox /
+# _heterodox each pick which of the nine keys to add_location_modifier
+# via a 9-way branch on var:aqd_halqa_madhhab (the canonical 1-9 index,
+# already set before dispatch runs) - the KEYS themselves are unchanged
+# by this tuning pass, only the field VALUES inside each definition
+# below, so nothing outside this file needed to change. NOT every
+# variant carries every field any more - z_aqd_halqa_heterodox_ismaili
+# has no local_clergy_max_literacy at all (see its own note) - so the
+# badge-icon experiment's "literacy field first" rule only holds where
+# that field still exists; that one variant's first field is
+# local_unrest instead.
+#
+# CLASS baselines (what a madhhab keeps unless its own note below says
+# otherwise) - see the dispatch in z_aqd_jurist_effects.txt:
+#   state      - the seat's madhhab IS the realm's own sharia_law policy.
+#                Consolidation: control, unrest down, heretic (cross-sect
+#                Muslim, NOT heathen) conversion boosted specifically
+#                (local_heretic_pop_conversion_speed_modifier). One-shot:
+#                20%/10% (seat/rest of province) of cross-sect Muslims
+#                convert to the state religion - same shape as
+#                heterodox's own conversion, just aimed at root.religion.
+#                TODO: local_monthly_control's 0.05 default is a
+#                PLACEHOLDER - the user asked for this to mirror "the
+#                parliament center modifier" (halved), but no building/
+#                modifier by that name exists anywhere in base game or
+#                this mod (confirmed by an exhaustive grep). Do not tune
+#                the unmodified 0.05 default further without pinning
+#                down the actual reference (several madhhabs below now
+#                override it directly with their own explicit value).
+#   orthodox   - the creed favours the madhhab, or is neutral to it
+#                (var:aqd_jurist_compat 1 or 0). Calm + minor uplift +
+#                a heretic conversion HALF of state's (10%/5%,
+#                seat/rest); a tiny nudge of the realm toward
+#                spiritualism (mirrors heterodox's humanism nudge, same
+#                magnitude, opposite pole).
+#   heterodox  - the creed opposes the madhhab (var:aqd_jurist_compat
+#                -1). Raises unrest (a provocation, not a calming
+#                presence); blocks clergy conversion outright (any
+#                religion) and slows heretic (other-sect Muslim)
+#                conversion 60%, leaving heathen conversion untouched;
+#                literacy/tradition as orthodox.
+#                One-shot (event-side, not this modifier): 20% of the
+#                state-religion population converts to the seat's own
+#                sect at the seat's own location, 10% elsewhere in the
+#                province; a tiny nudge of the realm toward humanism.
+#                monthly_towards_humanist (the periodic societal-value
+#                push) is country-scope-only (game_data category =
+#                country) and so cannot live in this location modifier -
+#                deliberately left a one-shot change_societal_value in
+#                the event instead of a companion country modifier.
+#   tolerated  - din-i-ilahi realms only. The orthodox uplift, but NO
+#                conversion of any kind (the syncretic state proselytises
+#                for none) and the heterodox conversion block.
+#
+# Modifier fields are all valid at location scope (category = location,
+# confirmed against main_menu/common/modifier_type_definitions/
+# 00_modifier_types.txt for every field used below, including the four
+# newly-introduced ones: local_tribal_promotion, local_population_growth,
+# local_defensive, local_manpower_modifier - all percent = yes).
+# local_clergy_max_literacy is listed FIRST wherever it is still present -
+# EXPERIMENTAL, unconfirmed: the compact province-panel badge for a
+# location modifier appears to be derived from one of its fields (no
+# icon field exists anywhere in modifier_type_definitions or any base
+# static_modifiers file), and this field's icon (no
+# local_clergy_max_literacy.dds, but global_clergy_max_literacy.dds DOES
+# exist under gfx/interface/icons/modifier_types/ - a local -> global
+# fallback) is the clergy-themed one available. If field order is not
+# actually what drives the badge pick, this is a no-op (order never
+# affects the modifier's actual effect).
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# STATE
+# ---------------------------------------------------------------------
+
+# Ḥanafī - empire administrator school (Abbasid/Seljuk/Ottoman kanun):
+# double the default control.
+z_aqd_halqa_state_hanafi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_monthly_control = 0.1
+	local_unrest = -0.10
+	local_heretic_pop_conversion_speed_modifier = 0.15
+}
+# Ḥanbalī - the Miḥna precedent, assertive under full state authority:
+# a much stronger heretic-conversion push, but less calming than the
+# default (strict enforcement, not soft administration).
+z_aqd_halqa_state_hanbali = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_monthly_control = 0.05
+	local_unrest = -0.05
+	local_heretic_pop_conversion_speed_modifier = 0.3
+}
+# Mālikī - law as lived local custom: strong tradition, default calm.
+z_aqd_halqa_state_maliki = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_monthly_control = 0.05
+	local_unrest = -0.10
+	local_heretic_pop_conversion_speed_modifier = 0.15
+	local_cultural_tradition = 0.1
+}
+# Shāfiʿī - the methodologist's school: very strong literacy, and
+# local_tribal_promotion (tribesmen settle into peasant life around a
+# seat of systematic jurisprudence).
+z_aqd_halqa_state_shafii = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 10
+	local_monthly_control = 0.05
+	local_unrest = -0.10
+	local_heretic_pop_conversion_speed_modifier = 0.15
+	local_tribal_promotion = 0.5
+}
+# Ẓāhirī - demographic rather than administrative footprint.
+z_aqd_halqa_state_zahiri = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_monthly_control = 0.05
+	local_unrest = -0.10
+	local_heretic_pop_conversion_speed_modifier = 0.15
+	local_population_growth = 0.05
+}
+# Ismāʿīlī - Fatimid/Nizari fortress statecraft (Alamut): doubled
+# heretic-conversion push (the daʿwa) and a defensiveness bonus.
+z_aqd_halqa_state_ismaili = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_monthly_control = 0.05
+	local_unrest = -0.10
+	local_heretic_pop_conversion_speed_modifier = 0.3
+	local_defensive = 0.1
+}
+# Jaʿfarī - identical to Ḥanafī (per user instruction).
+z_aqd_halqa_state_jafari = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_monthly_control = 0.1
+	local_unrest = -0.10
+	local_heretic_pop_conversion_speed_modifier = 0.15
+}
+# Zaydī - imamate martial tradition: manpower, at the cost of a weaker
+# heretic-conversion push than the default (soft power traded for hard).
+z_aqd_halqa_state_zaidi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_monthly_control = 0.05
+	local_unrest = -0.10
+	local_heretic_pop_conversion_speed_modifier = 0.1
+	local_manpower_modifier = 0.1
+}
+# Ibāḍī - unchanged from the class baseline.
+z_aqd_halqa_state_ibadi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_monthly_control = 0.05
+	local_unrest = -0.10
+	local_heretic_pop_conversion_speed_modifier = 0.15
+}
+
+# ---------------------------------------------------------------------
+# ORTHODOX
+# ---------------------------------------------------------------------
+
+# Ḥanafī - control follows the school even outside official state law.
+z_aqd_halqa_orthodox_hanafi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = -0.10
+	local_cultural_tradition = 0.05
+	local_monthly_control = 0.07
+}
+# Ḥanbalī - combative even when merely tolerated: unrest RISES instead
+# of easing, and it still pushes a heretic-conversion effort (unusual
+# for orthodox, which normally has none at all).
+z_aqd_halqa_orthodox_hanbali = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.05
+	local_cultural_tradition = 0.05
+	local_heretic_pop_conversion_speed_modifier = 0.15
+}
+# Mālikī - weaker calm than default, stronger tradition.
+z_aqd_halqa_orthodox_maliki = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = -0.05
+	local_cultural_tradition = 0.07
+}
+# Shāfiʿī - strong literacy, even as a merely-tolerated rival.
+z_aqd_halqa_orthodox_shafii = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 7
+	local_unrest = -0.10
+	local_cultural_tradition = 0.05
+}
+# Ẓāhirī - a smaller demographic footprint than its own state variant.
+z_aqd_halqa_orthodox_zahiri = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = -0.10
+	local_cultural_tradition = 0.05
+	local_population_growth = 0.03
+}
+# Ismāʿīlī - deliberately an exact copy of Ḥanbalī-orthodox's fields
+# (per user instruction) - rare as "merely orthodox" historically, so no
+# independent flavour of its own here.
+z_aqd_halqa_orthodox_ismaili = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.05
+	local_cultural_tradition = 0.05
+	local_heretic_pop_conversion_speed_modifier = 0.15
+}
+# Jaʿfarī - identical to Ḥanafī (per user instruction).
+z_aqd_halqa_orthodox_jafari = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = -0.10
+	local_cultural_tradition = 0.05
+	local_monthly_control = 0.07
+}
+# Zaydī - unchanged from the class baseline.
+z_aqd_halqa_orthodox_zaidi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = -0.10
+	local_cultural_tradition = 0.05
+}
+# Ibāḍī - unchanged from the class baseline.
+z_aqd_halqa_orthodox_ibadi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = -0.10
+	local_cultural_tradition = 0.05
+}
+
+# ---------------------------------------------------------------------
+# HETERODOX
+# ---------------------------------------------------------------------
+
+# Ḥanafī - unchanged from the class baseline.
+z_aqd_halqa_heterodox_hanafi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.05
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.6
+	local_cultural_tradition = 0.05
+}
+# Ḥanbalī - doubled unrest when opposed outright.
+z_aqd_halqa_heterodox_hanbali = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.1
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.6
+	local_cultural_tradition = 0.05
+}
+# Mālikī - unchanged from the class baseline.
+z_aqd_halqa_heterodox_maliki = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.05
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.6
+	local_cultural_tradition = 0.05
+}
+# Shāfiʿī - unchanged from the class baseline.
+z_aqd_halqa_heterodox_shafii = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.05
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.6
+	local_cultural_tradition = 0.05
+}
+# Ẓāhirī - unchanged from the class baseline.
+z_aqd_halqa_heterodox_zahiri = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.05
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.6
+	local_cultural_tradition = 0.05
+}
+# Ismāʿīlī - the daʿwa opposed outright: much higher unrest, a near-total
+# conversion stall (deepened from -0.6 to -0.8), and NO
+# local_clergy_max_literacy at all (per user instruction) - the only
+# variant in the whole set missing a field every other one carries, so
+# its first field is local_unrest instead of literacy.
+z_aqd_halqa_heterodox_ismaili = {
+	game_data = { category = location }
+	local_unrest = 0.2
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.8
+	local_cultural_tradition = 0.05
+}
+# Jaʿfarī - identical to Ḥanafī (per user instruction) = unchanged from
+# the class baseline (Ḥanafī heterodox itself carries no override).
+z_aqd_halqa_heterodox_jafari = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.05
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.6
+	local_cultural_tradition = 0.05
+}
+# Zaydī - khurūj activism: doubled unrest and a manpower malus (a
+# rebellious imamate seat actively drains the local levy).
+z_aqd_halqa_heterodox_zaidi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.1
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.6
+	local_cultural_tradition = 0.05
+	local_manpower_modifier = -0.1
+}
+# Ibāḍī - unchanged from the class baseline.
+z_aqd_halqa_heterodox_ibadi = {
+	game_data = { category = location }
+	local_clergy_max_literacy = 3
+	local_unrest = 0.05
+	local_clergy_conversion_blocked = yes
+	local_heretic_pop_conversion_speed_modifier = -0.6
+	local_cultural_tradition = 0.05
+}
+
+# ---------------------------------------------------------------------
+# TOLERATED ("Ṣulḥ-i Kul") - single madhhab-agnostic object, unchanged.
+# See the naming note at the top of this file for why.
+# ---------------------------------------------------------------------
+z_aqd_halqa_tolerated = {
+	game_data = {
+		category = location
+	}
+	local_clergy_max_literacy = 3
+	local_unrest = -0.15
+	local_cultural_tradition = 0.05
+	local_pop_conversion_speed_modifier = -0.9
+}

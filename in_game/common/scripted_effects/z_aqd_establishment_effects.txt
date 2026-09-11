@@ -85,25 +85,31 @@ aqd_establish_save_target_dispatch = {
 }
 
 aqd_establish_save_target = {
-	# Pick an owned city (or larger) with the sect present, whose
+	# Pick an owned town (or larger) with the sect present, whose
 	# province holds the 3-madrasa + mosque density. This is the
-	# guaranteed seat target - a seat can only be raised in a city+.
+	# guaranteed seat target. NOT rural, not city+: at 1337 most real
+	# cities (Damascus, Alexandria, Aleppo...) are only location_rank:town
+	# (rank city needs population >= 30) - a city+-only gate silently
+	# excludes them. owner ?= root, not owner = root: a province_definition
+	# can include lake/sea locations with no owner, which owner = root
+	# errors on.
 	random_owned_location = {
 		limit = {
-			"religion_percentage(religion:$SECT$)" >= 0.25
-			OR = {
-				location_rank ?= location_rank:city
-				location_rank ?= location_rank:megalopolis
-			}
+			# TESTING: sect population gate disabled (was >= 0.25) - kept as
+			# a >= 0 check so $SECT$ stays referenced in this body; a bare
+			# `always = yes` here drops the only $SECT$ reference and makes
+			# every SECT-passing call site fail to compile silently.
+			religion_percentage = { religion = religion:$SECT$  value >= 0 }
+			always = yes # TESTING: rural_settlement allowed
 			province_definition = {
 				any_location_in_province_definition = {
 					count >= 3
-					owner = root
+					owner ?= root
 					has_building = building_type:madrasa_of_$MADHHAB$_fiqh
 				}
 				any_location_in_province_definition = {
 					count >= 1
-					owner = root
+					owner ?= root
 					has_building = building_type:temple
 				}
 				NOT = { any_location_in_province_definition = { has_building = building_type:seat_of_$MADHHAB$_jurists } }
@@ -113,7 +119,7 @@ aqd_establish_save_target = {
 		save_scope_as = aqd_establish_seat_loc
 		province_definition = { save_scope_as = aqd_establish_prov }
 	}
-	# Prefer the province capital if we own it and it is a city+.
+	# Prefer the province capital if we own it and it is not rural.
 	if = {
 		limit = { exists = scope:aqd_establish_prov }
 		scope:aqd_establish_prov = {
@@ -121,10 +127,7 @@ aqd_establish_save_target = {
 				if = {
 					limit = {
 						owner = root
-						OR = {
-							location_rank ?= location_rank:city
-							location_rank ?= location_rank:megalopolis
-						}
+						always = yes # TESTING: rural_settlement allowed
 					}
 					save_scope_as = aqd_establish_loc
 				}

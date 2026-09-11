@@ -32,15 +32,18 @@ aqd_exile_save_target_dispatch = {
 
 # Same location test as scripted_triggers/z_aqd_jurist_triggers.txt's
 # aqd_can_host_exile_seat any_owned_location block - the selection phase
-# already confirmed at least one such location exists.
+# already confirmed at least one such location exists. NOT rural, not
+# city+ (see aqd_can_host_exile_seat's comment: most real cities are
+# only location_rank:town at 1337).
 aqd_exile_save_target = {
 	random_owned_location = {
 		limit = {
-			"religion_percentage(religion:$SECT$)" >= 0.25
-			OR = {
-				location_rank ?= location_rank:city
-				location_rank ?= location_rank:megalopolis
-			}
+			# TESTING: sect population gate disabled (was >= 0.25) - kept as
+			# a >= 0 check so $SECT$ stays referenced in this body; a bare
+			# `always = yes` here drops the only $SECT$ reference and makes
+			# every SECT-passing call site fail to compile silently.
+			religion_percentage = { religion = religion:$SECT$  value >= 0 }
+			always = yes # TESTING: rural_settlement allowed
 			NOT = { has_building = building_type:seat_of_$MADHHAB$_jurists }
 			NOT = { has_location_modifier = z_aqd_establishment_pending }
 		}

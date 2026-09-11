@@ -7,11 +7,20 @@
 # vs. 4 for a jurist seat), driving the tiered auto_modifiers in
 # auto_modifiers/z_aqd_madhhab_tiers.txt.
 #
-# It is a CROWN religious_category building, mirroring the base
-# madrasa/"Maktab" (common/building_types/religion_buildings.txt) - NOT
-# an estate building. An `estate = clergy_estate` field would hand
-# construction to the clergy estate and take it out of the player's
-# build menu; that is why the fiqh madrasa now carries none.
+# It is an ESTATE building (category = estate_category, estate =
+# clergy_estate), mirroring vanilla's cathedral/parish_church
+# (common/building_types/estate_buildings.txt) rather than the player-
+# built base madrasa/"Maktab" (religion_buildings.txt / z_aqd_maktab.txt).
+# The clergy estate raises and maintains these on its own initiative,
+# not the crown - it is off the player's direct build menu, the same
+# way cathedral/parish_church are. This keeps the fiqh madrasa from
+# freely stacking with the player-built Maktab as a second, on-demand
+# copy of the same literacy/conversion bonus in every eligible city;
+# the estate still targets locations per the eligibility rules below,
+# just on its own (control/wealth-share-driven) schedule instead of the
+# player's. construction_demand is estate_construct_building (no
+# physical construction goods), matching cathedral/parish_church - not
+# town_building_construction, which assumes a player-funded build.
 #
 # WHO CAN BUILD WHICH (location_potential, evaluated location-scoped;
 # `exists = owner` guards it so it never errors on unowned locations):
@@ -24,23 +33,26 @@
 #    outward from a juristic centre the realm has (established or
 #    conquered).
 #
-# The foreign-jurist event (events/religion/z_aqd_jurist_events.txt via
-# scripted_effects/z_aqd_jurist_effects.txt's
-# aqd_build_madrasas_of_madhhab_from) plants 1-3 of these directly with
-# change_building_level_in_location, which bypasses location_potential -
-# so a realm can be seeded with a foreign madhhab with no prior seat,
-# and if that province then reaches 3 madrasas + a mosque the
-# establishment event (events/religion/z_aqd_establishment_events.txt)
-# can grant it a seat without conquest. The event places only in
-# non-rural owned locations of a province that has >= 25% of the sect
-# somewhere; the madrasa's remove_if only culls on non-Muslim conquest
-# (matching base), so a minority-school madrasa is not instantly pruned.
+# The "Foreign Jurists at the Gate" event (events/religion/
+# z_aqd_jurist_events.txt) grants the visitors' madhhab a Seat directly
+# (aqd_jurists_accept); its "endow a college as well" option additionally
+# drops ONE of these beside the new Seat (aqd_jurists_finish_yes), placed
+# with change_building_level_in_location, which bypasses location_potential
+# so a foreign madhhab with no prior area seat can still be endowed one.
+# (The dormant aqd_build_madrasas_of_madhhab_from primitive can still seed
+# 1-3 of these in a province without a seat, toward an establishment - it
+# is currently unreferenced.) These placements target non-rural owned
+# locations of a province that has >= 25% of the sect somewhere; the
+# madrasa's remove_if only culls on non-Muslim conquest (matching base),
+# so a minority-school madrasa is not instantly pruned.
 #
-# The modifier is DELIBERATELY identical to the base madrasa/"Maktab"
-# (common/building_types/religion_buildings.txt) payload, plus one
-# per-madhhab societal-axis nudge - madrasas are not weaker than the
-# generic school. The single-level cap and clergy food upkeep are the
-# built-in brakes on the AI over-building them.
+# Payload (per level, x goods access): local_clergy_max_literacy 5,
+# local_pop_conversion_speed_modifier 0.1, local_clergy_food_consumption
+# 0.1 (the cost side), local_cultural_tradition 0.1. Upkeep is
+# aqd_madrasa_maintenance (paper 0.1 / cloth 0.2, no output;
+# production_methods/z_aqd_pm.txt) - the higher-learning building costs
+# real goods to run, unlike the elementary Maktab. The single-level cap,
+# clergy food upkeep, and goods upkeep are the brakes on over-building.
 #
 # Removed by scripted_effects/z_aqd_jurist_effects.txt's
 # aqd_crackdown_destroy_<X>_madrasa (crackdown), or auto-removed by
@@ -48,25 +60,26 @@
 # =====================================================================
 
 madrasa_of_hanafi_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:sunni }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:sunni)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:sunni)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = hanafi_policy }
@@ -83,36 +96,36 @@ madrasa_of_hanafi_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_mysticism = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }
 
 madrasa_of_hanbali_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:sunni }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:sunni)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:sunni)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = hanbali_policy }
@@ -129,36 +142,36 @@ madrasa_of_hanbali_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_traditionalist = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }
 
 madrasa_of_maliki_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:sunni }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:sunni)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:sunni)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = maliki_policy }
@@ -175,36 +188,36 @@ madrasa_of_maliki_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_spiritualist = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }
 
 madrasa_of_shafii_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:sunni }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:sunni)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:sunni)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = shafii_policy }
@@ -221,36 +234,36 @@ madrasa_of_shafii_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_free_trade = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }
 
 madrasa_of_zahiri_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:sunni }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:sunni)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:sunni)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = zahiri_policy }
@@ -267,36 +280,36 @@ madrasa_of_zahiri_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_conciliatory = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }
 
 madrasa_of_ismaili_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:shia }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:shia)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:shia)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = ismaili_policy }
@@ -313,36 +326,36 @@ madrasa_of_ismaili_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_belligerent = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }
 
 madrasa_of_jafari_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:shia }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:shia)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:shia)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = jafari_policy }
@@ -359,36 +372,36 @@ madrasa_of_jafari_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_humanist = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }
 
 madrasa_of_zaidi_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:shia }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:shia)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:shia)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = zaidi_policy }
@@ -405,36 +418,36 @@ madrasa_of_zaidi_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_free_subjects = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }
 
 madrasa_of_ibadi_fiqh = {
-	category = religious_category
+	category = estate_category
+	estate = clergy_estate
 	pop_type = clergy
 	employment_size = large_religious_building_employment
 	max_levels = 1
 
 	graphical_tags = { medium_religious }
 
-	rural_settlement = no
+	rural_settlement = yes  # TESTING: was no - revert before release
 	town = yes
 	city = yes
 	megalopolis = yes
 
 	build_time = religious_building_time
-	construction_demand = town_building_construction
+	construction_demand = estate_construct_building
 
 	country_potential = { religion = religion:ibadi }
 	location_potential = {
 		exists = owner
-		"religion_percentage(religion:ibadi)" >= 0.25
+		# TESTING: sect population gate disabled - was "religion_percentage(religion:ibadi)" >= 0.25
 		NOT = { aqd_location_has_fiqh_madrasa = yes }
 		OR = {
 			owner = { has_policy = ibadi_policy }
@@ -451,12 +464,11 @@ madrasa_of_ibadi_fiqh = {
 		}
 	}
 
-	possible_production_methods = { estate_building_input }
+	possible_production_methods = { aqd_madrasa_maintenance }
 	modifier = {
 		local_clergy_max_literacy = 5
 		local_pop_conversion_speed_modifier = 0.1
 		local_clergy_food_consumption = 0.1
-		local_tribal_promotion = 0.1
-		monthly_towards_individualism = societal_value_minor_monthly_move
+		local_cultural_tradition = 0.1
 	}
 }

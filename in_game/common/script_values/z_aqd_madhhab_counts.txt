@@ -260,3 +260,70 @@ aqd_crackdown_gold_estimate_target = {
 	multiply = 0.25
 	multiply = monthly_income_trade_and_tax
 }
+
+# ---------------------------------------------------------------------
+# Gold cost of the "endow a college as well" option on "Foreign Jurists
+# at the Gate" (events/religion/z_aqd_jurist_events.txt via
+# scripted_effects/z_aqd_jurist_effects.txt's aqd_jurists_finish_yes).
+# ~4 months of trade + tax income, so the spend scales with realm size
+# the same way the crackdown's confiscation math does. Shown to the
+# player via var:aqd_endow_gold_est + custom_tooltip aqd_endow_gold_tt,
+# set in the event's immediate. TUNABLE: the multiply factor.
+# ---------------------------------------------------------------------
+aqd_endow_gold_estimate = {
+	value = monthly_income_trade_and_tax
+	multiply = 4
+}
+
+# ---------------------------------------------------------------------
+# Ḥalqa madhhab-pick leader weighting (events/religion/
+# z_aqd_halqa_events.txt / scripted_effects/z_aqd_jurist_effects.txt's
+# aqd_halqa_compute_leader). PROVINCE-scoped counts (owned madrasas of
+# THAT madhhab, in the one province being picked for) - NOT the same as
+# the realm-wide <X>_institution_score above. Each is invoked directly
+# at root/country scope and re-enters scope:halqa_prov itself, so it
+# does not depend on "this" already being the province when called -
+# unlike aqd_halqa_prov_ready_<x> and aqd_province_has_madhhab_density,
+# which DO assume a province_definition "this" (a genuine random_list
+# weight-by-script_value expression is not supported - EU5's random_list
+# only accepts a literal integer as the leading weight token, confirmed
+# by its absence anywhere in base game; this is why the leader mechanic
+# works by choosing between two literal-weight entries per madhhab
+# instead of a computed weight - see z_aqd_halqa_events.txt).
+# ---------------------------------------------------------------------
+aqd_prov_madrasa_count_hanafi = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_hanafi_fiqh }  add = 1 } }
+}
+aqd_prov_madrasa_count_hanbali = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_hanbali_fiqh }  add = 1 } }
+}
+aqd_prov_madrasa_count_maliki = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_maliki_fiqh }  add = 1 } }
+}
+aqd_prov_madrasa_count_shafii = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_shafii_fiqh }  add = 1 } }
+}
+aqd_prov_madrasa_count_zahiri = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_zahiri_fiqh }  add = 1 } }
+}
+aqd_prov_madrasa_count_ismaili = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_ismaili_fiqh }  add = 1 } }
+}
+aqd_prov_madrasa_count_jafari = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_jafari_fiqh }  add = 1 } }
+}
+aqd_prov_madrasa_count_zaidi = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_zaidi_fiqh }  add = 1 } }
+}
+aqd_prov_madrasa_count_ibadi = {
+	value = 0
+	scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root  has_building = building_type:madrasa_of_ibadi_fiqh }  add = 1 } }
+}

@@ -1,0 +1,273 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: the Ḥalqa.
+#
+# The periodic "activity" of a jurist seat. Fired rarely by
+# on_action/00_aqd_game_start.txt's aqd_halqa_pulse (monthly_country_pulse)
+# for any Muslim realm that owns a seat and has at least one province
+# where that seat sits and no ḥalqa is already running (one per province,
+# first-come-first-serve; scripted_triggers/z_aqd_jurist_triggers.txt).
+# No in-province madrasa count is required - a bare seat is enough.
+#
+# Pure flavour: the immediate picks a province, picks the madhhab
+# (random_list among whichever madhhabs qualify in that province - flat/
+# uniform, UNLESS exactly one of them owns strictly more of its own
+# madrasas there than every other qualifier, in which case that leader
+# gets a 3x-weighted, not guaranteed, edge - scripted_effects/
+# z_aqd_jurist_effects.txt's aqd_halqa_compute_leader), classifies it
+# (state / orthodox / heterodox / tolerated - see scripted_effects/
+# z_aqd_jurist_effects.txt's aqd_halqa_dispatch), and applies a
+# temporary province-wide z_aqd_halqa_* modifier plus one-shot effects.
+# The single option just dismisses.
+#
+# Saved scopes do not survive trigger_event, so the immediate re-derives
+# its own target - mirroring z_aqd_establishment.1 / z_aqd_exile.1. The
+# event trigger re-checks aqd_country_has_any_halqa_ready so a same-tick
+# change that invalidates every ready province suppresses the pop-up
+# instead of showing an empty one.
+# =====================================================================
+
+namespace = z_aqd_halqa
+
+z_aqd_halqa.1 = {
+	type = country_event
+	title = z_aqd_halqa.1.title
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { religious_school = religious_school:din_i_ilahi_school }
+				desc = z_aqd_halqa.1.desc.tolerated
+			}
+			triggered_desc = {
+				trigger = {
+					exists = var:aqd_halqa_madhhab
+					OR = {
+						AND = { var:aqd_halqa_madhhab = 1  has_policy = hanafi_policy }
+						AND = { var:aqd_halqa_madhhab = 2  has_policy = hanbali_policy }
+						AND = { var:aqd_halqa_madhhab = 3  has_policy = maliki_policy }
+						AND = { var:aqd_halqa_madhhab = 4  has_policy = shafii_policy }
+						AND = { var:aqd_halqa_madhhab = 5  has_policy = zahiri_policy }
+						AND = { var:aqd_halqa_madhhab = 6  has_policy = ismaili_policy }
+						AND = { var:aqd_halqa_madhhab = 7  has_policy = jafari_policy }
+						AND = { var:aqd_halqa_madhhab = 8  has_policy = zaidi_policy }
+						AND = { var:aqd_halqa_madhhab = 9  has_policy = ibadi_policy }
+					}
+				}
+				desc = z_aqd_halqa.1.desc.state
+			}
+			triggered_desc = {
+				trigger = { var:aqd_jurist_compat = -1 }
+				desc = z_aqd_halqa.1.desc.heterodox
+			}
+			triggered_desc = {
+				desc = z_aqd_halqa.1.desc.orthodox
+			}
+		}
+	}
+	outcome = neutral
+
+	trigger = {
+		religion.group = religion_group:muslim
+		aqd_country_has_any_halqa_ready = yes
+	}
+
+	illustration_tags = {
+		10 = interior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+
+		# Re-derive the target: an owned location holding a seat, with no
+		# ḥalqa already running anywhere in the province. save_scope_as = halqa_loc (kept
+		# for any future effect use - e.g. a follow-up event, a debug
+		# check) even though the desc can NOT name it: debug.log confirms
+		# [scope:halqa_loc.GetName] fails to resolve at all ("Failed to
+		# find type 'scope:halqa_loc'") - a custom save_scope_as name is
+		# not visible to the loc engine's data-function type-checker, only
+		# the small set of engine-reserved names (scope:actor etc.) are.
+		# The desc uses generic "a province of the realm" phrasing instead
+		# (main_menu/localization/english/aqd_l_english.yml).
+		random_owned_location = {
+			limit = {
+				province_definition = {
+					NOT = { any_location_in_province_definition = { aqd_location_has_active_halqa = yes } }
+				}
+				OR = {
+					AND = { has_building = building_type:seat_of_hanafi_jurists   province_definition = { aqd_halqa_prov_ready_hanafi = yes } }
+					AND = { has_building = building_type:seat_of_hanbali_jurists  province_definition = { aqd_halqa_prov_ready_hanbali = yes } }
+					AND = { has_building = building_type:seat_of_maliki_jurists   province_definition = { aqd_halqa_prov_ready_maliki = yes } }
+					AND = { has_building = building_type:seat_of_shafii_jurists   province_definition = { aqd_halqa_prov_ready_shafii = yes } }
+					AND = { has_building = building_type:seat_of_zahiri_jurists   province_definition = { aqd_halqa_prov_ready_zahiri = yes } }
+					AND = { has_building = building_type:seat_of_ismaili_jurists  province_definition = { aqd_halqa_prov_ready_ismaili = yes } }
+					AND = { has_building = building_type:seat_of_jafari_jurists   province_definition = { aqd_halqa_prov_ready_jafari = yes } }
+					AND = { has_building = building_type:seat_of_zaidi_jurists    province_definition = { aqd_halqa_prov_ready_zaidi = yes } }
+					AND = { has_building = building_type:seat_of_ibadi_jurists    province_definition = { aqd_halqa_prov_ready_ibadi = yes } }
+				}
+			}
+			save_scope_as = halqa_loc
+			province_definition = { save_scope_as = halqa_prov }
+		}
+
+		if = {
+			limit = { exists = scope:halqa_prov }
+
+			# Decide whether one ready madhhab in this province has
+			# strictly more owned madrasas of its own fiqh than every
+			# other ready madhhab here - if so, var:aqd_halqa_leader_madhhab
+			# (scripted_effects/z_aqd_jurist_effects.txt) names it, else it
+			# is the sentinel 0.
+			aqd_halqa_compute_leader = yes
+
+			# Pick among the madhhabs that qualify in this province (i.e.
+			# have a seat there). Each gets TWO literal-weight entries -
+			# EU5's random_list only accepts a literal integer as the
+			# weight, no per-entry weight modifier/script_value expression
+			# (confirmed absent anywhere in base game) - so a "higher but
+			# not guaranteed" chance for the leader is built by splitting
+			# each madhhab's single entry into a 30-weight one gated on
+			# "I am the leader" and a 10-weight one gated on "I am not",
+			# mutually exclusive so exactly one of the two is ever live
+			# per ready candidate. When var:aqd_halqa_leader_madhhab is
+			# the sentinel 0 (no unique leader - a tie, an all-zero tie,
+			# or only one candidate ready), no madhhab's index ever
+			# matches it, so every candidate falls to its 10-weight entry
+			# and the whole list is flat/uniform again - identical to
+			# before this feature existed. 3x is the leader's edge (e.g.
+			# 75/25 with one rival, 60/20/20 with two) - tune by editing
+			# the "30" literals.
+			scope:halqa_prov = {
+				random_list = {
+					30 = {
+						trigger = { aqd_halqa_prov_ready_hanafi = yes  var:aqd_halqa_leader_madhhab = 1 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 1 }  set_variable = { name = aqd_compat_madhhab  value = 1 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_hanafi = yes  NOT = { var:aqd_halqa_leader_madhhab = 1 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 1 }  set_variable = { name = aqd_compat_madhhab  value = 1 } }
+					}
+					30 = {
+						trigger = { aqd_halqa_prov_ready_hanbali = yes  var:aqd_halqa_leader_madhhab = 2 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 2 }  set_variable = { name = aqd_compat_madhhab  value = 2 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_hanbali = yes  NOT = { var:aqd_halqa_leader_madhhab = 2 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 2 }  set_variable = { name = aqd_compat_madhhab  value = 2 } }
+					}
+					30 = {
+						trigger = { aqd_halqa_prov_ready_maliki = yes  var:aqd_halqa_leader_madhhab = 3 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 3 }  set_variable = { name = aqd_compat_madhhab  value = 3 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_maliki = yes  NOT = { var:aqd_halqa_leader_madhhab = 3 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 3 }  set_variable = { name = aqd_compat_madhhab  value = 3 } }
+					}
+					30 = {
+						trigger = { aqd_halqa_prov_ready_shafii = yes  var:aqd_halqa_leader_madhhab = 4 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 4 }  set_variable = { name = aqd_compat_madhhab  value = 4 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_shafii = yes  NOT = { var:aqd_halqa_leader_madhhab = 4 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 4 }  set_variable = { name = aqd_compat_madhhab  value = 4 } }
+					}
+					30 = {
+						trigger = { aqd_halqa_prov_ready_zahiri = yes  var:aqd_halqa_leader_madhhab = 5 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 5 }  set_variable = { name = aqd_compat_madhhab  value = 5 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_zahiri = yes  NOT = { var:aqd_halqa_leader_madhhab = 5 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 5 }  set_variable = { name = aqd_compat_madhhab  value = 5 } }
+					}
+					30 = {
+						trigger = { aqd_halqa_prov_ready_ismaili = yes  var:aqd_halqa_leader_madhhab = 6 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 6 }  set_variable = { name = aqd_compat_madhhab  value = 6 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_ismaili = yes  NOT = { var:aqd_halqa_leader_madhhab = 6 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 6 }  set_variable = { name = aqd_compat_madhhab  value = 6 } }
+					}
+					30 = {
+						trigger = { aqd_halqa_prov_ready_jafari = yes  var:aqd_halqa_leader_madhhab = 7 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 7 }  set_variable = { name = aqd_compat_madhhab  value = 7 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_jafari = yes  NOT = { var:aqd_halqa_leader_madhhab = 7 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 7 }  set_variable = { name = aqd_compat_madhhab  value = 7 } }
+					}
+					30 = {
+						trigger = { aqd_halqa_prov_ready_zaidi = yes  var:aqd_halqa_leader_madhhab = 8 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 8 }  set_variable = { name = aqd_compat_madhhab  value = 8 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_zaidi = yes  NOT = { var:aqd_halqa_leader_madhhab = 8 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 8 }  set_variable = { name = aqd_compat_madhhab  value = 8 } }
+					}
+					30 = {
+						trigger = { aqd_halqa_prov_ready_ibadi = yes  var:aqd_halqa_leader_madhhab = 9 }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 9 }  set_variable = { name = aqd_compat_madhhab  value = 9 } }
+					}
+					10 = {
+						trigger = { aqd_halqa_prov_ready_ibadi = yes  NOT = { var:aqd_halqa_leader_madhhab = 9 } }
+						root = { set_variable = { name = aqd_halqa_madhhab  value = 9 }  set_variable = { name = aqd_compat_madhhab  value = 9 } }
+					}
+				}
+			}
+			# Belt-and-braces: if random_list somehow set nothing (no entry
+			# valid), fall back to the first qualifying madhhab so the event
+			# never renders with an unset var.
+			if = {
+				limit = { NOT = { exists = var:aqd_halqa_madhhab } }
+				scope:halqa_prov = {
+					if = { limit = { aqd_halqa_prov_ready_hanafi = yes }  root = { set_variable = { name = aqd_halqa_madhhab  value = 1 }  set_variable = { name = aqd_compat_madhhab  value = 1 } } }
+					else_if = { limit = { aqd_halqa_prov_ready_hanbali = yes }  root = { set_variable = { name = aqd_halqa_madhhab  value = 2 }  set_variable = { name = aqd_compat_madhhab  value = 2 } } }
+					else_if = { limit = { aqd_halqa_prov_ready_maliki = yes }   root = { set_variable = { name = aqd_halqa_madhhab  value = 3 }  set_variable = { name = aqd_compat_madhhab  value = 3 } } }
+					else_if = { limit = { aqd_halqa_prov_ready_shafii = yes }   root = { set_variable = { name = aqd_halqa_madhhab  value = 4 }  set_variable = { name = aqd_compat_madhhab  value = 4 } } }
+					else_if = { limit = { aqd_halqa_prov_ready_zahiri = yes }   root = { set_variable = { name = aqd_halqa_madhhab  value = 5 }  set_variable = { name = aqd_compat_madhhab  value = 5 } } }
+					else_if = { limit = { aqd_halqa_prov_ready_ismaili = yes }  root = { set_variable = { name = aqd_halqa_madhhab  value = 6 }  set_variable = { name = aqd_compat_madhhab  value = 6 } } }
+					else_if = { limit = { aqd_halqa_prov_ready_jafari = yes }   root = { set_variable = { name = aqd_halqa_madhhab  value = 7 }  set_variable = { name = aqd_compat_madhhab  value = 7 } } }
+					else_if = { limit = { aqd_halqa_prov_ready_zaidi = yes }    root = { set_variable = { name = aqd_halqa_madhhab  value = 8 }  set_variable = { name = aqd_compat_madhhab  value = 8 } } }
+					else_if = { limit = { aqd_halqa_prov_ready_ibadi = yes }    root = { set_variable = { name = aqd_halqa_madhhab  value = 9 }  set_variable = { name = aqd_compat_madhhab  value = 9 } } }
+				}
+			}
+
+			# Classify (state check is in the dispatch; this sets
+			# var:aqd_jurist_compat from var:aqd_compat_madhhab). The apply
+			# itself (aqd_halqa_dispatch) runs from the option below, NOT
+			# here - effects placed in immediate have no tooltip surface, so
+			# the heterodox conversion's custom_tooltip (scripted_effects/
+			# z_aqd_jurist_effects.txt's aqd_halqa_apply_heterodox) would
+			# never render if dispatched from immediate. scope:halqa_prov
+			# and the var:aqd_halqa_madhhab / var:aqd_jurist_compat set here
+			# both survive into the option (same event, not a fresh
+			# trigger_event) - mirrors base game's muslim_school_events.12
+			# "Taqiyya", which saves its target in immediate's hidden_effect
+			# and converts from the chosen option.
+			aqd_classify_madhhab_compatibility = { COUNTRY = root }
+		}
+	}
+
+	option = {
+		name = z_aqd_halqa.1.ok
+		# Self-guarded on exists = var:aqd_halqa_madhhab, so a console-forced
+		# fire with no real target does nothing here.
+		aqd_halqa_dispatch = yes
+		# Scratch var cleanup. var:aqd_compat_madhhab is transient / reused
+		# by every other jurist path; var:aqd_halqa_madhhab and the
+		# aqd_halqa_compute_leader working vars (scripted_effects/
+		# z_aqd_jurist_effects.txt) are ours. remove_variable on an unset
+		# variable is a no-op, so it is safe to remove aqd_halqa_count_1..9
+		# unconditionally even though most were never set this fire.
+		remove_variable = aqd_halqa_madhhab
+		remove_variable = aqd_halqa_leader_madhhab
+		remove_variable = aqd_halqa_max_count
+		remove_variable = aqd_halqa_max_ties
+		remove_variable = aqd_halqa_count_1
+		remove_variable = aqd_halqa_count_2
+		remove_variable = aqd_halqa_count_3
+		remove_variable = aqd_halqa_count_4
+		remove_variable = aqd_halqa_count_5
+		remove_variable = aqd_halqa_count_6
+		remove_variable = aqd_halqa_count_7
+		remove_variable = aqd_halqa_count_8
+		remove_variable = aqd_halqa_count_9
+	}
+}

@@ -8,9 +8,21 @@
 # drops.
 # Between base's commented mild (-25) and severe (-50) penalties;
 # decays over roughly fifteen years.
+#
+# z_aqd_endowed_our_school: the mirror image - applied by
+# aqd_jurists_finish_yes (the "endow a college as well" option on
+# "Foreign Jurists at the Gate") to every Muslim country within
+# diplomatic range whose sharia_law policy IS the endowed madhhab. A
+# smaller magnitude than the crackdown penalty (goodwill is cheaper to
+# earn than hostility is to undo); decays over roughly ten years.
 # =====================================================================
 
 z_aqd_crackdown_on_our_school = {
 	value = -30
+	yearly_decay = 2
+}
+
+z_aqd_endowed_our_school = {
+	value = 20
 	yearly_decay = 2
 }

@@ -1,0 +1,76 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - TEMPORARY debug helpers. DELETE before release.
+# Paired with in_game/events/religion/zz_aqd_debug_events.txt.
+# =====================================================================
+
+# Seed a seat of $MADHHAB$ in the capital + up to 5 madrasas of it
+# across the capital's province, then refresh the tier denominator.
+# change_building_level_in_location is the same raw placement the mod
+# uses everywhere (bypasses allow / location_potential / country_potential).
+aqd_debug_seed_halqa = {
+	capital = {
+		change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
+		province_definition = {
+			random_location_in_province_definition = {
+				limit = { owner = root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } # TESTING: rural_settlement allowed
+				change_building_level_in_location = { building = building_type:madrasa_of_$MADHHAB$_fiqh  value = 1 }
+			}
+			random_location_in_province_definition = {
+				limit = { owner = root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } # TESTING: rural_settlement allowed
+				change_building_level_in_location = { building = building_type:madrasa_of_$MADHHAB$_fiqh  value = 1 }
+			}
+			random_location_in_province_definition = {
+				limit = { owner = root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } # TESTING: rural_settlement allowed
+				change_building_level_in_location = { building = building_type:madrasa_of_$MADHHAB$_fiqh  value = 1 }
+			}
+			random_location_in_province_definition = {
+				limit = { owner = root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } # TESTING: rural_settlement allowed
+				change_building_level_in_location = { building = building_type:madrasa_of_$MADHHAB$_fiqh  value = 1 }
+			}
+			random_location_in_province_definition = {
+				limit = { owner = root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } # TESTING: rural_settlement allowed
+				change_building_level_in_location = { building = building_type:madrasa_of_$MADHHAB$_fiqh  value = 1 }
+			}
+		}
+	}
+	root = { aqd_recount_jurist_total = yes }
+}
+
+# Strip any active ḥalqa modifier from the capital's province so the
+# event can be re-tested there.
+aqd_debug_clear_halqa = {
+	capital = {
+		province_definition = {
+			every_location_in_province_definition = {
+				remove_location_modifier = z_aqd_halqa_state_hanafi
+				remove_location_modifier = z_aqd_halqa_state_hanbali
+				remove_location_modifier = z_aqd_halqa_state_maliki
+				remove_location_modifier = z_aqd_halqa_state_shafii
+				remove_location_modifier = z_aqd_halqa_state_zahiri
+				remove_location_modifier = z_aqd_halqa_state_ismaili
+				remove_location_modifier = z_aqd_halqa_state_jafari
+				remove_location_modifier = z_aqd_halqa_state_zaidi
+				remove_location_modifier = z_aqd_halqa_state_ibadi
+				remove_location_modifier = z_aqd_halqa_orthodox_hanafi
+				remove_location_modifier = z_aqd_halqa_orthodox_hanbali
+				remove_location_modifier = z_aqd_halqa_orthodox_maliki
+				remove_location_modifier = z_aqd_halqa_orthodox_shafii
+				remove_location_modifier = z_aqd_halqa_orthodox_zahiri
+				remove_location_modifier = z_aqd_halqa_orthodox_ismaili
+				remove_location_modifier = z_aqd_halqa_orthodox_jafari
+				remove_location_modifier = z_aqd_halqa_orthodox_zaidi
+				remove_location_modifier = z_aqd_halqa_orthodox_ibadi
+				remove_location_modifier = z_aqd_halqa_heterodox_hanafi
+				remove_location_modifier = z_aqd_halqa_heterodox_hanbali
+				remove_location_modifier = z_aqd_halqa_heterodox_maliki
+				remove_location_modifier = z_aqd_halqa_heterodox_shafii
+				remove_location_modifier = z_aqd_halqa_heterodox_zahiri
+				remove_location_modifier = z_aqd_halqa_heterodox_ismaili
+				remove_location_modifier = z_aqd_halqa_heterodox_jafari
+				remove_location_modifier = z_aqd_halqa_heterodox_zaidi
+				remove_location_modifier = z_aqd_halqa_heterodox_ibadi
+				remove_location_modifier = z_aqd_halqa_tolerated
+			}
+		}
+	}
+}

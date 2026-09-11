@@ -112,19 +112,25 @@
  # any custom_tooltip/prose reference.
  z_aqd_jurist_evicted: "Legal School Persecuted"
  STATIC_MODIFIER_NAME_z_aqd_jurist_evicted: "Legal School Persecuted"
- z_aqd_jurist_evicted_desc: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
  # Moving against a fellow school of law now grants the base-game
  # modifier ulema_displeased ("'Ulamā' Privileges Infringed").
  z_aqd_heretics_suppressed: "Heretical School Suppressed"
  STATIC_MODIFIER_NAME_z_aqd_heretics_suppressed: "Heretical School Suppressed"
- z_aqd_heretics_suppressed_desc: "The state has broken up the colleges of a heretical school of law. The ulema applaud the piety of it, and the realm's heretics are watched more closely."
+ STATIC_MODIFIER_DESC_z_aqd_heretics_suppressed: "The state has broken up the colleges of a heretical school of law. The ulema applaud the piety of it, and the realm's heretics are watched more closely."
  z_aqd_crackdown_on_our_school: "Persecuted our school of law"
+ z_aqd_endowed_our_school: "Endowed our school of law"
 
  # ---- Ulema Institutions: foreign jurists event ----
  z_aqd_jurists.1.title: "Foreign Jurists at the Gate"
- z_aqd_jurists.1.desc: "A party of jurists from a neighboring land has arrived, asking leave to open their school's teaching in your realm. Your own ulema watch closely to see what you will do."
- z_aqd_jurists.1.accept: "Give them leave to teach"
+ # [scope:aqd_jurists_seat_loc.GetName] does NOT resolve (see the Halqa
+ # section below for the confirmed debug.log evidence) - reverted to the
+ # single generic desc rather than a dead "named" variant.
+ z_aqd_jurists.1.desc: "A party of jurists from a neighboring land has arrived, asking leave to establish their school of law in your realm - to raise a Seat in one of your cities, a standing authority to train and appoint the qadis of their method. Your own ulema watch closely to see what you will do."
+ z_aqd_jurists.1.grant_seat: "Let them raise a Seat"
+ z_aqd_jurists.1.endow: "Raise their Seat, and endow a college beside it"
  z_aqd_jurists.1.refuse: "Turn them away"
+ aqd_endow_gold_tt: "Spend #Y[ROOT.GetVariable('aqd_endow_gold_est').GetValue|V0]@gold!#! to endow their college"
 
  # ---- Ulema Institutions: seat establishment ----
  z_aqd_establishment.1.title: "A School Puts Down Roots"
@@ -134,13 +140,107 @@
  aqd_crackdown_gold_result_tt: "Seize up to #Y [ROOT.GetVariable('aqd_crackdown_gold_est').GetValue|V0]@gold!#! in confiscated endowments"
  z_aqd_establishment_pending: "Jurists Petitioning"
  STATIC_MODIFIER_NAME_z_aqd_establishment_pending: "Jurists Petitioning"
- z_aqd_establishment_pending_desc: "The question of a jurists' Seat here has recently been settled. It will not be raised again for some years."
+ STATIC_MODIFIER_DESC_z_aqd_establishment_pending: "The question of a jurists' Seat here has recently been settled. It will not be raised again for some years."
 
  # ---- Ulema Institutions: exiled jurists find refuge ----
  z_aqd_exile.1.title: "Jurists in Exile"
  z_aqd_exile.1.desc: "Jurists of a school of law driven out of a neighboring realm have crossed into our lands, asking leave to raise a permanent Seat of their school in one of our cities - a standing authority to train and appoint the qadis of their method. Our own ulema are watching to see whether we will shelter them."
  z_aqd_exile.1.accept: "Shelter them - let them raise a Seat"
  z_aqd_exile.1.refuse: "Send them on their way"
+
+ # ---- Ulema Institutions: the Halqa (jurist-seat activity) ----
+ # Dynamic province/city naming via [scope:X.GetName] does NOT work for a
+ # custom save_scope_as name - confirmed in debug.log: "Failed to find
+ # type 'scope:halqa_loc' in 'scope:halqa_loc.GetName'" /
+ # "Data error in loc string 'z_aqd_halqa.1.desc...'". No base-game event
+ # anywhere names a random_owned_location-derived scope this way either
+ # (only the reserved/engine-known scope:actor / scope:winner resolve).
+ # Matches z_aqd_establishment.1.desc's existing "a province of the
+ # realm" phrasing below - not a location-naming bug specific to this
+ # event, apparently an engine-wide limit on custom scope names in loc.
+ z_aqd_halqa.1.title: "A Circle Convenes"
+ z_aqd_halqa.1.ok: "The circle continues"
+ z_aqd_halqa.1.desc.state: "In a province of the realm, the qadis and students of the realm's own school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.orthodox: "The scholars of a school our own creed holds sound keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.heterodox: "In a province of the realm, the circle of a school our creed cannot abide meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.tolerated: "The teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ # Static-modifier descriptions: the engine resolves these ONLY via
+ # STATIC_MODIFIER_DESC_<key> (mirroring STATIC_MODIFIER_NAME_<key> for
+ # the name) - confirmed against base game's own static_modifiers_l_english.yml
+ # (e.g. STATIC_MODIFIER_DESC_encomienda_system). A bare <key>_desc is
+ # never read for a static modifier; fixed here AND on the three
+ # pre-existing modifiers below that had the same mistake.
+ # 27 concrete objects (nine madhhabs x state/orthodox/heterodox,
+ # static_modifiers/z_aqd_halqa.txt) so the NAME always reads "<Madhhab>
+ # Madhhab Ḥalqa" regardless of class - the class distinction lives only
+ # in the DESC text below (three strings, reused nine times each).
+ # Diacritics copied verbatim from base game's own
+ # main_menu/localization/english/religion_l_english.yml (hanafi_school
+ # etc.) for consistency with how this mod's own hanafi_policy etc.
+ # already display.
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_hanafi: "Ḥanafī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_hanbali: "Ḥanbalī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_maliki: "Mālikī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_shafii: "Shāfi'ī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_zahiri: "Ẓāhirī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_ismaili: "Ismā'īlī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_jafari: "Ja'farī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_zaidi: "Zaydī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_state_ibadi: "Ibāḍī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_hanafi: "Ḥanafī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_hanbali: "Ḥanbalī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_maliki: "Mālikī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_shafii: "Shāfi'ī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_zahiri: "Ẓāhirī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_ismaili: "Ismā'īlī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_jafari: "Ja'farī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_zaidi: "Zaydī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_orthodox_ibadi: "Ibāḍī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_hanafi: "Ḥanafī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_hanbali: "Ḥanbalī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_maliki: "Mālikī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_shafii: "Shāfi'ī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_zahiri: "Ẓāhirī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_ismaili: "Ismā'īlī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_jafari: "Ja'farī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_zaidi: "Zaydī Madhhab Ḥalqa"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_heterodox_ibadi: "Ibāḍī Madhhab Ḥalqa"
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_hanafi: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_hanbali: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_maliki: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_shafii: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_zahiri: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_ismaili: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_jafari: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_zaidi: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_state_ibadi: "The teaching circle of the realm's own school of law is in session here: control is rising, unrest is easing, the clergy's learning is lent some polish, and cross-sect Muslims here are converting to the realm's state religion faster than usual."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_hanafi: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_hanbali: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_maliki: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_shafii: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_zahiri: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_ismaili: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_jafari: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_zaidi: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_orthodox_ibadi: "The teaching circle of a school our creed holds sound is in session here: unrest is easing, learning and tradition are lent some polish, and a few of the province's cross-sect Muslims are gradually converting to the realm's state religion."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_hanafi: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_hanbali: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_maliki: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_shafii: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_zahiri: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_ismaili: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_jafari: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_zaidi: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ STATIC_MODIFIER_DESC_z_aqd_halqa_heterodox_ibadi: "The teaching circle of a school our creed opposes is in session here: its presence stirs unrest rather than easing it. Our clergy will not be converted at all, and other Muslims only slowly - heathens are untouched by any of this - though the circle still lends a little polish to learning and tradition here."
+ # "Ṣulḥ-i Kul" ("peace/reconciliation with all") is Akbar's own term for
+ # the state doctrine din_i_ilahi_school represents in this mod - not a
+ # generic "tolerance" but a named Mughal court policy, the actual
+ # principle Din-i Ilahi itself grew out of. Replaces the placeholder
+ # "Tolerated" - mechanically unchanged (still the single madhhab-
+ # agnostic z_aqd_halqa_tolerated object), display name only.
+ z_aqd_halqa_tolerated: "Ṣulḥ-i Kul"
+ STATIC_MODIFIER_NAME_z_aqd_halqa_tolerated: "Ṣulḥ-i Kul"
+ STATIC_MODIFIER_DESC_z_aqd_halqa_tolerated: "A teaching circle is in session here under the ruler's doctrine of ṣulḥ-i kul, peace with all: unrest is easing and learning lent some polish, but conversion is closed off in every direction - no one here is pressed to change their rite."
 
  # ===================================================================
  # BASE-GAME "madrasa" -> "Maktab" (elementary Qur'an school / kuttab)

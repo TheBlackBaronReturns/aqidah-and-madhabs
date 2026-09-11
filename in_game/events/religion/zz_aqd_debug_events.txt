@@ -1,0 +1,135 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - TEMPORARY debug events. DELETE before release.
+#
+#   event z_aqd_debug.1   - seed a seat + madrasas in your capital province
+#   event z_aqd_debug.2   - set your realm's aqidah (for orthodox / heterodox / tolerated)
+#   event z_aqd_debug.3   - clear any active ḥalqa from your capital province
+#   event z_aqd_debug.4   - diagnose WHY AHI is (not) an eligible foreign-jurist
+#                           source for you - the event text itself names the
+#                           first failing condition, no log-reading needed.
+#
+# Then:  event z_aqd_halqa.1  /  event z_aqd_jurists.1
+# =====================================================================
+
+namespace = z_aqd_debug
+
+z_aqd_debug.1 = {
+	type = country_event
+	title = z_aqd_debug.1.t
+	desc = z_aqd_debug.1.d
+	outcome = neutral
+
+	option = {
+		name = z_aqd_debug.1.hanafi
+		aqd_debug_seed_halqa = { MADHHAB = hanafi }
+	}
+	option = {
+		name = z_aqd_debug.1.hanbali
+		aqd_debug_seed_halqa = { MADHHAB = hanbali }
+	}
+	option = {
+		name = z_aqd_debug.1.maliki
+		aqd_debug_seed_halqa = { MADHHAB = maliki }
+	}
+	option = {
+		name = z_aqd_debug.1.jafari
+		aqd_debug_seed_halqa = { MADHHAB = jafari }
+	}
+	option = {
+		name = z_aqd_debug.1.ibadi
+		aqd_debug_seed_halqa = { MADHHAB = ibadi }
+	}
+	option = {
+		name = z_aqd_debug.1.cancel
+	}
+}
+
+z_aqd_debug.2 = {
+	type = country_event
+	title = z_aqd_debug.2.t
+	desc = z_aqd_debug.2.d
+	outcome = neutral
+
+	option = {
+		name = z_aqd_debug.2.ashari
+		set_religious_school = religious_school:ashari_school
+	}
+	option = {
+		name = z_aqd_debug.2.athari
+		set_religious_school = religious_school:athari_school
+	}
+	option = {
+		name = z_aqd_debug.2.imamiya
+		set_religious_school = religious_school:imamiya_school
+	}
+	option = {
+		name = z_aqd_debug.2.dinilahi
+		set_religious_school = religious_school:din_i_ilahi_school
+	}
+	option = {
+		name = z_aqd_debug.2.cancel
+	}
+}
+
+z_aqd_debug.3 = {
+	type = country_event
+	title = z_aqd_debug.3.t
+	desc = z_aqd_debug.3.d
+	outcome = neutral
+
+	option = {
+		name = z_aqd_debug.3.clear
+		aqd_debug_clear_halqa = yes
+	}
+	option = {
+		name = z_aqd_debug.3.cancel
+	}
+}
+
+# Walks aqd_is_eligible_jurist_source's jafari branch condition-by-condition
+# against c:AHI and reports, IN THE EVENT TEXT, the first one that fails -
+# settles "is Ahi even eligible, and if not, why" without touching a log.
+z_aqd_debug.4 = {
+	type = country_event
+	title = z_aqd_debug.4.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { NOT = { exists = c:AHI } }
+				desc = z_aqd_debug.4.desc.no_ahi
+			}
+			triggered_desc = {
+				trigger = { c:AHI = { aqd_is_eligible_jurist_source = yes } }
+				desc = z_aqd_debug.4.desc.eligible
+			}
+			triggered_desc = {
+				trigger = { NOT = { any_neighbor_country = { this = c:AHI } } }
+				desc = z_aqd_debug.4.desc.not_neighbor
+			}
+			triggered_desc = {
+				trigger = { NOT = { c:AHI = { religion.group = religion_group:muslim } } }
+				desc = z_aqd_debug.4.desc.not_muslim
+			}
+			triggered_desc = {
+				trigger = { NOT = { c:AHI = { has_policy = jafari_policy } } }
+				desc = z_aqd_debug.4.desc.no_jafari
+			}
+			triggered_desc = {
+				trigger = { has_policy = jafari_policy }
+				desc = z_aqd_debug.4.desc.we_have_jafari
+			}
+			triggered_desc = {
+				trigger = { jafari_institution_tier >= 3 }
+				desc = z_aqd_debug.4.desc.tier_high
+			}
+			triggered_desc = {
+				desc = z_aqd_debug.4.desc.unknown
+			}
+		}
+	}
+	outcome = neutral
+
+	option = {
+		name = z_aqd_debug.4.ok
+	}
+}

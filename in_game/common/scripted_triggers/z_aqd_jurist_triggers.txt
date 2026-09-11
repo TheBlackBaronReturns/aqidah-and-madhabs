@@ -1,6 +1,52 @@
 # =====================================================================
 # AQIDAH SCHOOLS OF CREED - Ulema Institutions: shared triggers.
 #
+# *** GOTCHA (cost real hours to find - read this before touching any
+# $PARAM$ near a population-percentage check) ***
+# "religion_percentage(religion:$SECT$)" - the QUOTED-STRING function-
+# call form of this trigger - never substitutes a $PARAM$ placed inside
+# the quotes. It parses the string with its own mini-parser, which does
+# not go through the normal script-wide text substitution pass, so
+# "religion_percentage(religion:$SECT$)" is evaluated literally with an
+# EMPTY religion ("Type: none" / "field not set" in error.log) no matter
+# what $SECT$ is bound to - in a trigger, an effect, ANY calling context.
+# It fails perfectly silently as far as gameplay is concerned: the
+# surrounding limit/trigger just reads false, so every check built on it
+# (seat/madrasa placement, establishment, exile, foreign-jurist
+# eligibility) looked like it was "doing nothing" with no error a casual
+# read of the log would associate with the actual line.
+# FIX: use the STRUCTURED block form instead when the religion must be
+# parameterised - `religion = religion:$SECT$` there is a normal token,
+# not inside a string, so ordinary text substitution applies and it
+# works fine:
+#     religion_percentage = { religion = religion:$SECT$  value >= 0.25 }
+# A LITERAL religion inside the quoted form (e.g. "religion:sunni") is
+# fine and unaffected - only a $PARAM$ inside the quotes is broken.
+#
+# *** SECOND GOTCHA, same family, also cost real hours: an UNREFERENCED
+# $PARAM$ is a hard compile error, not a silent false ***
+# When the "sect population gate disabled" TESTING edits above replaced
+# the religion_percentage(...$SECT$...) line with two bare `always = yes`
+# lines, that deleted the ONLY textual occurrence of $SECT$ in several
+# scripted_trigger/scripted_effect bodies (aqd_province_has_madhhab_density,
+# aqd_establish_save_target, aqd_exile_save_target,
+# aqd_jurists_find_seat_loc). EU5's argument compiler scans a definition's
+# body for every $PARAM$ token to learn its accepted parameters; a call
+# site that then passes SECT = ... to a definition with no $SECT$ left in
+# its body fails with "Compiling source for <name> failed for unknown
+# arguments: SECT" in debug.log - and the WHOLE invocation silently
+# no-ops (any random_owned_location/random_country inside it never runs,
+# so any scope it would have saved is simply never set). This is exactly
+# what broke establishment/exile/foreign-jurist seat placement for a
+# whole session: the events still fired and applied their non-placement
+# effects (opinion/legitimacy reactions), but placed no building, because
+# the save_target/find_seat_loc effect that was supposed to do so never
+# ran. FIX: never fully delete a parameter's last usage while disabling a
+# gate under TESTING - replace it with a trivially-true check that still
+# references the token, e.g. `religion_percentage = { religion =
+# religion:$SECT$  value >= 0 }` instead of `always = yes`. That is also
+# a one-line revert (0 -> 0.25) instead of restoring two deleted lines.
+#
 # aqd_is_eligible_jurist_source: is 'this' (a candidate neighbor
 # country) a valid source of "foreign jurists" for 'root' (the
 # receiving country)? A candidate qualifies for a given madhhab if it
@@ -8,15 +54,15 @@
 # hold that same madhhab as its own current law (never offer your own
 # madhhab as "foreign"), that madhhab's tier in root has not already
 # reached Plurality (root.<X>_institution_tier < 3 - see
-# script_values/z_aqd_madhhab_counts.txt; tier 3 = Plurality), AND
-# root actually has a location whose population meets the population
-# threshold for the CANDIDATE's own religion (sunni/shia/ibadi per
-# madhhab) - so the event is never offered when accepting it could
-# never actually place a seat anywhere (e.g. a wholly-Sunni root has
-# no province any Shia jurists could realistically settle in). The
-# 0.25 threshold here must match building_types/z_aqd_madrasas.txt and
-# scripted_effects/z_aqd_jurist_effects.txt's
-# aqd_build_madrasas_of_madhhab_from exactly.
+# script_values/z_aqd_madhhab_counts.txt; tier 3 = Plurality), AND root
+# owns a town+ location with >= 25% of the CANDIDATE's own religion, no
+# seat of that madhhab there yet, no z_aqd_establishment_pending marker
+# (inlined per branch below, not delegated to a shared sub-trigger -
+# see the note further down on trigger-calling-trigger param binding).
+# "Foreign Jurists at the Gate" grants a Seat directly, so if no city
+# can host one the event must not fire at all - the whole point of
+# folding that check in here. The 0.25 threshold must match
+# building_types/z_aqd_madrasas.txt and aqd_province_has_madhhab_density.
 #
 # aqd_province_has_madhhab_density = { MADHHAB SECT }: does 'this' (a
 # country, = root here) own a province_definition holding >= 3 of its
@@ -48,61 +94,115 @@ aqd_location_has_fiqh_madrasa = {
 	}
 }
 
+# NOTE: the "root can host a seat of this madhhab" check is INLINED per
+# branch below (there is no separate aqd_can_host_jurist_seat any more -
+# aqd_jurists_accept in scripted_effects/z_aqd_jurist_effects.txt inlines
+# its own per-location version the same way, see that file). The actual
+# bug that made an earlier parameterised version of this fail every pulse
+# was the religion_percentage quoted-string gotcha documented at the top
+# of this file, not trigger-calling-trigger per se - but keeping this
+# inlined (rather than reintroducing a shared sub-trigger) avoids the
+# question entirely for this hot, per-pulse path.
 aqd_is_eligible_jurist_source = {
 	OR = {
 		AND = {
 			this = { has_policy = hanafi_policy }
 			NOT = { root = { has_policy = hanafi_policy } }
 			root.hanafi_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_hanafi_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 		AND = {
 			this = { has_policy = hanbali_policy }
 			NOT = { root = { has_policy = hanbali_policy } }
 			root.hanbali_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_hanbali_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 		AND = {
 			this = { has_policy = maliki_policy }
 			NOT = { root = { has_policy = maliki_policy } }
 			root.maliki_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_maliki_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 		AND = {
 			this = { has_policy = shafii_policy }
 			NOT = { root = { has_policy = shafii_policy } }
 			root.shafii_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_shafii_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 		AND = {
 			this = { has_policy = zahiri_policy }
 			NOT = { root = { has_policy = zahiri_policy } }
 			root.zahiri_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:sunni)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_zahiri_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 		AND = {
 			this = { has_policy = ismaili_policy }
 			NOT = { root = { has_policy = ismaili_policy } }
 			root.ismaili_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:shia)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_ismaili_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 		AND = {
 			this = { has_policy = jafari_policy }
 			NOT = { root = { has_policy = jafari_policy } }
 			root.jafari_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:shia)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_jafari_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 		AND = {
 			this = { has_policy = zaidi_policy }
 			NOT = { root = { has_policy = zaidi_policy } }
 			root.zaidi_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:shia)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_zaidi_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 		AND = {
 			this = { has_policy = ibadi_policy }
 			NOT = { root = { has_policy = ibadi_policy } }
 			root.ibadi_institution_tier < 3
-			root = { any_owned_location = { NOT = { location_rank ?= location_rank:rural_settlement }  "religion_percentage(religion:ibadi)" >= 0.25 } }
+			root = { any_owned_location = {
+				always = yes # TESTING: sect population gate disabled
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { has_building = building_type:seat_of_ibadi_jurists }
+				NOT = { has_location_modifier = z_aqd_establishment_pending }
+			} }
 		}
 	}
 }
@@ -110,31 +210,37 @@ aqd_is_eligible_jurist_source = {
 aqd_province_has_madhhab_density = {
 	any_owned_location = {
 		province_definition = {
-			# 3+ of our own madrasas of the madhhab
+			# 3+ of our own madrasas of the madhhab. owner ?= root, not
+			# owner = root: a province_definition can include lake / sea
+			# locations with no owner, and owner = root errors on those.
 			any_location_in_province_definition = {
 				count >= 3
-				owner = root
+				owner ?= root
 				has_building = building_type:madrasa_of_$MADHHAB$_fiqh
 			}
 			# a mosque
 			any_location_in_province_definition = {
 				count >= 1
-				owner = root
+				owner ?= root
 				has_building = building_type:temple
 			}
 			# no seat of the madhhab yet
 			NOT = { any_location_in_province_definition = { has_building = building_type:seat_of_$MADHHAB$_jurists } }
 			# not recently settled here
 			NOT = { any_location_in_province_definition = { has_location_modifier = z_aqd_establishment_pending } }
-			# a valid seat target we own: a city (or larger) with the sect present
+			# a valid seat target we own: a town (or larger) with the sect present
 			any_location_in_province_definition = {
 				count >= 1
-				owner = root
-				"religion_percentage(religion:$SECT$)" >= 0.25
-				OR = {
-					location_rank ?= location_rank:city
-					location_rank ?= location_rank:megalopolis
-				}
+				owner ?= root
+				# TESTING: sect population gate disabled (was >= 0.25) - kept
+				# as a >= 0 check, not `always = yes`, so $SECT$ stays a
+				# referenced parameter. Dropping the only $SECT$ reference
+				# from this body makes every call site that passes SECT
+				# fail to compile ("unknown arguments: SECT"), which
+				# silently no-ops the whole trigger - this is exactly what
+				# broke establishment/exile/foreign-jurist seat placement.
+				religion_percentage = { religion = religion:$SECT$  value >= 0 }
+				always = yes # TESTING: rural_settlement allowed
 			}
 		}
 	}
@@ -165,12 +271,248 @@ aqd_can_host_exile_seat = {
 	religion = religion:$SECT$
 	has_policy = sharia_law_policy
 	any_owned_location = {
-		"religion_percentage(religion:$SECT$)" >= 0.25
-		OR = {
-			location_rank ?= location_rank:city
-			location_rank ?= location_rank:megalopolis
-		}
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
 		NOT = { has_building = building_type:seat_of_$MADHHAB$_jurists }
 		NOT = { has_location_modifier = z_aqd_establishment_pending }
+	}
+}
+
+# aqd_can_host_jurist_seat (the parameterised per-madhhab "could this
+# country raise a Seat of MADHHAB" check) has been removed: it is
+# inlined directly, per-location, in scripted_effects/
+# z_aqd_jurist_effects.txt's aqd_jurists_accept, which is the only place
+# that needs a per-LOCATION answer - calling this country-scope
+# any_owned_location trigger as a random_owned_location `limit` was a
+# scope mismatch (the limit runs at location scope) and silently found
+# nothing. See that file's comment for the inlined version.
+
+# aqd_can_host_seat_madrasa_<x>: as aqd_can_host_jurist_seat, but the
+# qualifying seat city's province must ALSO hold a free madrasa slot (an
+# owned, non-rural location with no fiqh madrasa of any madhhab). NINE
+# concrete triggers, NOT one parameterised one - see the note on
+# aqd_is_eligible_jurist_source. Gates the event's "endow a college"
+# option so the player is never charged for a madrasa that could not be
+# placed. owner ?= root, not owner = root (skip unowned/sea locations).
+aqd_can_host_seat_madrasa_hanafi = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_hanafi_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+aqd_can_host_seat_madrasa_hanbali = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_hanbali_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+aqd_can_host_seat_madrasa_maliki = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_maliki_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+aqd_can_host_seat_madrasa_shafii = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_shafii_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+aqd_can_host_seat_madrasa_zahiri = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_zahiri_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+aqd_can_host_seat_madrasa_ismaili = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_ismaili_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+aqd_can_host_seat_madrasa_jafari = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_jafari_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+aqd_can_host_seat_madrasa_zaidi = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_zaidi_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+aqd_can_host_seat_madrasa_ibadi = {
+	any_owned_location = {
+		always = yes # TESTING: sect population gate disabled
+		always = yes # TESTING: rural_settlement allowed
+		NOT = { has_building = building_type:seat_of_ibadi_jurists }
+		NOT = { has_location_modifier = z_aqd_establishment_pending }
+		province_definition = { any_location_in_province_definition = { owner ?= root  always = yes  NOT = { aqd_location_has_fiqh_madrasa = yes } } } # TESTING: rural_settlement allowed
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_source_madhhab_endow_hostable: gates z_aqd_jurists.1's "endow a
+# college as well" option - true when a Seat host for the offered madhhab
+# (var:aqd_compat_madhhab, canonical 1-9, set on root in the event's
+# immediate) ALSO has a free madrasa slot in its province. Branches on
+# the numeric index; the per-branch check is a concrete no-param trigger
+# (trigger->trigger param substitution does not work in EU5).
+# ---------------------------------------------------------------------
+aqd_source_madhhab_endow_hostable = {
+	OR = {
+		AND = { var:aqd_compat_madhhab = 1  aqd_can_host_seat_madrasa_hanafi = yes }
+		AND = { var:aqd_compat_madhhab = 2  aqd_can_host_seat_madrasa_hanbali = yes }
+		AND = { var:aqd_compat_madhhab = 3  aqd_can_host_seat_madrasa_maliki = yes }
+		AND = { var:aqd_compat_madhhab = 4  aqd_can_host_seat_madrasa_shafii = yes }
+		AND = { var:aqd_compat_madhhab = 5  aqd_can_host_seat_madrasa_zahiri = yes }
+		AND = { var:aqd_compat_madhhab = 6  aqd_can_host_seat_madrasa_ismaili = yes }
+		AND = { var:aqd_compat_madhhab = 7  aqd_can_host_seat_madrasa_jafari = yes }
+		AND = { var:aqd_compat_madhhab = 8  aqd_can_host_seat_madrasa_zaidi = yes }
+		AND = { var:aqd_compat_madhhab = 9  aqd_can_host_seat_madrasa_ibadi = yes }
+	}
+}
+
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: Ḥalqa gating.
+#
+# A ḥalqa (events/religion/z_aqd_halqa_events.txt, static_modifiers/
+# z_aqd_halqa.txt) fires from a jurist seat whose province holds >= 3 of
+# the realm's own madrasas of that same madhhab, and only where no ḥalqa
+# is already running (one per province, first-come-first-serve).
+# =====================================================================
+
+# Location-scoped. Does this location carry any of the four ḥalqa
+# modifiers? Used to keep one ḥalqa per province.
+# 28-way: 9 madhhabs x (state/orthodox/heterodox) + the single
+# madhhab-agnostic tolerated key (static_modifiers/z_aqd_halqa.txt).
+# Still the one-ḥalqa-per-province occupancy marker; no separate marker
+# object was added (see that file's header note on why: a fields-less
+# modifier would still render its own row in the province panel's
+# active-modifiers list, ADDING a stray visible entry rather than
+# avoiding one, and the 28-way OR itself is negligible - only reached
+# for the already-narrow set of owned locations holding a seat at all,
+# behind two cheaper prefilters in aqd_country_has_any_halqa_ready).
+aqd_location_has_active_halqa = {
+	OR = {
+		has_location_modifier = z_aqd_halqa_state_hanafi
+		has_location_modifier = z_aqd_halqa_state_hanbali
+		has_location_modifier = z_aqd_halqa_state_maliki
+		has_location_modifier = z_aqd_halqa_state_shafii
+		has_location_modifier = z_aqd_halqa_state_zahiri
+		has_location_modifier = z_aqd_halqa_state_ismaili
+		has_location_modifier = z_aqd_halqa_state_jafari
+		has_location_modifier = z_aqd_halqa_state_zaidi
+		has_location_modifier = z_aqd_halqa_state_ibadi
+		has_location_modifier = z_aqd_halqa_orthodox_hanafi
+		has_location_modifier = z_aqd_halqa_orthodox_hanbali
+		has_location_modifier = z_aqd_halqa_orthodox_maliki
+		has_location_modifier = z_aqd_halqa_orthodox_shafii
+		has_location_modifier = z_aqd_halqa_orthodox_zahiri
+		has_location_modifier = z_aqd_halqa_orthodox_ismaili
+		has_location_modifier = z_aqd_halqa_orthodox_jafari
+		has_location_modifier = z_aqd_halqa_orthodox_zaidi
+		has_location_modifier = z_aqd_halqa_orthodox_ibadi
+		has_location_modifier = z_aqd_halqa_heterodox_hanafi
+		has_location_modifier = z_aqd_halqa_heterodox_hanbali
+		has_location_modifier = z_aqd_halqa_heterodox_maliki
+		has_location_modifier = z_aqd_halqa_heterodox_shafii
+		has_location_modifier = z_aqd_halqa_heterodox_zahiri
+		has_location_modifier = z_aqd_halqa_heterodox_ismaili
+		has_location_modifier = z_aqd_halqa_heterodox_jafari
+		has_location_modifier = z_aqd_halqa_heterodox_zaidi
+		has_location_modifier = z_aqd_halqa_heterodox_ibadi
+		has_location_modifier = z_aqd_halqa_tolerated
+	}
+}
+
+# Country-scoped. Cheap short-circuiting prefilter for the halqa pulse
+# (on_action/00_aqd_game_start.txt): does this realm hold ANY jurist
+# seat at all? Most Muslim realms hold none, so this keeps the province
+# scan below off all but ~15-20 realms.
+aqd_country_owns_any_jurist_seat = {
+	any_owned_location = {
+		OR = {
+			has_building = building_type:seat_of_hanafi_jurists
+			has_building = building_type:seat_of_hanbali_jurists
+			has_building = building_type:seat_of_maliki_jurists
+			has_building = building_type:seat_of_shafii_jurists
+			has_building = building_type:seat_of_zahiri_jurists
+			has_building = building_type:seat_of_ismaili_jurists
+			has_building = building_type:seat_of_jafari_jurists
+			has_building = building_type:seat_of_zaidi_jurists
+			has_building = building_type:seat_of_ibadi_jurists
+		}
+	}
+}
+
+# province_definition-scoped. Does this province hold an owned seat of
+# <X>? Previously also required >= 3 of the realm's own madrasas of <X>
+# in the same province (the same clause as aqd_province_has_madhhab_density
+# above) - removed by design: a ḥalqa is now initiated off a bare seat, no
+# madrasa density needed. NINE concrete triggers, NOT one parameterised one: EU5 does not
+# substitute $PARAM$ when a scripted_trigger is invoked from inside
+# another scripted_trigger (it only works from an effect / an effect's
+# limit). Used by aqd_country_has_any_halqa_ready below and by
+# events/religion/z_aqd_halqa_events.txt (the picker limit and each
+# random_list weight entry).
+aqd_halqa_prov_ready_hanafi  = { any_location_in_province_definition = { has_building = building_type:seat_of_hanafi_jurists } }
+aqd_halqa_prov_ready_hanbali = { any_location_in_province_definition = { has_building = building_type:seat_of_hanbali_jurists } }
+aqd_halqa_prov_ready_maliki  = { any_location_in_province_definition = { has_building = building_type:seat_of_maliki_jurists } }
+aqd_halqa_prov_ready_shafii  = { any_location_in_province_definition = { has_building = building_type:seat_of_shafii_jurists } }
+aqd_halqa_prov_ready_zahiri  = { any_location_in_province_definition = { has_building = building_type:seat_of_zahiri_jurists } }
+aqd_halqa_prov_ready_ismaili = { any_location_in_province_definition = { has_building = building_type:seat_of_ismaili_jurists } }
+aqd_halqa_prov_ready_jafari  = { any_location_in_province_definition = { has_building = building_type:seat_of_jafari_jurists } }
+aqd_halqa_prov_ready_zaidi   = { any_location_in_province_definition = { has_building = building_type:seat_of_zaidi_jurists } }
+aqd_halqa_prov_ready_ibadi   = { any_location_in_province_definition = { has_building = building_type:seat_of_ibadi_jurists } }
+
+# Country-scoped. Does the realm own at least one province that could
+# host a ḥalqa right now - a seat of some madhhab (no madrasa density
+# required), and no ḥalqa already running anywhere in that province?
+# ONE any_owned_location pass: the 9
+# madhhab branches live inside one OR, and has_building = seat_of_X is
+# first in each AND so the province sub-scan only runs for the handful
+# of locations that actually hold that seat.
+aqd_country_has_any_halqa_ready = {
+	any_owned_location = {
+		province_definition = {
+			NOT = { any_location_in_province_definition = { aqd_location_has_active_halqa = yes } }
+		}
+		OR = {
+			AND = { has_building = building_type:seat_of_hanafi_jurists   province_definition = { aqd_halqa_prov_ready_hanafi = yes } }
+			AND = { has_building = building_type:seat_of_hanbali_jurists  province_definition = { aqd_halqa_prov_ready_hanbali = yes } }
+			AND = { has_building = building_type:seat_of_maliki_jurists   province_definition = { aqd_halqa_prov_ready_maliki = yes } }
+			AND = { has_building = building_type:seat_of_shafii_jurists   province_definition = { aqd_halqa_prov_ready_shafii = yes } }
+			AND = { has_building = building_type:seat_of_zahiri_jurists   province_definition = { aqd_halqa_prov_ready_zahiri = yes } }
+			AND = { has_building = building_type:seat_of_ismaili_jurists  province_definition = { aqd_halqa_prov_ready_ismaili = yes } }
+			AND = { has_building = building_type:seat_of_jafari_jurists   province_definition = { aqd_halqa_prov_ready_jafari = yes } }
+			AND = { has_building = building_type:seat_of_zaidi_jurists    province_definition = { aqd_halqa_prov_ready_zaidi = yes } }
+			AND = { has_building = building_type:seat_of_ibadi_jurists    province_definition = { aqd_halqa_prov_ready_ibadi = yes } }
+		}
 	}
 }

@@ -19,7 +19,8 @@
 # auto_modifier block. Refreshed monthly + at game start (on_action/
 # 00_aqd_game_start.txt) and immediately after any jurist building is
 # placed or razed (crackdown, establishment grant, exile grant,
-# foreign-jurist madrasa seeding). Run at the country's own scope.
+# foreign-jurist seat/college grant, foreign-jurist madrasa seeding).
+# Run at the country's own scope.
 # ---------------------------------------------------------------------
 aqd_recount_jurist_total = {
 	set_variable = { name = aqd_realm_jurist_total  value = aqd_realm_jurist_total_recount }
@@ -35,13 +36,22 @@ aqd_recount_all_jurist_totals = {
 }
 
 # ---------------------------------------------------------------------
-# Foreign-jurist madrasa seeding. Called from events/religion/
-# z_aqd_jurist_events.txt's accept option with SOURCE = the chosen
-# neighbour country scope. Branches on the SOURCE's held madhhab
-# policy, picks one qualifying province of root, and plants 1-3
+# Foreign-jurist madrasa seeding. CURRENTLY UNREFERENCED - retained for
+# reuse. It was the accept branch of "Foreign Jurists at the Gate" back
+# when that event only seeded madrasas; the event now grants a Seat
+# directly (aqd_jurists_accept below) and does not fire at all unless a
+# city can host one (scripted_triggers/z_aqd_jurist_triggers.txt's
+# aqd_is_eligible_jurist_source folds in aqd_can_host_jurist_seat), so
+# there is no longer a "no host" path for this to serve. Kept because it
+# is a clean, self-contained "seed N madrasas of a foreign madhhab in
+# one province, bypassing location_potential" primitive that a future
+# event may want.
+#
+# SOURCE = a neighbour country scope. Branches on the SOURCE's held
+# madhhab policy, picks one qualifying province of root, and plants 1-3
 # madrasas of that madhhab INSIDE THAT ONE PROVINCE so the density can
-# accumulate toward the establishment threshold (3 madrasas + a
-# mosque) without conquest.
+# accumulate toward the establishment threshold (3 madrasas + a mosque)
+# without conquest.
 #
 # change_building_level_in_location (not construct_building): the
 # madrasa's location_potential OR-branch is false for a foreign
@@ -350,6 +360,166 @@ aqd_build_madrasas_of_madhhab_from = {
 	# New madrasas changed the realm's jurist footprint - refresh the
 	# cached tier denominator so tiers update at once, not next month.
 	aqd_recount_jurist_total = yes
+}
+
+# ---------------------------------------------------------------------
+# "Foreign Jurists at the Gate" (events/religion/z_aqd_jurist_events.txt).
+# The visitors' madhhab is given a standing Seat in one of the realm's
+# own cities immediately - the grassroots madrasas-then-establishment
+# chain is bypassed. The event never fires unless a city can host that
+# Seat (aqd_is_eligible_jurist_source), so there is no "no host" fallback
+# path.
+#
+# TARGET PICK (aqd_jurists_derive_seat_target, called ONCE from the
+# event's immediate): branches on var:aqd_compat_madhhab (canonical 1-9,
+# set on root in the immediate; 0 is the "no real source" sentinel and
+# matches no branch below, so this - and everything downstream - is a
+# clean no-op rather than an unset-variable error when the event is
+# console-forced with no eligible neighbour) into
+# aqd_jurists_find_seat_loc { MADHHAB SECT }, which picks the city once
+# and saves scope:aqd_jurists_seat_loc / _seat_prov - so the event desc
+# can name the city BEFORE the player chooses, and every option acts on
+# that same, already-resolved city (no per-option re-roll).
+#
+# ACCEPT (aqd_jurists_accept_dispatch / aqd_jurists_accept, called from
+# the option effects): re-derives nothing, just guards
+# scope:aqd_jurists_seat_loc still exists and hands off to a dynamic
+# effect NAME (aqd_jurists_finish_$ENDOW$) - ENDOW (yes/no) is never
+# compared in a trigger, per this file's header note on text
+# substitution. Both finish_ variants place the Seat (so $MADHHAB$ is a
+# real reference in each - no unused-parameter branch).
+#
+# aqd_jurists_finish_yes additionally: plants one madrasa of the madhhab
+# in the seat's province BEFORE the Seat (so raising the Seat cannot take
+# the province's last free slot); spends aqd_endow_gold_estimate
+# (script_values/z_aqd_madhhab_counts.txt) in gold; and grants
+# z_aqd_endowed_our_school (common/biases/z_aqd_opinion.txt) with every
+# Muslim realm of that madhhab in diplomatic range. The "endow" option's
+# own trigger (aqd_source_madhhab_endow_hostable) guarantees a free
+# madrasa slot exists, so no player is ever charged for a college that
+# cannot be built.
+# ---------------------------------------------------------------------
+aqd_jurists_derive_seat_target = {
+	if      = { limit = { var:aqd_compat_madhhab = 1 } aqd_jurists_find_seat_loc = { MADHHAB = hanafi   SECT = sunni } }
+	else_if = { limit = { var:aqd_compat_madhhab = 2 } aqd_jurists_find_seat_loc = { MADHHAB = hanbali  SECT = sunni } }
+	else_if = { limit = { var:aqd_compat_madhhab = 3 } aqd_jurists_find_seat_loc = { MADHHAB = maliki   SECT = sunni } }
+	else_if = { limit = { var:aqd_compat_madhhab = 4 } aqd_jurists_find_seat_loc = { MADHHAB = shafii   SECT = sunni } }
+	else_if = { limit = { var:aqd_compat_madhhab = 5 } aqd_jurists_find_seat_loc = { MADHHAB = zahiri   SECT = sunni } }
+	else_if = { limit = { var:aqd_compat_madhhab = 6 } aqd_jurists_find_seat_loc = { MADHHAB = ismaili  SECT = shia } }
+	else_if = { limit = { var:aqd_compat_madhhab = 7 } aqd_jurists_find_seat_loc = { MADHHAB = jafari   SECT = shia } }
+	else_if = { limit = { var:aqd_compat_madhhab = 8 } aqd_jurists_find_seat_loc = { MADHHAB = zaidi    SECT = shia } }
+	else_if = { limit = { var:aqd_compat_madhhab = 9 } aqd_jurists_find_seat_loc = { MADHHAB = ibadi    SECT = ibadi } }
+}
+
+# Per-LOCATION check, inlined - a country-scope any_owned_location
+# trigger used as a random_owned_location limit is a scope mismatch.
+# Effect context, so $SECT$ / $MADHHAB$ substitute fine here.
+aqd_jurists_find_seat_loc = {
+	random_owned_location = {
+		limit = {
+			# TESTING: sect population gate disabled (was >= 0.25) - kept as
+			# a >= 0 check so $SECT$ stays referenced in this body; a bare
+			# `always = yes` here drops the only $SECT$ reference and makes
+			# every SECT-passing call site fail to compile silently. This
+			# was exactly why z_aqd_jurists.1 granted no seat: this effect
+			# never ran, so scope:aqd_jurists_seat_loc was never set and
+			# aqd_jurists_accept's exists-guard always failed - the event
+			# still fired and applied aqd_apply_jurist_reaction (the
+			# opinion/legitimacy "ulema modifiers"), but placed nothing.
+			religion_percentage = { religion = religion:$SECT$  value >= 0 }
+			always = yes # TESTING: rural_settlement allowed
+			NOT = { has_building = building_type:seat_of_$MADHHAB$_jurists }
+			NOT = { has_location_modifier = z_aqd_establishment_pending }
+		}
+		save_scope_as = aqd_jurists_seat_loc
+		province_definition = { save_scope_as = aqd_jurists_seat_prov }
+	}
+}
+
+aqd_jurists_accept_dispatch = {
+	if      = { limit = { var:aqd_compat_madhhab = 1 } aqd_jurists_accept = { MADHHAB = hanafi   ENDOW = $ENDOW$ } }
+	else_if = { limit = { var:aqd_compat_madhhab = 2 } aqd_jurists_accept = { MADHHAB = hanbali  ENDOW = $ENDOW$ } }
+	else_if = { limit = { var:aqd_compat_madhhab = 3 } aqd_jurists_accept = { MADHHAB = maliki   ENDOW = $ENDOW$ } }
+	else_if = { limit = { var:aqd_compat_madhhab = 4 } aqd_jurists_accept = { MADHHAB = shafii   ENDOW = $ENDOW$ } }
+	else_if = { limit = { var:aqd_compat_madhhab = 5 } aqd_jurists_accept = { MADHHAB = zahiri   ENDOW = $ENDOW$ } }
+	else_if = { limit = { var:aqd_compat_madhhab = 6 } aqd_jurists_accept = { MADHHAB = ismaili  ENDOW = $ENDOW$ } }
+	else_if = { limit = { var:aqd_compat_madhhab = 7 } aqd_jurists_accept = { MADHHAB = jafari   ENDOW = $ENDOW$ } }
+	else_if = { limit = { var:aqd_compat_madhhab = 8 } aqd_jurists_accept = { MADHHAB = zaidi    ENDOW = $ENDOW$ } }
+	else_if = { limit = { var:aqd_compat_madhhab = 9 } aqd_jurists_accept = { MADHHAB = ibadi    ENDOW = $ENDOW$ } }
+}
+
+aqd_jurists_accept = {
+	# Belt-and-braces: the immediate already derived the target (and the
+	# option's own eligibility already proved a host exists), but guard
+	# anyway so a vanished city - or the var:aqd_compat_madhhab = 0
+	# no-real-source case - cannot half-apply the outcome.
+	if = {
+		limit = { exists = scope:aqd_jurists_seat_loc }
+		aqd_jurists_finish_$ENDOW$ = { MADHHAB = $MADHHAB$ }
+		# The new Seat (and madrasa) changed the realm's jurist footprint -
+		# refresh the cached tier denominator so tiers update at once.
+		root = { aqd_recount_jurist_total = yes }
+	}
+}
+
+# Bare Seat. Raw level-delta bypasses allow / location_potential /
+# country_potential, exactly as aqd_exile_plant_seat / aqd_seed_seat.
+aqd_jurists_finish_no = {
+	scope:aqd_jurists_seat_loc = {
+		change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
+	}
+}
+
+# Endowment college first (placed in a location OTHER than the seat city
+# where possible, fallback the seat city itself), then the Seat, then the
+# gold spend + diplomatic goodwill. scope:aqd_jurists_seat_prov / _seat_loc
+# are still live - saved scopes persist across scripted_effect calls in
+# one tree.
+aqd_jurists_finish_yes = {
+	scope:aqd_jurists_seat_prov = {
+		random_location_in_province_definition = {
+			limit = {
+				owner ?= root
+				always = yes # TESTING: rural_settlement allowed
+				NOT = { aqd_location_has_fiqh_madrasa = yes }
+				NOT = { this = scope:aqd_jurists_seat_loc }
+			}
+			save_scope_as = aqd_jurists_madrasa_loc
+		}
+	}
+	if = {
+		limit = { NOT = { exists = scope:aqd_jurists_madrasa_loc } }
+		scope:aqd_jurists_seat_prov = {
+			random_location_in_province_definition = {
+				limit = {
+					owner ?= root
+					always = yes # TESTING: rural_settlement allowed
+					NOT = { aqd_location_has_fiqh_madrasa = yes }
+				}
+				save_scope_as = aqd_jurists_madrasa_loc
+			}
+		}
+	}
+	if = {
+		limit = { exists = scope:aqd_jurists_madrasa_loc }
+		scope:aqd_jurists_madrasa_loc = {
+			change_building_level_in_location = { building = building_type:madrasa_of_$MADHHAB$_fiqh  value = 1 }
+		}
+	}
+
+	scope:aqd_jurists_seat_loc = {
+		change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
+	}
+
+	add_gold = { value = aqd_endow_gold_estimate  multiply = -1 }
+	every_country_in_diplomatic_range = {
+		limit = {
+			NOT = { this = root }
+			religion.group = religion_group:muslim
+			has_policy = $MADHHAB$_policy
+		}
+		add_opinion = { target = root  modifier = z_aqd_endowed_our_school }
+	}
 }
 
 # ---------------------------------------------------------------------
@@ -1046,6 +1216,345 @@ aqd_crackdown_exile_pick = {
 		scope:aqd_exile_target = {
 			set_variable = { name = aqd_exile_madhhab  value = $IDX$ }
 			trigger_event_non_silently = { id = z_aqd_exile.1  days = 3 }
+		}
+	}
+}
+
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: Ḥalqa madhhab-pick
+# leader weighting.
+#
+# Called from z_aqd_halqa_events.txt's immediate, at country scope,
+# right before the random_list, once scope:halqa_prov exists. Decides
+# whether exactly one ready madhhab in scope:halqa_prov owns STRICTLY
+# more madrasas of its own fiqh than every other ready madhhab there -
+# if so, var:aqd_halqa_leader_madhhab is set to its canonical 1-9 index
+# so the random_list can give it a higher (not guaranteed) weight. Left
+# at the sentinel 0 - NEVER left unset, so every `var:aqd_halqa_leader_
+# madhhab = N` comparison in the random_list is always safe (an unset-
+# variable comparison is a hard error, not a silent false - the exact
+# bug class that broke establishment/exile/foreign-jurist placement
+# earlier this project) - whenever two or more ready madhhabs tie for
+# the top count (including an all-zero tie, the common early-game case
+# now that a ḥalqa no longer requires any madrasas at all) or only one
+# madhhab is ready (moot: its two random_list entries sum to the same
+# weight either way). All scratch variables here (aqd_halqa_count_1..9,
+# aqd_halqa_max_count, aqd_halqa_max_ties, aqd_halqa_leader_madhhab) are
+# cleaned up by z_aqd_halqa.1's option, alongside var:aqd_halqa_madhhab.
+# =====================================================================
+aqd_halqa_compute_leader = {
+	# Per-candidate counts - only for madhhabs actually ready here, so a
+	# typical single-seat province computes exactly one of these instead
+	# of all nine.
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_hanafi = yes } }   set_variable = { name = aqd_halqa_count_1  value = aqd_prov_madrasa_count_hanafi } }
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_hanbali = yes } }  set_variable = { name = aqd_halqa_count_2  value = aqd_prov_madrasa_count_hanbali } }
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_maliki = yes } }   set_variable = { name = aqd_halqa_count_3  value = aqd_prov_madrasa_count_maliki } }
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_shafii = yes } }   set_variable = { name = aqd_halqa_count_4  value = aqd_prov_madrasa_count_shafii } }
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_zahiri = yes } }   set_variable = { name = aqd_halqa_count_5  value = aqd_prov_madrasa_count_zahiri } }
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_ismaili = yes } }  set_variable = { name = aqd_halqa_count_6  value = aqd_prov_madrasa_count_ismaili } }
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_jafari = yes } }   set_variable = { name = aqd_halqa_count_7  value = aqd_prov_madrasa_count_jafari } }
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_zaidi = yes } }    set_variable = { name = aqd_halqa_count_8  value = aqd_prov_madrasa_count_zaidi } }
+	if = { limit = { scope:halqa_prov = { aqd_halqa_prov_ready_ibadi = yes } }    set_variable = { name = aqd_halqa_count_9  value = aqd_prov_madrasa_count_ibadi } }
+
+	# Max scan. Starts below any real count (including 0) so the first
+	# ready candidate always wins its own comparison.
+	set_variable = { name = aqd_halqa_max_count  value = -1 }
+	if = { limit = { exists = var:aqd_halqa_count_1  var:aqd_halqa_count_1 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_1 } }
+	if = { limit = { exists = var:aqd_halqa_count_2  var:aqd_halqa_count_2 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_2 } }
+	if = { limit = { exists = var:aqd_halqa_count_3  var:aqd_halqa_count_3 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_3 } }
+	if = { limit = { exists = var:aqd_halqa_count_4  var:aqd_halqa_count_4 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_4 } }
+	if = { limit = { exists = var:aqd_halqa_count_5  var:aqd_halqa_count_5 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_5 } }
+	if = { limit = { exists = var:aqd_halqa_count_6  var:aqd_halqa_count_6 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_6 } }
+	if = { limit = { exists = var:aqd_halqa_count_7  var:aqd_halqa_count_7 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_7 } }
+	if = { limit = { exists = var:aqd_halqa_count_8  var:aqd_halqa_count_8 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_8 } }
+	if = { limit = { exists = var:aqd_halqa_count_9  var:aqd_halqa_count_9 > var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_max_count  value = var:aqd_halqa_count_9 } }
+
+	# Tie count - how many ready candidates equal the max.
+	set_variable = { name = aqd_halqa_max_ties  value = 0 }
+	if = { limit = { exists = var:aqd_halqa_count_1  var:aqd_halqa_count_1 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+	if = { limit = { exists = var:aqd_halqa_count_2  var:aqd_halqa_count_2 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+	if = { limit = { exists = var:aqd_halqa_count_3  var:aqd_halqa_count_3 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+	if = { limit = { exists = var:aqd_halqa_count_4  var:aqd_halqa_count_4 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+	if = { limit = { exists = var:aqd_halqa_count_5  var:aqd_halqa_count_5 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+	if = { limit = { exists = var:aqd_halqa_count_6  var:aqd_halqa_count_6 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+	if = { limit = { exists = var:aqd_halqa_count_7  var:aqd_halqa_count_7 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+	if = { limit = { exists = var:aqd_halqa_count_8  var:aqd_halqa_count_8 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+	if = { limit = { exists = var:aqd_halqa_count_9  var:aqd_halqa_count_9 = var:aqd_halqa_max_count }  change_variable = { name = aqd_halqa_max_ties  add = 1 } }
+
+	# Sentinel 0 by default; only overwritten when the top count is held
+	# by exactly one ready candidate.
+	set_variable = { name = aqd_halqa_leader_madhhab  value = 0 }
+	if = {
+		limit = { var:aqd_halqa_max_ties = 1 }
+		if      = { limit = { exists = var:aqd_halqa_count_1  var:aqd_halqa_count_1 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 1 } }
+		else_if = { limit = { exists = var:aqd_halqa_count_2  var:aqd_halqa_count_2 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 2 } }
+		else_if = { limit = { exists = var:aqd_halqa_count_3  var:aqd_halqa_count_3 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 3 } }
+		else_if = { limit = { exists = var:aqd_halqa_count_4  var:aqd_halqa_count_4 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 4 } }
+		else_if = { limit = { exists = var:aqd_halqa_count_5  var:aqd_halqa_count_5 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 5 } }
+		else_if = { limit = { exists = var:aqd_halqa_count_6  var:aqd_halqa_count_6 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 6 } }
+		else_if = { limit = { exists = var:aqd_halqa_count_7  var:aqd_halqa_count_7 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 7 } }
+		else_if = { limit = { exists = var:aqd_halqa_count_8  var:aqd_halqa_count_8 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 8 } }
+		else_if = { limit = { exists = var:aqd_halqa_count_9  var:aqd_halqa_count_9 = var:aqd_halqa_max_count }  set_variable = { name = aqd_halqa_leader_madhhab  value = 9 } }
+	}
+}
+
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Ulema Institutions: Ḥalqa apply + dispatch.
+#
+# Entry point is aqd_halqa_dispatch, called from events/religion/
+# z_aqd_halqa_events.txt's z_aqd_halqa.1 immediate after it has picked
+# scope:halqa_prov (a province_definition) and set var:aqd_halqa_madhhab
+# (canonical 1-9) + var:aqd_jurist_compat (via
+# aqd_classify_madhhab_compatibility). All run at the event country's
+# scope; root is the event country throughout.
+#
+# One of the four class effects stamps a z_aqd_halqa_* modifier
+# (main_menu/common/static_modifiers/z_aqd_halqa.txt) on every owned
+# location of the province for 4 years - the modifier also being the
+# one-ḥalqa-per-province marker - plus the class's one-shot effects.
+# Class rules, in dispatch order:
+#   tolerated  - religious_school din_i_ilahi_school (ALL seats, first).
+#   state      - the seat's madhhab is the realm's own <X>_policy.
+#   heterodox  - var:aqd_jurist_compat = -1 (creed opposes the madhhab).
+#   orthodox   - otherwise (compat 1 or 0; also no-state-madhhab realms).
+# =====================================================================
+
+aqd_halqa_dispatch = {
+	# The pick always sets var:aqd_halqa_madhhab (the random_list entry
+	# triggers mirror the picker limit); guard anyway so a stray unset
+	# cannot stamp a class-less ḥalqa.
+	if = {
+		limit = { exists = var:aqd_halqa_madhhab }
+
+		if = {
+			limit = { religious_school = religious_school:din_i_ilahi_school }
+			aqd_halqa_apply_tolerated = yes
+		}
+		else_if = {
+			limit = {
+				OR = {
+					AND = { var:aqd_halqa_madhhab = 1  has_policy = hanafi_policy }
+					AND = { var:aqd_halqa_madhhab = 2  has_policy = hanbali_policy }
+					AND = { var:aqd_halqa_madhhab = 3  has_policy = maliki_policy }
+					AND = { var:aqd_halqa_madhhab = 4  has_policy = shafii_policy }
+					AND = { var:aqd_halqa_madhhab = 5  has_policy = zahiri_policy }
+					AND = { var:aqd_halqa_madhhab = 6  has_policy = ismaili_policy }
+					AND = { var:aqd_halqa_madhhab = 7  has_policy = jafari_policy }
+					AND = { var:aqd_halqa_madhhab = 8  has_policy = zaidi_policy }
+					AND = { var:aqd_halqa_madhhab = 9  has_policy = ibadi_policy }
+				}
+			}
+			aqd_halqa_apply_state = yes
+		}
+		else_if = {
+			limit = { var:aqd_jurist_compat = -1 }
+			if = {
+				limit = { OR = { var:aqd_halqa_madhhab = 1  var:aqd_halqa_madhhab = 2  var:aqd_halqa_madhhab = 3  var:aqd_halqa_madhhab = 4  var:aqd_halqa_madhhab = 5 } }
+				aqd_halqa_apply_heterodox = { SECT = sunni }
+			}
+			else_if = {
+				limit = { OR = { var:aqd_halqa_madhhab = 6  var:aqd_halqa_madhhab = 7  var:aqd_halqa_madhhab = 8 } }
+				aqd_halqa_apply_heterodox = { SECT = shia }
+			}
+			else = {
+				aqd_halqa_apply_heterodox = { SECT = ibadi }
+			}
+		}
+		else = {
+			aqd_halqa_apply_orthodox = yes
+		}
+	}
+}
+
+# STATE - consolidation. No one-shot change_control (removed - control
+# now comes only from the modifier's own local_monthly_control, see
+# TODO in static_modifiers/z_aqd_halqa.txt). Cross-sect Muslims
+# (heretics, NOT non-Muslim heathens - the religion_group limit is what
+# excludes them) drift to the state religion, in the same 20%/10%
+# (seat/rest of province) shape as aqd_halqa_apply_heterodox's own
+# conversion - just aimed at root.religion instead of a SECT param, and
+# with no "already that religion" guard needed (root can never already
+# be cross-sect of itself).
+#
+# The modifier key itself is one of nine (z_aqd_halqa_state_hanafi ...
+# _ibadi, static_modifiers/z_aqd_halqa.txt) so the display NAME reads
+# "<Madhhab> Madhhab Ḥalqa" - picked by a 9-way branch on
+# var:aqd_halqa_madhhab, read directly (NOT passed as a $MADHHAB$
+# parameter - this effect already runs at root/country scope, where the
+# bare var: form reads correctly; a new $PARAM$ pathway here would risk
+# the exact "unknown arguments" silent-no-op class that broke
+# establishment/exile/foreign-jurist placement earlier this project).
+# All nine variants have IDENTICAL fields - this only changes the name.
+aqd_halqa_apply_state = {
+	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_hanafi   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_hanbali  years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_maliki   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_shafii   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_zahiri   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_ismaili  years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_jafari   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_zaidi    years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_ibadi    years = 4 } } } }
+	if = {
+		limit = { exists = scope:halqa_loc }
+		scope:halqa_loc = {
+			every_pop = {
+				limit = {
+					religion.group = religion_group:muslim
+					NOT = { religion = root.religion }
+				}
+				split_pop = { fraction = 0.2  religion = root.religion }
+			}
+		}
+	}
+	scope:halqa_prov = {
+		every_location_in_province_definition = {
+			limit = {
+				owner ?= root
+				NOT = { this = scope:halqa_loc }
+			}
+			every_pop = {
+				limit = {
+					religion.group = religion_group:muslim
+					NOT = { religion = root.religion }
+				}
+				split_pop = { fraction = 0.1  religion = root.religion }
+			}
+		}
+	}
+}
+
+# ORTHODOX - calm + minor uplift + a heretic conversion HALF of state's
+# own (10%/5%, seat/rest of province - state's 20%/10% halved), plus a
+# tiny nudge of the realm toward spiritualism - the mirror of
+# aqd_halqa_apply_heterodox's humanism nudge, same magnitude
+# (societal_value_tiny_move), opposite pole of the spiritualist_vs_
+# humanist axis (to_left here vs to_right there).
+#
+# Modifier key picked by var:aqd_halqa_madhhab - see aqd_halqa_apply_state's
+# comment above for why this reads var: directly rather than taking a
+# $MADHHAB$ parameter.
+aqd_halqa_apply_orthodox = {
+	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_hanafi   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_hanbali  years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_maliki   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_shafii   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_zahiri   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_ismaili  years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_jafari   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_zaidi    years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_ibadi    years = 4 } } } }
+	if = {
+		limit = { exists = scope:halqa_loc }
+		scope:halqa_loc = {
+			every_pop = {
+				limit = {
+					religion.group = religion_group:muslim
+					NOT = { religion = root.religion }
+				}
+				split_pop = { fraction = 0.1  religion = root.religion }
+			}
+		}
+	}
+	scope:halqa_prov = {
+		every_location_in_province_definition = {
+			limit = {
+				owner ?= root
+				NOT = { this = scope:halqa_loc }
+			}
+			every_pop = {
+				limit = {
+					religion.group = religion_group:muslim
+					NOT = { religion = root.religion }
+				}
+				split_pop = { fraction = 0.05  religion = root.religion }
+			}
+		}
+	}
+	change_societal_value = { type = spiritualist_vs_humanist  value = societal_value_tiny_move_to_left }
+}
+
+# HETERODOX { SECT } - a provocation, not a calming presence: unrest
+# RISES, clergy conversion is blocked outright regardless of the
+# clergy's own religion (local_clergy_conversion_blocked is pop-TYPE
+# scoped only - the engine has no per-pop-type-AND-heretic/heathen
+# variant, confirmed absent from modifier_type_definitions/
+# 00_modifier_types.txt, so this cannot be narrowed further), while
+# everyone else's conversion is slowed 60% via
+# local_heretic_pop_conversion_speed_modifier specifically (NOT the
+# generic local_pop_conversion_speed_modifier) - a real, separate,
+# location-scope engine field (confirmed in 00_modifier_types.txt
+# alongside local_heathen_pop_conversion_speed_modifier) that only
+# throttles conversion of pops already in the same religion GROUP
+# (other Muslim sects), leaving non-Muslim heathen conversion at this
+# location completely unaffected by the circle's presence. Literacy/
+# tradition as orthodox. change_societal_value stays a one-shot
+# event-side nudge, NOT a companion country modifier: monthly_towards_
+# humanist is game_data category = country (confirmed against base
+# game's static_modifiers/societal_values.txt), so it cannot live
+# inside this location modifier at all - there is no way to make the
+# push "part of the modifier" without a second, country-scope modifier
+# object, which is not what was asked for, so this stays a one-shot.
+# Conversion is a plain split_pop (NOT wrapped in a custom_tooltip) so
+# the engine's default effect tooltip lists the specific pops converted,
+# same as aqd_halqa_apply_state / _orthodox above: 20% of the
+# state-religion population AT THE SEAT'S OWN LOCATION (scope:halqa_loc)
+# converts to SECT, and 10% at every OTHER owned location in the
+# province (scope:halqa_prov, excluding scope:halqa_loc). Both only run
+# when SECT differs from the realm's own religion - a same-sect
+# disfavoured school (e.g. a Ẓāhirī seat opposed by an Athari Sunnī
+# realm) changes no one's sect.
+#
+# Modifier key picked by var:aqd_halqa_madhhab - see aqd_halqa_apply_state's
+# comment above for why this reads var: directly rather than taking a
+# $MADHHAB$ parameter. Independent of the $SECT$ parameter this effect
+# already takes - var:aqd_halqa_madhhab (which SECT was derived from, in
+# aqd_halqa_dispatch) is still a live root variable at this point.
+aqd_halqa_apply_heterodox = {
+	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_hanafi   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_hanbali  years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_maliki   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_shafii   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_zahiri   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_ismaili  years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_jafari   years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_zaidi    years = 4 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_ibadi    years = 4 } } } }
+	if = {
+		limit = { NOT = { religion = religion:$SECT$ } }
+		if = {
+			limit = { exists = scope:halqa_loc }
+			scope:halqa_loc = {
+				every_pop = {
+					limit = { religion = root.religion }
+					split_pop = { fraction = 0.2  religion = religion:$SECT$ }
+				}
+			}
+		}
+		scope:halqa_prov = {
+			every_location_in_province_definition = {
+				limit = {
+					owner ?= root
+					NOT = { this = scope:halqa_loc }
+				}
+				every_pop = {
+					limit = { religion = root.religion }
+					split_pop = { fraction = 0.1  religion = religion:$SECT$ }
+				}
+			}
+		}
+	}
+	change_societal_value = { type = spiritualist_vs_humanist  value = societal_value_tiny_move_to_right }
+}
+
+# TOLERATED (din-i-ilahi only) - the orthodox uplift, no conversion of
+# any kind, and the heterodox-style conversion block. The syncretic
+# state shields every community and proselytises for none.
+aqd_halqa_apply_tolerated = {
+	scope:halqa_prov = {
+		every_location_in_province_definition = {
+			limit = { owner ?= root }
+			add_location_modifier = { modifier = z_aqd_halqa_tolerated  years = 4 }
 		}
 	}
 }
