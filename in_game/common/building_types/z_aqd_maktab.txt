@@ -1,0 +1,66 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - the base madrasa (displayed as "Maktab",
+# see main_menu/localization/english/aqd_l_english.yml) rebalanced.
+#
+# The elementary Qur'an school. It is DELIBERATELY not the higher-
+# learning building any more - that layer is the fiqh madrasas
+# (building_types/z_aqd_madrasas.txt) and the jurist seats. So the
+# Maktab here is cheap to run (no goods upkeep) and small, and its
+# payload is basic literacy + settling tribesmen, not scholarship.
+#
+# REPLACE: fully overrides the base definition
+# (game/in_game/common/building_types/religion_buildings.txt). Every
+# base system that names 'madrasa' (missions, muslim_school_events,
+# country setup, the great_madrasa upgrade) still resolves - only the
+# stats change.
+#
+# Changes vs. base:
+#  - employment_size large_religious_building_employment (0.1 / 100) ->
+#    religious_building_employment (0.05 / 50 clergy)
+#  - production method (paper+cloth madrasa_maintenance) -> none
+#    (aqd_maktab_upkeep, a bare maintenance slot with no goods)
+#  - modifier: local_clergy_max_literacy 5 / local_pop_conversion_speed
+#    0.1 / local_clergy_food_consumption 0.1 / local_tribal_promotion
+#    0.1  ->  local_max_literacy 1 / local_tribal_promotion 0.1
+# =====================================================================
+
+REPLACE:madrasa = {
+	audio_tier = 1
+	is_foreign = no
+	max_levels = 1
+	pop_type = clergy
+
+	employment_size = religious_building_employment
+
+	category = religious_category
+
+	rural_settlement = no
+	town = yes
+	city = yes
+	megalopolis = yes
+
+	build_time = religious_building_time
+
+	graphical_tags = { medium_religious }
+
+	country_potential = {
+		religion ?= {
+			group = religion_group:muslim
+		}
+	}
+
+	possible_production_methods = { aqd_maktab_upkeep }
+
+	remove_if = {
+		location = {
+			owner ?= { religion.group != religion_group:muslim }
+		}
+	}
+
+	construction_demand = town_building_construction
+
+	modifier = {
+		local_max_literacy = 1
+		local_tribal_promotion = 0.1
+	}
+}

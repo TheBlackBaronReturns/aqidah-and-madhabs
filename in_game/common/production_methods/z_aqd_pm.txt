@@ -1,0 +1,23 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - production methods.
+#
+# aqd_madrasa_maintenance - upkeep for the fiqh madrasas
+#   (building_types/z_aqd_madrasas.txt): paper + cloth, no output.
+#   Mirrors the base madrasa's own madrasa_maintenance.
+# aqd_maktab_upkeep - a bare building_maintenance slot with NO goods,
+#   for the base madrasa/"Maktab" (building_types/z_aqd_maktab.txt).
+#   A building type must reference a production method; this is the
+#   "no production method" case - it consumes nothing and outputs
+#   nothing.
+# =====================================================================
+
+aqd_madrasa_maintenance = {
+	paper = 0.1
+	cloth = 0.2
+
+	category = building_maintenance
+}
+
+aqd_maktab_upkeep = {
+	category = building_maintenance
+}
