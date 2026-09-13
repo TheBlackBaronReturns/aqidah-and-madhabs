@@ -1,0 +1,120 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "Local Jurists Displeased".
+#
+# Applied by scripted_effects/z_aqd_fatwa_effects.txt's
+# aqd_fatwa_apply_displeased_for_seat when the ruler refuses a fatwa
+# demanding peace in an unjust war against a fellow-sect, aqidah-
+# acceptable Muslim state (events/religion/z_aqd_fatwa_events.txt).
+#
+# NINE concrete objects, one per madhhab, NOT one shared key - a
+# province can hold seats of more than one madhhab, and only the
+# madhhab whose own jurists issued (and were refused) the fatwa should
+# have its ḥalqa eligibility blocked; the other seat(s) in the same
+# province must keep rolling normally. Mirrors static_modifiers/
+# z_aqd_halqa.txt's own convention of 9 distinct per-madhhab keys behind
+# one shared display concept - here all 9 share the one displayed name
+# "Local Jurists Displeased", only the mechanical key differs, so the
+# game can track which madhhab is banned without the player ever
+# needing to see nine different modifier names.
+#
+# scripted_triggers/z_aqd_jurist_triggers.txt's 9 concrete
+# aqd_halqa_prov_ready_<madhhab> triggers each check for their OWN
+# matching key here to gate that one madhhab's ḥalqa eligibility -
+# aqd_location_has_active_halqa (that same file) is NOT touched by this
+# feature and keeps its separate, madhhab-agnostic meaning ("a circle
+# is actively running here right now").
+#
+# Calibration: local_unrest = 0.5 matches the highest flat-unrest
+# modifier found anywhere in the base game (cruel_overlord,
+# main_menu/common/static_modifiers/location.txt) - deliberately at
+# that ceiling rather than below this mod's own 0.4
+# z_aqd_jurist_evicted, since a fatwa publicly condemning an ongoing
+# unjust war, refused, reads as at least as severe as "cruel overlord".
+# local_production_efficiency = -0.10 matches the base game's own
+# largest named production-penalty tier
+# (large_production_efficiency_penalty). No decaying = yes - matches
+# z_aqd_jurist_evicted's non-tapering design; the displeasure holds at
+# full strength until the term ends (5 years at stage 1, re-extended to
+# 10 for every affected seat if stage 2 is also refused).
+# =====================================================================
+
+z_aqd_fatwa_displeased_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}
+
+z_aqd_fatwa_displeased_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}
+
+z_aqd_fatwa_displeased_maliki = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}
+
+z_aqd_fatwa_displeased_shafii = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}
+
+z_aqd_fatwa_displeased_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}
+
+z_aqd_fatwa_displeased_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}
+
+z_aqd_fatwa_displeased_jafari = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}
+
+z_aqd_fatwa_displeased_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}
+
+z_aqd_fatwa_displeased_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.5
+	local_pop_join_rebel_threshold = -0.15
+	local_production_efficiency = -0.10
+}

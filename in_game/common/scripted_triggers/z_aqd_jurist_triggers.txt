@@ -481,15 +481,28 @@ aqd_country_owns_any_jurist_seat = {
 # limit). Used by aqd_country_has_any_halqa_ready below and by
 # events/religion/z_aqd_halqa_events.txt (the picker limit and each
 # random_list weight entry).
-aqd_halqa_prov_ready_hanafi  = { any_location_in_province_definition = { has_building = building_type:seat_of_hanafi_jurists } }
-aqd_halqa_prov_ready_hanbali = { any_location_in_province_definition = { has_building = building_type:seat_of_hanbali_jurists } }
-aqd_halqa_prov_ready_maliki  = { any_location_in_province_definition = { has_building = building_type:seat_of_maliki_jurists } }
-aqd_halqa_prov_ready_shafii  = { any_location_in_province_definition = { has_building = building_type:seat_of_shafii_jurists } }
-aqd_halqa_prov_ready_zahiri  = { any_location_in_province_definition = { has_building = building_type:seat_of_zahiri_jurists } }
-aqd_halqa_prov_ready_ismaili = { any_location_in_province_definition = { has_building = building_type:seat_of_ismaili_jurists } }
-aqd_halqa_prov_ready_jafari  = { any_location_in_province_definition = { has_building = building_type:seat_of_jafari_jurists } }
-aqd_halqa_prov_ready_zaidi   = { any_location_in_province_definition = { has_building = building_type:seat_of_zaidi_jurists } }
-aqd_halqa_prov_ready_ibadi   = { any_location_in_province_definition = { has_building = building_type:seat_of_ibadi_jurists } }
+#
+# Each also excludes a location currently under THAT SAME madhhab's own
+# fatwa ban (main_menu/common/static_modifiers/z_aqd_fatwa_displeased.txt,
+# events/religion/z_aqd_fatwa_events.txt) - one combined scan per
+# trigger, not two: the ban is checked on the SAME location as the seat
+# building, both more correct (the ban is applied at the seat's own
+# location) and free (no second any_location_in_province_definition
+# pass). This is per-madhhab by design: banning Hanafi must not stop
+# Shafi'i (or any other madhhab) from rolling its own ḥalqa in the same
+# province - see z_aqd_fatwa_displeased.txt's header for why this is 9
+# concrete keys rather than one shared one, and why
+# aqd_location_has_active_halqa below is deliberately NOT touched by
+# this feature.
+aqd_halqa_prov_ready_hanafi  = { any_location_in_province_definition = { has_building = building_type:seat_of_hanafi_jurists   NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanafi } } }
+aqd_halqa_prov_ready_hanbali = { any_location_in_province_definition = { has_building = building_type:seat_of_hanbali_jurists  NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanbali } } }
+aqd_halqa_prov_ready_maliki  = { any_location_in_province_definition = { has_building = building_type:seat_of_maliki_jurists   NOT = { has_location_modifier = z_aqd_fatwa_displeased_maliki } } }
+aqd_halqa_prov_ready_shafii  = { any_location_in_province_definition = { has_building = building_type:seat_of_shafii_jurists   NOT = { has_location_modifier = z_aqd_fatwa_displeased_shafii } } }
+aqd_halqa_prov_ready_zahiri  = { any_location_in_province_definition = { has_building = building_type:seat_of_zahiri_jurists   NOT = { has_location_modifier = z_aqd_fatwa_displeased_zahiri } } }
+aqd_halqa_prov_ready_ismaili = { any_location_in_province_definition = { has_building = building_type:seat_of_ismaili_jurists  NOT = { has_location_modifier = z_aqd_fatwa_displeased_ismaili } } }
+aqd_halqa_prov_ready_jafari  = { any_location_in_province_definition = { has_building = building_type:seat_of_jafari_jurists   NOT = { has_location_modifier = z_aqd_fatwa_displeased_jafari } } }
+aqd_halqa_prov_ready_zaidi   = { any_location_in_province_definition = { has_building = building_type:seat_of_zaidi_jurists    NOT = { has_location_modifier = z_aqd_fatwa_displeased_zaidi } } }
+aqd_halqa_prov_ready_ibadi   = { any_location_in_province_definition = { has_building = building_type:seat_of_ibadi_jurists    NOT = { has_location_modifier = z_aqd_fatwa_displeased_ibadi } } }
 
 # Country-scoped. Does the realm own at least one province that could
 # host a ḥalqa right now - a seat of some madhhab (no madrasa density

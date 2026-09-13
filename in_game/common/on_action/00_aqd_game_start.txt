@@ -92,7 +92,46 @@ aqd_seat_establishment_pulse = {
 # subscribers - same merge-not-override guarantee documented above for
 # on_game_start.
 monthly_country_pulse = {
-	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse }
+	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse }
+}
+
+# The Jurists' Fatwa Against an Unjust War (events/religion/
+# z_aqd_fatwa_events.txt). Cheap prefilters only, mirroring
+# aqd_halqa_pulse's own division of labor - the full
+# aqd_fatwa_core_conditions (CB/warscore/madhhab, scripted_triggers/
+# z_aqd_fatwa_triggers.txt) is re-checked authoritatively in each
+# event's own trigger at fire time, so a same-tick change that
+# invalidates eligibility suppresses the pop-up instead of showing a
+# stale one. chance_to_happen values are production values (stage 2
+# deliberately rarer than stage 1), not inflated testing values like
+# aqd_halqa_pulse's current 80.
+aqd_fatwa_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		NOT = { has_variable = aqd_fatwa_cooldown }
+		aqd_country_owns_any_jurist_seat = yes
+		war_exhaustion >= 5
+		any_current_war = { attacker_leader = root }
+	}
+	random_events = {
+		100 = z_aqd_fatwa.1
+
+		chance_to_happen = 15
+	}
+}
+aqd_fatwa_escalation_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		has_variable = aqd_fatwa_stage1_fired
+		NOT = { has_variable = aqd_fatwa_stage2_too_soon }
+		war_exhaustion >= 8
+		any_owned_location = { aqd_location_has_any_fatwa_ban = yes }
+	}
+	random_events = {
+		100 = z_aqd_fatwa.2
+
+		chance_to_happen = 5
+	}
 }
 
 # Ulema Institutions - refresh the cached tier denominator

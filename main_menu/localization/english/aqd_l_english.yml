@@ -298,3 +298,54 @@
  flavor_tur.16.desc: "There is turmoil in [ShowRegionName('anatolia_region')]. Madrasa students, irregular Sekban soldiers, and minor officials have joined forces under a [ShowReligionAdjective('shia')] preacher named [sheikh_celal.GetName], enraged by financial woes. They have begun riots in many provinces, and demand lower taxes, less government meddling in local affairs, and more respect for the [ShowReligionAdjectiveWithNoTooltip('shia')] faithful."
  flavor_tur.133.desc: "The many scholars among the [ROOT.GetCountry.GetGovernment.GetEstateName('clergy_estate')] are finding it more and more difficult to find work. While Qāḍī are always in demand, those positions are coveted and highly competitive, and there is not enough for all. Fathers are now advising their sons not to become scholars, and perhaps not even study in the madrasa at all. They miss now, the scholars say, the days of 'Alī al-Qawshajī and Taqī ad-Dīn, when science of all kinds was still appreciated by the state."
  waqf_payments_desc: "To demonstrate our piety and religious dedication, we will grant #italic waqf#! payments as charitable endowments, which shall be used to fund maktabs and madrasas, hospitals, and mosques, as well as to aid the less fortunate."
+
+ # ---- The Jurists' Fatwa Against an Unjust War (z_aqd_fatwa_events.txt) ----
+ # .desc.favored / .desc.neutral: root's own aqidah judges the enemy's
+ # madhhab favored (1) or merely neutral (0) - heterodox (-1) can never
+ # reach this event, by construction of aqd_fatwa_core_conditions.
+ z_aqd_fatwa.1.title: "A Fatwa Against This War"
+ z_aqd_fatwa.1.desc.favored: "The jurists of [target_location.GetName] have issued a fatwa: this war against [SCOPE.sCountry('enemy').GetName], a fellow Muslim state whose own rite our scholars hold sound, rests on no true cause, and the bloodshed must end. They ask that peace be made now, while it can still be made with honour."
+ z_aqd_fatwa.1.desc.neutral: "The jurists of [target_location.GetName] have issued a fatwa: this war against [SCOPE.sCountry('enemy').GetName], a fellow Muslim state whose own rite our scholars do not condemn, rests on no true cause, and the bloodshed must end. They ask that peace be made now, while it can still be made with honour."
+ z_aqd_fatwa.1.desc.fallback: "DEBUG/fallback: no matching war or jurist seat was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
+ z_aqd_fatwa.1.accept: "Heed the fatwa and sue for peace"
+ z_aqd_fatwa.1.refuse: "The war will continue"
+
+ z_aqd_fatwa.2.title: "The Jurists Speak as One"
+ z_aqd_fatwa.2.desc.favored: "Word of the fatwa against [SCOPE.sCountry('enemy').GetName] has spread. Every jurists' seat of [target_province.GetName] has now added its voice to the first: this war against a fellow Muslim state whose own rite our scholars hold sound has dragged on far too long, and must end."
+ z_aqd_fatwa.2.desc.neutral: "Word of the fatwa against [SCOPE.sCountry('enemy').GetName] has spread. Every jurists' seat of [target_province.GetName] has now added its voice to the first: this war against a fellow Muslim state whose own rite our scholars do not condemn has dragged on far too long, and must end."
+ z_aqd_fatwa.2.desc.fallback: "DEBUG/fallback: no matching war or jurist seat was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
+ z_aqd_fatwa.2.accept: "Make peace, as they demand"
+ z_aqd_fatwa.2.refuse: "Their displeasure changes nothing"
+
+ # ---- "Local Jurists Displeased" (main_menu/common/static_modifiers/
+ # z_aqd_fatwa_displeased.txt) - 9 concrete per-madhhab keys, all
+ # sharing this one displayed name; only the mechanical key differs, so
+ # a refusal can ban one madhhab's ḥalqa without touching any other
+ # madhhab's seat in the same province. ----
+ z_aqd_fatwa_displeased_hanafi: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_hanafi: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_hanafi: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_hanbali: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_hanbali: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_hanbali: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_maliki: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_maliki: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_maliki: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_shafii: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_shafii: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_shafii: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_zahiri: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_zahiri: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_zahiri: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_ismaili: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_ismaili: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_ismaili: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_jafari: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_jafari: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_jafari: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_zaidi: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_zaidi: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_zaidi: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_ibadi: "Local Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_ibadi: "Local Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_ibadi: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."

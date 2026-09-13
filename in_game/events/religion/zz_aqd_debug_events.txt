@@ -7,6 +7,9 @@
 #   event z_aqd_debug.4   - diagnose WHY AHI is (not) an eligible foreign-jurist
 #                           source for you - the event text itself names the
 #                           first failing condition, no log-reading needed.
+#   event z_aqd_debug.5   - force-fire z_aqd_fatwa.1 / .2 directly (bypassing
+#                           their own trigger), or clear their cooldown/stage
+#                           variables for a repeat test.
 #
 # Then:  event z_aqd_halqa.1  /  event z_aqd_jurists.1
 # =====================================================================
@@ -131,5 +134,28 @@ z_aqd_debug.4 = {
 
 	option = {
 		name = z_aqd_debug.4.ok
+	}
+}
+
+z_aqd_debug.5 = {
+	type = country_event
+	title = z_aqd_debug.5.t
+	desc = z_aqd_debug.5.d
+	outcome = neutral
+
+	option = {
+		name = z_aqd_debug.5.force1
+		aqd_debug_force_fatwa_1 = yes
+	}
+	option = {
+		name = z_aqd_debug.5.force2
+		aqd_debug_force_fatwa_2 = yes
+	}
+	option = {
+		name = z_aqd_debug.5.clearvars
+		aqd_debug_clear_fatwa_vars = yes
+	}
+	option = {
+		name = z_aqd_debug.5.cancel
 	}
 }

@@ -1,0 +1,229 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - The Jurists' Fatwa Against an Unjust War:
+# shared triggers.
+#
+# aqd_madhhab_acceptable_to_root: a pure (non-mutating) re-expression of
+# scripted_effects/z_aqd_jurist_effects.txt's aqd_classify_madhhab_
+# compatibility outcome ">= 0" (favored OR neutral, i.e. NOT heterodox).
+# Effects cannot be called from inside a trigger field, so this walks
+# the same religious_school -> opposed-madhhab table by hand. Called as
+# `defender_leader = { aqd_madhhab_acceptable_to_root = yes }` from
+# aqd_fatwa_core_conditions below - 'this' becomes the candidate country
+# there (the war's defender_leader), 'root' stays the event root (the
+# declarer) throughout, since root does not shift with 'this'. Checks
+# 'this' (the candidate)'s has_policy = <madhhab>_policy against ROOT's
+# own religious_school - i.e. "does MY aqidah consider the CANDIDATE's
+# madhhab orthodox or neutral". Table re-derived line-by-line from
+# aqd_classify_madhhab_compatibility (z_aqd_jurist_effects.txt lines
+# 575-729) and cross-checked against it a second time - MUST be
+# re-diffed against that file if it ever changes; there is no compiler
+# link keeping the two in sync.
+#
+# NINE concrete branches, NOT one parameterised trigger: EU5 does not
+# substitute $PARAM$ when a scripted_trigger is invoked from inside
+# another scripted_trigger (see z_aqd_jurist_triggers.txt's header note)
+# - mirrors aqd_is_eligible_jurist_source's own style exactly.
+# =====================================================================
+
+aqd_madhhab_acceptable_to_root = {
+	OR = {
+		AND = {
+			has_policy = hanafi_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:imamiya_school
+				religious_school = religious_school:ismaili_school
+				religious_school = religious_school:nizari_school
+				religious_school = religious_school:mustali_school
+				religious_school = religious_school:alevism_school
+				religious_school = religious_school:alawi_school
+			} } }
+		}
+		AND = {
+			has_policy = hanbali_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:imamiya_school
+				religious_school = religious_school:ismaili_school
+				religious_school = religious_school:nizari_school
+				religious_school = religious_school:mustali_school
+				religious_school = religious_school:alevism_school
+				religious_school = religious_school:alawi_school
+				religious_school = religious_school:mutazili_school
+				religious_school = religious_school:zaidi_school
+			} } }
+		}
+		AND = {
+			has_policy = maliki_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:imamiya_school
+				religious_school = religious_school:ismaili_school
+				religious_school = religious_school:nizari_school
+				religious_school = religious_school:mustali_school
+				religious_school = religious_school:alevism_school
+				religious_school = religious_school:alawi_school
+				religious_school = religious_school:zaidi_school
+				religious_school = religious_school:azzaba_school
+			} } }
+		}
+		AND = {
+			has_policy = shafii_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:imamiya_school
+				religious_school = religious_school:ismaili_school
+				religious_school = religious_school:nizari_school
+				religious_school = religious_school:mustali_school
+				religious_school = religious_school:alevism_school
+				religious_school = religious_school:alawi_school
+				religious_school = religious_school:mutazili_school
+				religious_school = religious_school:zaidi_school
+			} } }
+		}
+		AND = {
+			has_policy = zahiri_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:ashari_school
+				religious_school = religious_school:maturidi_school
+				religious_school = religious_school:athari_school
+				religious_school = religious_school:imamiya_school
+				religious_school = religious_school:ismaili_school
+				religious_school = religious_school:nizari_school
+				religious_school = religious_school:mustali_school
+				religious_school = religious_school:alevism_school
+				religious_school = religious_school:alawi_school
+				religious_school = religious_school:zaidi_school
+			} } }
+		}
+		AND = {
+			has_policy = ismaili_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:ashari_school
+				religious_school = religious_school:maturidi_school
+				religious_school = religious_school:athari_school
+				religious_school = religious_school:mutazili_school
+				religious_school = religious_school:wahhabi_school
+				religious_school = religious_school:wahbi_school
+				religious_school = religious_school:azzaba_school
+			} } }
+		}
+		AND = {
+			has_policy = jafari_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:ashari_school
+				religious_school = religious_school:maturidi_school
+				religious_school = religious_school:athari_school
+				religious_school = religious_school:mutazili_school
+				religious_school = religious_school:wahhabi_school
+				religious_school = religious_school:wahbi_school
+				religious_school = religious_school:azzaba_school
+			} } }
+		}
+		AND = {
+			has_policy = zaidi_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:ashari_school
+				religious_school = religious_school:maturidi_school
+				religious_school = religious_school:athari_school
+				religious_school = religious_school:mutazili_school
+				religious_school = religious_school:wahhabi_school
+				religious_school = religious_school:wahbi_school
+				religious_school = religious_school:azzaba_school
+			} } }
+		}
+		AND = {
+			has_policy = ibadi_policy
+			NOT = { root = { OR = {
+				religious_school = religious_school:ashari_school
+				religious_school = religious_school:maturidi_school
+				religious_school = religious_school:athari_school
+				religious_school = religious_school:mutazili_school
+				religious_school = religious_school:wahhabi_school
+			} } }
+		}
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_fatwa_core_conditions: is root right now the attacker-leader of a
+# war against a fellow-sect Muslim state, fought on a weak/absent casus
+# belli, that root is clearly winning, whose madhhab root's own aqidah
+# does not consider heretical? Deliberately carries NO cooldown and NO
+# war_exhaustion threshold - those differ per stage and belong on each
+# stage's own event trigger / pulse, not here: a shared cooldown here
+# would make the escalation event's eligibility window impossible,
+# since stage 2 can only fire strictly inside stage 1's own cooldown
+# period.
+#
+# attacker_leader (not is_an_attacker): this feature is specifically
+# about the country that DECLARED the war, not every ally who later
+# joined the attacking side - attacker_leader is the single instigating
+# country, matching that intent exactly. Mirrors events/religion/
+# hindu_events.txt's attacker_leader / defender_leader pairing.
+#
+# war_score_versus (not war_score_in_war): avoids an ambiguous `war =`
+# scope reference entirely by comparing two countries directly -
+# confirmed idiom, e.g. events/disaster/decline_of_mali.txt's
+# `any_attacker = { war_score_versus = { target = root ... } } }`
+# (mirrored below with attacker/defender swapped, since root is the
+# attacker here, not the defender).
+#
+# "Weak or lacking justification" = is_no_cb_war (cb_none - literally no
+# CB at all) OR one of a hand-picked list of CBs that require nothing
+# but rivalry/enemy-status/a flimsy pretext to use, no real claim, core,
+# religious tie, or historical/situational grounding (common/casus_belli/
+# *.txt, base game). Checked directly against every candidate file
+# there is no base-game "opportunistic" tag to key off (confirmed by an
+# exhaustive grep for custom_tags across that whole folder - none are
+# actually set anywhere). Deliberately excludes cb_conquer_province
+# (requires an actual is_core_of claim), cb_hegemon/_ultimatum (a
+# systemic check on hegemonic power, not unilateral opportunism), and
+# cb_cut_down_in_size (create_enabled = always = no - never a real
+# player declare-war choice) - those read as legitimate-enough
+# grounds even against a fellow Muslim. The ~50 remaining CBs (HRE,
+# steppe/horde, colonial, native, and country/situation-specific ones)
+# were not individually audited - none of them can realistically target
+# a fellow-sect, aqidah-acceptable Muslim state in the first place, so
+# they never reach this trigger regardless.
+aqd_fatwa_core_conditions = {
+	religion.group = religion_group:muslim
+	aqd_country_owns_any_jurist_seat = yes
+	any_current_war = {
+		attacker_leader = root
+		OR = {
+			is_no_cb_war = yes
+			NOT = { has_casus_belli = yes }
+			casus_belli ?= casus_belli:cb_fabricated_conquer_province
+			casus_belli ?= casus_belli:cb_trade_conflict
+			casus_belli ?= casus_belli:cb_disrupting_trade
+			casus_belli ?= casus_belli:cb_humiliate_rival
+			casus_belli ?= casus_belli:cb_humiliate
+			casus_belli ?= casus_belli:cb_conquer_enemy
+			casus_belli ?= casus_belli:attack_threat
+			casus_belli ?= casus_belli:cb_imperialism
+		}
+		defender_leader = {
+			religion = root.religion
+			aqd_madhhab_acceptable_to_root = yes
+			war_score_versus = { target = root  value <= -0.25 }
+		}
+	}
+}
+
+# Location-scoped 9-way OR anchor: does this location carry ANY of the
+# 9 concrete per-madhhab z_aqd_fatwa_displeased_<madhhab> keys
+# (main_menu/common/static_modifiers/z_aqd_fatwa_displeased.txt)? Used
+# both by z_aqd_fatwa.2's own trigger (has stage 1 already hit some
+# province of ours?) and by its immediate (re-find that same province,
+# since saved scopes do not survive trigger_event) - written once here
+# instead of copy-pasted in both places.
+aqd_location_has_any_fatwa_ban = {
+	OR = {
+		has_location_modifier = z_aqd_fatwa_displeased_hanafi
+		has_location_modifier = z_aqd_fatwa_displeased_hanbali
+		has_location_modifier = z_aqd_fatwa_displeased_maliki
+		has_location_modifier = z_aqd_fatwa_displeased_shafii
+		has_location_modifier = z_aqd_fatwa_displeased_zahiri
+		has_location_modifier = z_aqd_fatwa_displeased_ismaili
+		has_location_modifier = z_aqd_fatwa_displeased_jafari
+		has_location_modifier = z_aqd_fatwa_displeased_zaidi
+		has_location_modifier = z_aqd_fatwa_displeased_ibadi
+	}
+}

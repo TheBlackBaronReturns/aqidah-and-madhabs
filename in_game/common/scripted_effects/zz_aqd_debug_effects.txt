@@ -36,6 +36,29 @@ aqd_debug_seed_halqa = {
 	root = { aqd_recount_jurist_total = yes }
 }
 
+# Force-fire the fatwa demand/escalation events directly, bypassing
+# their own trigger, so the desc/options and the apply/clear effects
+# can be checked without first arranging a real weak-CB, winning,
+# fellow-sect war. Does NOT set up such a war itself - the real trigger
+# (aqd_fatwa_core_conditions) must still be met for these to appear
+# through the normal pulse; this only proves the event body itself
+# works, same purpose as z_aqd_debug.1-4's own force helpers.
+aqd_debug_force_fatwa_1 = {
+	trigger_event = z_aqd_fatwa.1
+}
+aqd_debug_force_fatwa_2 = {
+	trigger_event = z_aqd_fatwa.2
+}
+
+# Clear every variable this feature uses, so a forced or real fire can
+# be repeated freely while testing (stage 1's own cooldown / stage 2's
+# gating would otherwise block a re-test for years).
+aqd_debug_clear_fatwa_vars = {
+	remove_variable = aqd_fatwa_cooldown
+	remove_variable = aqd_fatwa_stage1_fired
+	remove_variable = aqd_fatwa_stage2_too_soon
+}
+
 # Strip any active ḥalqa modifier from the capital's province so the
 # event can be re-tested there.
 aqd_debug_clear_halqa = {
