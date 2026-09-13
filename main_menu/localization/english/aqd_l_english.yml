@@ -19,7 +19,7 @@
 
  aqd_crackdown_madhhab: "Crack Down on Jurists"
  aqd_crackdown_madhhab_desc: "Move against a rival madhhab's institutions in your realm - closing courts, and if need be a seat itself, until its standing is broken back by one degree. The Ulema will not forget it quickly."
- aqd_crackdown_gold_tt: "Seize up to #Y [SCOPE.sCountry('aqd_crackdown_actor').MakeScope.GetVariable('aqd_crackdown_gold_est').GetValue|V0]@gold!#! in confiscated endowments"
+ aqd_crackdown_gold_tt: "Seize up to #Y [SCOPE.sCountry('actor').MakeScope.GetVariable('aqd_crackdown_gold_est').GetValue|V0]@gold!#! in confiscated endowments"
  aqd_crackdown_select: "Crack down on which madhhab?"
  aqd_crackdown_none: "@trigger_no! No rival madhhab has enough of a foothold in your realm to crack down on."
 

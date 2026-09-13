@@ -219,43 +219,62 @@ ibadi_institution_tier = {
 }
 
 # ---------------------------------------------------------------------
+# Realm-wide MADRASA-ONLY counts, one per madhhab. Distinct from the
+# PROVINCE-scoped aqd_prov_madrasa_count_<X> below (halqa leader-weight
+# only) - these are the whole-realm equivalent, needed because
+# crackdown's confiscation gold now comes from madrasas alone (seats are
+# still razed but no longer pay out - see the doc comment below).
+# ---------------------------------------------------------------------
+hanafi_madrasa_score   = { every_owned_location = { limit = { has_building = building_type:madrasa_of_hanafi_fiqh }   add = 1 } }
+hanbali_madrasa_score  = { every_owned_location = { limit = { has_building = building_type:madrasa_of_hanbali_fiqh }  add = 1 } }
+maliki_madrasa_score   = { every_owned_location = { limit = { has_building = building_type:madrasa_of_maliki_fiqh }   add = 1 } }
+shafii_madrasa_score   = { every_owned_location = { limit = { has_building = building_type:madrasa_of_shafii_fiqh }   add = 1 } }
+zahiri_madrasa_score   = { every_owned_location = { limit = { has_building = building_type:madrasa_of_zahiri_fiqh }   add = 1 } }
+ismaili_madrasa_score  = { every_owned_location = { limit = { has_building = building_type:madrasa_of_ismaili_fiqh }  add = 1 } }
+jafari_madrasa_score   = { every_owned_location = { limit = { has_building = building_type:madrasa_of_jafari_fiqh }   add = 1 } }
+zaidi_madrasa_score    = { every_owned_location = { limit = { has_building = building_type:madrasa_of_zaidi_fiqh }    add = 1 } }
+ibadi_madrasa_score    = { every_owned_location = { limit = { has_building = building_type:madrasa_of_ibadi_fiqh }    add = 1 } }
+
+# ---------------------------------------------------------------------
 # Projected confiscation gold from a crackdown, shown in the event /
 # action choice text. The razing loop in scripted_effects/
 # z_aqd_jurist_effects.txt pays monthly_income_trade_and_tax * 0.25 per
-# razed madrasa and * 1.0 per razed seat; since a madrasa is strength 1
-# and a seat strength 4, that is exactly strength_razed * 0.25 * income.
-# This estimate uses the FULL score (the wipeout ceiling) - the
-# tier-drop branch seizes less, so the text says "up to".
+# razed madrasa and NOTHING per razed seat (seats are still destroyed,
+# they just aren't a source of gold) - so the estimate is keyed off the
+# realm's MADRASA COUNT alone, not the full institution_score (which
+# would still include each seat's strength-4 weighting). This estimate
+# uses the FULL madrasa count (the wipeout ceiling) - the tier-drop
+# branch seizes less, so the text says "up to".
 #   _establish : branches on var:aqd_establish_madhhab (1..9), used by
 #                z_aqd_establishment.1's crack-down option.
 #   _target    : branches on scope:target (a sharia_law policy), used by
 #                the aqd_crackdown_madhhab generic action.
 # ---------------------------------------------------------------------
 aqd_crackdown_gold_estimate_establish = {
-	if      = { limit = { var:aqd_establish_madhhab = 1 }  value = hanafi_institution_score }
-	else_if = { limit = { var:aqd_establish_madhhab = 2 }  value = hanbali_institution_score }
-	else_if = { limit = { var:aqd_establish_madhhab = 3 }  value = maliki_institution_score }
-	else_if = { limit = { var:aqd_establish_madhhab = 4 }  value = shafii_institution_score }
-	else_if = { limit = { var:aqd_establish_madhhab = 5 }  value = zahiri_institution_score }
-	else_if = { limit = { var:aqd_establish_madhhab = 6 }  value = ismaili_institution_score }
-	else_if = { limit = { var:aqd_establish_madhhab = 7 }  value = jafari_institution_score }
-	else_if = { limit = { var:aqd_establish_madhhab = 8 }  value = zaidi_institution_score }
-	else_if = { limit = { var:aqd_establish_madhhab = 9 }  value = ibadi_institution_score }
+	if      = { limit = { var:aqd_establish_madhhab = 1 }  value = hanafi_madrasa_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 2 }  value = hanbali_madrasa_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 3 }  value = maliki_madrasa_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 4 }  value = shafii_madrasa_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 5 }  value = zahiri_madrasa_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 6 }  value = ismaili_madrasa_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 7 }  value = jafari_madrasa_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 8 }  value = zaidi_madrasa_score }
+	else_if = { limit = { var:aqd_establish_madhhab = 9 }  value = ibadi_madrasa_score }
 	else    = { value = 0 }
 	multiply = 0.25
 	multiply = monthly_income_trade_and_tax
 }
 
 aqd_crackdown_gold_estimate_target = {
-	if      = { limit = { scope:target = policy:hanafi_policy }  value = hanafi_institution_score }
-	else_if = { limit = { scope:target = policy:hanbali_policy } value = hanbali_institution_score }
-	else_if = { limit = { scope:target = policy:maliki_policy }  value = maliki_institution_score }
-	else_if = { limit = { scope:target = policy:shafii_policy }  value = shafii_institution_score }
-	else_if = { limit = { scope:target = policy:zahiri_policy }  value = zahiri_institution_score }
-	else_if = { limit = { scope:target = policy:ismaili_policy } value = ismaili_institution_score }
-	else_if = { limit = { scope:target = policy:jafari_policy }  value = jafari_institution_score }
-	else_if = { limit = { scope:target = policy:zaidi_policy }   value = zaidi_institution_score }
-	else_if = { limit = { scope:target = policy:ibadi_policy }   value = ibadi_institution_score }
+	if      = { limit = { scope:target = policy:hanafi_policy }  value = hanafi_madrasa_score }
+	else_if = { limit = { scope:target = policy:hanbali_policy } value = hanbali_madrasa_score }
+	else_if = { limit = { scope:target = policy:maliki_policy }  value = maliki_madrasa_score }
+	else_if = { limit = { scope:target = policy:shafii_policy }  value = shafii_madrasa_score }
+	else_if = { limit = { scope:target = policy:zahiri_policy }  value = zahiri_madrasa_score }
+	else_if = { limit = { scope:target = policy:ismaili_policy } value = ismaili_madrasa_score }
+	else_if = { limit = { scope:target = policy:jafari_policy }  value = jafari_madrasa_score }
+	else_if = { limit = { scope:target = policy:zaidi_policy }   value = zaidi_madrasa_score }
+	else_if = { limit = { scope:target = policy:ibadi_policy }   value = ibadi_madrasa_score }
 	else    = { value = 0 }
 	multiply = 0.25
 	multiply = monthly_income_trade_and_tax

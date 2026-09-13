@@ -813,7 +813,9 @@ aqd_jurist_reaction_refuse_opposed = {
 #             the value the tier-drop loop chases down by one
 #
 # Beyond the razing the effect also: gains confiscation gold per razed
-# building; applies a footprint-scaled stability hit; stamps the
+# MADRASA only (seats are razed too but pay no gold - a seat's waqf is
+# assumed tied up in its own institution, not liquid); applies a
+# footprint-scaled stability hit; stamps the
 # nationwide "Legal School Persecuted" location modifier
 # (z_aqd_jurist_evicted) on every location holding the school's
 # buildings; adds a national modifier - z_aqd_heretics_suppressed if
@@ -914,7 +916,11 @@ aqd_crackdown_effect = {
 			}
 			scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_iter  add = 1 } }
 			aqd_crackdown_destroy_$MADHHAB$_seat = yes
-			add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 1 }
+			# No add_gold here - only madrasas pay out (see the doc comment
+			# above aqd_crackdown_gold_estimate_target in script_values/
+			# z_aqd_madhhab_counts.txt). A seat still gets razed and still
+			# counts toward strength_razed for tier-drop/wipeout bookkeeping,
+			# it just isn't a source of confiscation gold.
 			scope:aqd_crackdown_country = {
 				change_variable = { name = aqd_crackdown_seats_razed     add = 1 }
 				change_variable = { name = aqd_crackdown_strength_razed  add = 4 }
@@ -947,8 +953,9 @@ aqd_crackdown_effect = {
 			else_if = {
 				limit = { any_owned_location = { has_building = building_type:seat_of_$MADHHAB$_jurists } }
 				aqd_crackdown_destroy_$MADHHAB$_seat = yes
-				# A seat's waqf endowment is worth far more than a madrasa's.
-				add_gold = { value = scope:aqd_crackdown_country.monthly_income_trade_and_tax  multiply = 1 }
+				# No add_gold here - only madrasas pay out (see the doc
+				# comment above aqd_crackdown_gold_estimate_target in
+				# script_values/z_aqd_madhhab_counts.txt).
 				scope:aqd_crackdown_country = {
 					change_variable = { name = aqd_crackdown_seats_razed     add = 1 }
 					change_variable = { name = aqd_crackdown_strength_razed  add = 4 }
