@@ -152,6 +152,10 @@ z_aqd_debug.5 = {
 		aqd_debug_force_fatwa_2 = yes
 	}
 	option = {
+		name = z_aqd_debug.5.forcejihad
+		aqd_debug_force_jfatwa_1 = yes
+	}
+	option = {
 		name = z_aqd_debug.5.clearvars
 		aqd_debug_clear_fatwa_vars = yes
 	}

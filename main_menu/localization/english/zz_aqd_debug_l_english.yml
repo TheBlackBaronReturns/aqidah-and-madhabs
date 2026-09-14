@@ -32,5 +32,6 @@
  z_aqd_debug.5.d: "Force-fires the fatwa demand/escalation events directly (bypassing their own trigger), or clears their cooldown/stage variables for a repeat test. Does not set up a real war for you - only proves the event body itself works."
  z_aqd_debug.5.force1: "Force z_aqd_fatwa.1 (the demand)"
  z_aqd_debug.5.force2: "Force z_aqd_fatwa.2 (the escalation)"
+ z_aqd_debug.5.forcejihad: "Force z_aqd_jfatwa.1 (the Fatwa of Jihad)"
  z_aqd_debug.5.clearvars: "Clear fatwa cooldown/stage variables"
  z_aqd_debug.5.cancel: "Cancel"

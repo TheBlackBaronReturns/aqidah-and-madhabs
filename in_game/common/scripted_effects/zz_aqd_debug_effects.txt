@@ -50,6 +50,15 @@ aqd_debug_force_fatwa_2 = {
 	trigger_event = z_aqd_fatwa.2
 }
 
+# Same purpose, for the Fatwa of Jihad (events/religion/
+# z_aqd_jihad_fatwa_events.txt). Bypassing the trigger means scope:
+# target_location/scope:enemy won't exist (no pending-pick marker was
+# ever stamped), so the desc.fallback variant renders - same as the two
+# above, this only proves the event body itself works.
+aqd_debug_force_jfatwa_1 = {
+	trigger_event = z_aqd_jfatwa.1
+}
+
 # Clear every variable this feature uses, so a forced or real fire can
 # be repeated freely while testing (stage 1's own cooldown / stage 2's
 # gating would otherwise block a re-test for years).
@@ -57,6 +66,7 @@ aqd_debug_clear_fatwa_vars = {
 	remove_variable = aqd_fatwa_cooldown
 	remove_variable = aqd_fatwa_stage1_fired
 	remove_variable = aqd_fatwa_stage2_too_soon
+	remove_variable = aqd_jihad_fatwa_cooldown
 }
 
 # Strip any active ḥalqa modifier from the capital's province so the

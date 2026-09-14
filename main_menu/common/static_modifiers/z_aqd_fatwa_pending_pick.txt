@@ -1,0 +1,23 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - shared "pending pick" marker.
+#
+# Purely a same-tick re-derivation anchor for scripted_effects/
+# z_aqd_madhhab_approval_effects.txt's aqd_stamp_pending_pick, used by
+# any fatwa whose approval roll must happen silently in a pulse's effect
+# before an event fires (events/religion/z_aqd_fatwa_events.txt's
+# z_aqd_fatwa.1, events/religion/z_aqd_jihad_fatwa_events.txt's
+# z_aqd_jfatwa.1). Stamped on a successful roll, then consumed
+# (remove_location_modifier) in the very next line of the event's own
+# immediate that finds it via has_location_modifier - it should never be
+# visible to the player for more than an instant. months = 1 at the
+# stamp site is a safety-net duration only, not load-bearing: normal
+# flow always removes this explicitly before the player ever sees the
+# event's own text render.
+# =====================================================================
+
+z_aqd_fatwa_pending_pick = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

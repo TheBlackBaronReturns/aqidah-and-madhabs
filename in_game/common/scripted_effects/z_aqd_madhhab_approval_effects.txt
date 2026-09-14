@@ -1,0 +1,115 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - centralized madhhab-approval engine: effects.
+# Companion to script_values/z_aqd_madhhab_approval.txt. Every fatwa/
+# approval feature in this mod should go through aqd_compute_seat_approval
+# below rather than re-deriving a seat's madhhab or compatibility itself.
+# =====================================================================
+
+# $COUNTRY$-scoped. Classifies $SEAT_MADHHAB$ (the canonical 1-9 index -
+# see z_aqd_establishment_effects.txt's var:aqd_establish_madhhab for the
+# same numbering: 1 hanafi 2 hanbali 3 maliki 4 shafii 5 zahiri 6 ismaili
+# 7 jafari 8 zaidi 9 ibadi) against $COUNTRY$'s own aqidah, WITHOUT
+# disturbing var:aqd_compat_madhhab / var:aqd_jurist_compat - the
+# white-peace fatwa (events/religion/z_aqd_fatwa_events.txt) already uses
+# those two for a DIFFERENT purpose (classifying the ENEMY's madhhab via
+# scripted_effects/z_aqd_jurist_effects.txt's aqd_set_compat_madhhab_
+# from_country), and its desc text depends on that meaning surviving
+# untouched. Saves/restores both around its own pass; writes ITS OWN
+# result to var:aqd_seat_compat, which script_values/z_aqd_madhhab_
+# approval.txt's state/orthodox/heterodox term reads exclusively - that
+# script_value file must never read var:aqd_jurist_compat directly.
+aqd_classify_seat_compatibility = {
+	$COUNTRY$ = {
+		if = { limit = { exists = var:aqd_compat_madhhab }  set_variable = { name = aqd_compat_madhhab_save  value = var:aqd_compat_madhhab } }
+		if = { limit = { exists = var:aqd_jurist_compat }   set_variable = { name = aqd_jurist_compat_save   value = var:aqd_jurist_compat } }
+		set_variable = { name = aqd_compat_madhhab  value = $SEAT_MADHHAB$ }
+	}
+	aqd_classify_madhhab_compatibility = { COUNTRY = $COUNTRY$ }
+	$COUNTRY$ = {
+		set_variable = { name = aqd_seat_compat  value = var:aqd_jurist_compat }
+		if   = { limit = { exists = var:aqd_compat_madhhab_save }  set_variable = { name = aqd_compat_madhhab  value = var:aqd_compat_madhhab_save }  remove_variable = aqd_compat_madhhab_save }
+		else = { remove_variable = aqd_compat_madhhab }
+		if   = { limit = { exists = var:aqd_jurist_compat_save }   set_variable = { name = aqd_jurist_compat  value = var:aqd_jurist_compat_save }   remove_variable = aqd_jurist_compat_save }
+		else = { remove_variable = aqd_jurist_compat }
+	}
+}
+
+# Called at a SEAT-HOLDING LOCATION's own scope ('this'/implicit scope =
+# the location, root = the country judging it). Derives var:aqd_seat_
+# madhhab (1-9) from which seat_of_<X>_jurists building is present,
+# classifies it (above), then reads the matching aqd_madhhab_approval_<X>
+# script_value into var:aqd_approval_scratch on root. THE single entry
+# point for "how does this seat's madhhab feel about backing root right
+# now" - do not re-derive seat madhhab or call the script_values directly
+# elsewhere.
+aqd_compute_seat_approval = {
+	if      = { limit = { has_building = building_type:seat_of_hanafi_jurists }  root = { set_variable = { name = aqd_seat_madhhab  value = 1 } } }
+	else_if = { limit = { has_building = building_type:seat_of_hanbali_jurists } root = { set_variable = { name = aqd_seat_madhhab  value = 2 } } }
+	else_if = { limit = { has_building = building_type:seat_of_maliki_jurists }  root = { set_variable = { name = aqd_seat_madhhab  value = 3 } } }
+	else_if = { limit = { has_building = building_type:seat_of_shafii_jurists }  root = { set_variable = { name = aqd_seat_madhhab  value = 4 } } }
+	else_if = { limit = { has_building = building_type:seat_of_zahiri_jurists }  root = { set_variable = { name = aqd_seat_madhhab  value = 5 } } }
+	else_if = { limit = { has_building = building_type:seat_of_ismaili_jurists } root = { set_variable = { name = aqd_seat_madhhab  value = 6 } } }
+	else_if = { limit = { has_building = building_type:seat_of_jafari_jurists }  root = { set_variable = { name = aqd_seat_madhhab  value = 7 } } }
+	else_if = { limit = { has_building = building_type:seat_of_zaidi_jurists }   root = { set_variable = { name = aqd_seat_madhhab  value = 8 } } }
+	else_if = { limit = { has_building = building_type:seat_of_ibadi_jurists }   root = { set_variable = { name = aqd_seat_madhhab  value = 9 } } }
+
+	root = {
+		if = {
+			limit = { exists = var:aqd_seat_madhhab }
+			aqd_classify_seat_compatibility = { COUNTRY = root  SEAT_MADHHAB = var:aqd_seat_madhhab }
+			if      = { limit = { var:aqd_seat_madhhab = 1 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_hanafi } }
+			else_if = { limit = { var:aqd_seat_madhhab = 2 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_hanbali } }
+			else_if = { limit = { var:aqd_seat_madhhab = 3 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_maliki } }
+			else_if = { limit = { var:aqd_seat_madhhab = 4 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_shafii } }
+			else_if = { limit = { var:aqd_seat_madhhab = 5 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_zahiri } }
+			else_if = { limit = { var:aqd_seat_madhhab = 6 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_ismaili } }
+			else_if = { limit = { var:aqd_seat_madhhab = 7 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_jafari } }
+			else_if = { limit = { var:aqd_seat_madhhab = 8 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_zaidi } }
+			else_if = { limit = { var:aqd_seat_madhhab = 9 }  set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_ibadi } }
+		}
+	}
+}
+
+# Call at root, after aqd_compute_seat_approval, for any feature asking
+# "does this seat turn AGAINST the ruler" instead of "does it back him"
+# (the white-peace fatwa). The 5-95 clamp on every aqd_madhhab_approval_*
+# value guarantees 100-x also lands in 5-95, so no re-clamp is needed.
+aqd_invert_approval_scratch = {
+	change_variable = { name = aqd_approval_scratch  multiply = -1 }
+	change_variable = { name = aqd_approval_scratch  add = 100 }
+}
+
+# Reads var:aqd_approval_scratch (5-95) on root, writes var:aqd_madhhab_
+# approval_result (1 agree / 0 decline). EU5's random_list only accepts a
+# literal integer weight - no computed-weight support, confirmed absent
+# anywhere in base game (script_values/z_aqd_madhhab_counts.txt's own
+# header) - so the computed percentage is banded into 10%-wide buckets,
+# each a pre-authored two-literal-weight random_list, mirroring events/
+# religion/z_aqd_halqa_events.txt's leader-weight mechanic.
+aqd_roll_approval_percentage = {
+	set_variable = { name = aqd_madhhab_approval_result  value = 0 }
+	if      = { limit = { var:aqd_approval_scratch >= 90 }  random_list = { 90 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  10 = {} } }
+	else_if = { limit = { var:aqd_approval_scratch >= 80 }  random_list = { 80 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  20 = {} } }
+	else_if = { limit = { var:aqd_approval_scratch >= 70 }  random_list = { 70 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  30 = {} } }
+	else_if = { limit = { var:aqd_approval_scratch >= 60 }  random_list = { 60 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  40 = {} } }
+	else_if = { limit = { var:aqd_approval_scratch >= 50 }  random_list = { 50 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  50 = {} } }
+	else_if = { limit = { var:aqd_approval_scratch >= 40 }  random_list = { 40 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  60 = {} } }
+	else_if = { limit = { var:aqd_approval_scratch >= 30 }  random_list = { 30 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  70 = {} } }
+	else_if = { limit = { var:aqd_approval_scratch >= 20 }  random_list = { 20 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  80 = {} } }
+	else    = { random_list = { 10 = { set_variable = { name = aqd_madhhab_approval_result  value = 1 } }  90 = {} } }
+}
+
+# ---------------------------------------------------------------------
+# Shared "pending pick" primitive. Any fatwa feature whose roll must
+# happen silently BEFORE an event fires (so a decline produces no popup
+# at all) needs to commit something durable to the chosen location prior
+# to trigger_event, since saved scopes do not survive it. Stamp on
+# success, from the seat's own scope; the fired event re-finds the seat
+# via has_location_modifier = z_aqd_fatwa_pending_pick and consumes it
+# immediately in its own immediate (main_menu/common/static_modifiers/
+# z_aqd_fatwa_pending_pick.txt). Stamped and consumed same-tick, so it
+# never lingers or collides with a later, unrelated pick.
+# ---------------------------------------------------------------------
+aqd_stamp_pending_pick = {
+	add_location_modifier = { modifier = z_aqd_fatwa_pending_pick  months = 1 }
+}

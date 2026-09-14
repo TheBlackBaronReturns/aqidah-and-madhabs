@@ -1,0 +1,57 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - the Fatwa of Jihad: triggers.
+# =====================================================================
+
+# Country-scoped: is root part of a jihad right now, either as a formal
+# member of the jihad international_organization_type (leader or any
+# joiner alike - jihad.txt's own on_joined/can_join_trigger make no
+# leader/member distinction once membership exists), or as a war
+# participant fighting under casus_belli:cb_jihad without formal
+# membership (a subject/ally dragged into the jihad's war by alliance/
+# call-to-arms). is_an_attacker (not attacker_leader) is deliberate - it
+# must catch every co-attacker, not just the original declarer (confirmed
+# idiom: events/disaster/decline_of_mali.txt's own any_attacker usage;
+# is_member_of_international_organization_of_type = { type = jihad } is
+# the confirmed bare-key form for a TYPE, not a single named IO instance -
+# common/government_reforms/republic.txt's / events/debug/qa_debug.txt's
+# own type = union usage).
+aqd_is_jihad_participant = {
+	OR = {
+		is_member_of_international_organization_of_type = { type = jihad }
+		any_current_war = {
+			is_an_attacker = root
+			casus_belli ?= casus_belli:cb_jihad
+		}
+	}
+}
+
+# Location-scoped (called inside a random_owned_location limit at root's
+# own scope, and directly as this file's own pulse prefilter via
+# any_owned_location). Heterodox exclusion is a HARD gate here - never
+# modulated by scripted_effects/z_aqd_madhhab_approval_effects.txt's
+# approval roll, unlike the state/orthodox distinction the roll itself
+# already accounts for. The other two exclusions stop a seat from being
+# picked twice: once already refused/displeased by the white-peace fatwa
+# (scripted_triggers/z_aqd_fatwa_triggers.txt's aqd_location_has_any_
+# fatwa_ban), and once already carrying an unexpired Fatwa of Jihad of
+# its OWN madhhab (main_menu/common/static_modifiers/z_aqd_fatwa_of_
+# jihad.txt) - a different madhhab's seat at the same location, if one
+# exists, is unaffected and remains independently eligible.
+aqd_jihad_seat_eligible = {
+	aqd_seat_madhhab_not_heterodox_to_root = yes
+	NOT = { aqd_location_has_any_fatwa_ban = yes }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = {
+		OR = {
+			has_location_modifier = z_aqd_fatwa_of_jihad_hanafi
+			has_location_modifier = z_aqd_fatwa_of_jihad_hanbali
+			has_location_modifier = z_aqd_fatwa_of_jihad_maliki
+			has_location_modifier = z_aqd_fatwa_of_jihad_shafii
+			has_location_modifier = z_aqd_fatwa_of_jihad_zahiri
+			has_location_modifier = z_aqd_fatwa_of_jihad_ismaili
+			has_location_modifier = z_aqd_fatwa_of_jihad_jafari
+			has_location_modifier = z_aqd_fatwa_of_jihad_zaidi
+			has_location_modifier = z_aqd_fatwa_of_jihad_ibadi
+		}
+	}
+}

@@ -1,0 +1,85 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - the Fatwa of Jihad: effects.
+# =====================================================================
+
+aqd_jihad_fatwa_pick_seat = {
+	random_owned_location = {
+		limit = { aqd_jihad_seat_eligible = yes }
+		save_scope_as = target_location
+		province_definition = { save_scope_as = target_province }
+	}
+}
+
+# 9-branch dispatch, mirrors scripted_effects/z_aqd_fatwa_effects.txt's
+# aqd_fatwa_apply_displeased_for_seat in shape. Called from the event's
+# own option (not immediate) so the manpower/modifier grant renders in
+# the option's tooltip preview.
+aqd_apply_fatwa_of_jihad_for_seat = {
+	if = {
+		limit = { has_building = building_type:seat_of_hanafi_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_hanafi  years = 4  mode = add_and_extend }
+	}
+	else_if = {
+		limit = { has_building = building_type:seat_of_hanbali_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_hanbali  years = 4  mode = add_and_extend }
+	}
+	else_if = {
+		limit = { has_building = building_type:seat_of_maliki_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_maliki  years = 4  mode = add_and_extend }
+	}
+	else_if = {
+		limit = { has_building = building_type:seat_of_shafii_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_shafii  years = 4  mode = add_and_extend }
+	}
+	else_if = {
+		limit = { has_building = building_type:seat_of_zahiri_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_zahiri  years = 4  mode = add_and_extend }
+	}
+	else_if = {
+		limit = { has_building = building_type:seat_of_ismaili_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_ismaili  years = 4  mode = add_and_extend }
+	}
+	else_if = {
+		limit = { has_building = building_type:seat_of_jafari_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_jafari  years = 4  mode = add_and_extend }
+	}
+	else_if = {
+		limit = { has_building = building_type:seat_of_zaidi_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_zaidi  years = 4  mode = add_and_extend }
+	}
+	else_if = {
+		limit = { has_building = building_type:seat_of_ibadi_jurists }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_ibadi  years = 4  mode = add_and_extend }
+	}
+}
+
+# ---------------------------------------------------------------------
+# Country-scoped. Called from the pulse's effect (on_action/
+# 00_aqd_game_start.txt's aqd_jihad_fatwa_pulse), NOT from an event -
+# this is the silent-miss design: the roll happens here, before any
+# popup exists, so a declining seat produces no event at all this month.
+# On success, stamps the shared pending-pick marker (scripted_effects/
+# z_aqd_madhhab_approval_effects.txt's aqd_stamp_pending_pick) and fires
+# the narration event non-silently; the event's own immediate re-finds
+# the seat via that marker (saved scopes do not survive trigger_event).
+# On failure - no eligible seat at all, or the roll declines - this does
+# nothing, a true silent miss.
+# ---------------------------------------------------------------------
+aqd_jihad_fatwa_attempt = {
+	aqd_jihad_fatwa_pick_seat = yes
+	if = {
+		limit = { exists = scope:target_location }
+		scope:target_location = { aqd_compute_seat_approval = yes }
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			scope:target_location = { aqd_stamp_pending_pick = yes }
+			set_variable = { name = aqd_jihad_fatwa_cooldown  years = 5 }
+			trigger_event_non_silently = { id = z_aqd_jfatwa.1  days = 1 }
+		}
+	}
+	remove_variable = aqd_seat_madhhab
+	remove_variable = aqd_seat_compat
+	remove_variable = aqd_approval_scratch
+	remove_variable = aqd_madhhab_approval_result
+}

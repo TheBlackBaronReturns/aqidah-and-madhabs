@@ -92,19 +92,21 @@ aqd_seat_establishment_pulse = {
 # subscribers - same merge-not-override guarantee documented above for
 # on_game_start.
 monthly_country_pulse = {
-	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse }
+	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_jihad_fatwa_pulse }
 }
 
 # The Jurists' Fatwa Against an Unjust War (events/religion/
 # z_aqd_fatwa_events.txt). Cheap prefilters only, mirroring
-# aqd_halqa_pulse's own division of labor - the full
-# aqd_fatwa_core_conditions (CB/warscore/madhhab, scripted_triggers/
-# z_aqd_fatwa_triggers.txt) is re-checked authoritatively in each
-# event's own trigger at fire time, so a same-tick change that
-# invalidates eligibility suppresses the pop-up instead of showing a
-# stale one. chance_to_happen values are production values (stage 2
-# deliberately rarer than stage 1), not inflated testing values like
-# aqd_halqa_pulse's current 80.
+# aqd_halqa_pulse's own division of labor. This is a plain effect, NOT
+# random_events, since stage 1 is now silent-miss: scripted_effects/
+# z_aqd_fatwa_effects.txt's aqd_fatwa_attempt_stage1 does the full
+# aqd_fatwa_core_conditions check plus the centralized madhhab-approval
+# roll (scripted_effects/z_aqd_madhhab_approval_effects.txt) BEFORE any
+# event exists, and only calls trigger_event on a YES - a declining
+# roll produces no popup at all this month. random = { chance = N ... }
+# is the confirmed idiom for an effect-level dice gate (common/on_action/
+# country_four_yearly.txt, _hardcoded.txt), replacing random_events'
+# own chance_to_happen now that there's no event list to attach it to.
 aqd_fatwa_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
@@ -113,12 +115,34 @@ aqd_fatwa_pulse = {
 		war_exhaustion >= 5
 		any_current_war = { attacker_leader = root }
 	}
-	random_events = {
-		100 = z_aqd_fatwa.1
-
-		chance_to_happen = 15
+	effect = {
+		random = {
+			chance = 15
+			aqd_fatwa_attempt_stage1 = yes
+		}
 	}
 }
+
+# The Fatwa of Jihad (events/religion/z_aqd_jihad_fatwa_events.txt).
+# Same silent-miss shape as aqd_fatwa_pulse above: scripted_effects/
+# z_aqd_jihad_fatwa_effects.txt's aqd_jihad_fatwa_attempt does the seat
+# pick + centralized approval roll before any event exists, and only
+# fires the narration event on a YES.
+aqd_jihad_fatwa_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		NOT = { has_variable = aqd_jihad_fatwa_cooldown }
+		aqd_is_jihad_participant = yes
+		any_owned_location = { aqd_jihad_seat_eligible = yes }
+	}
+	effect = {
+		random = {
+			chance = 20
+			aqd_jihad_fatwa_attempt = yes
+		}
+	}
+}
+
 aqd_fatwa_escalation_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim

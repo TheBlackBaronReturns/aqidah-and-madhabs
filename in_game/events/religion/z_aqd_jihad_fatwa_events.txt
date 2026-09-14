@@ -1,0 +1,136 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - the Fatwa of Jihad.
+#
+# Fired by on_action/00_aqd_game_start.txt's aqd_jihad_fatwa_pulse
+# (monthly_country_pulse) on any Muslim realm currently party to a jihad -
+# leader, IO joiner, or a subject/ally fighting under casus_belli:cb_jihad
+# without formal IO membership alike (scripted_triggers/z_aqd_jihad_
+# fatwa_triggers.txt's aqd_is_jihad_participant). One of the realm's own
+# eligible jurist-seat provinces (aqd_jihad_seat_eligible - heterodox
+# seats, already-displeased seats, and seats already carrying an
+# unexpired Fatwa of Jihad of their own madhhab are all hard-excluded)
+# issues a fatwa calling all able-bodied believers to the jihad.
+#
+# SILENT MISS BY DESIGN: unlike z_aqd_fatwa.1, this event never shows a
+# "the jurists declined" popup. The per-madhhab approval roll (scripted_
+# effects/z_aqd_madhhab_approval_effects.txt, fed by script_values/
+# z_aqd_madhhab_approval.txt) happens entirely inside the pulse's own
+# effect (scripted_effects/z_aqd_jihad_fatwa_effects.txt's aqd_jihad_
+# fatwa_attempt), BEFORE this event ever fires - a declining roll simply
+# produces no popup that month. This event only ever fires once a seat
+# has already agreed, so it never needs a decline desc variant.
+#
+# Saved scopes do not survive trigger_event, so this event's own
+# immediate re-derives its target seat via the shared pending-pick marker
+# (main_menu/common/static_modifiers/z_aqd_fatwa_pending_pick.txt) that
+# aqd_jihad_fatwa_attempt stamped just before calling trigger_event, and
+# consumes it immediately - mirrors z_aqd_fatwa.2's own "re-find via a
+# stable anchor, not a fresh random pick" idiom exactly.
+# =====================================================================
+
+namespace = z_aqd_jfatwa
+
+z_aqd_jfatwa.1 = {
+	type = country_event
+	title = z_aqd_jfatwa.1.title
+	desc = {
+		first_valid = {
+			# scope:target_location and scope:enemy are only ever set
+			# inside their own exists = guards below - under a real fire
+			# both will resolve, but this fallback keeps a debug force-fire
+			# (bypassing the normal pending-pick marker) from rendering an
+			# unresolved custom scope name, mirroring z_aqd_fatwa.1's own
+			# precedent for this exact failure class.
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy }
+				desc = z_aqd_jfatwa.1.desc.main
+			}
+			triggered_desc = {
+				desc = z_aqd_jfatwa.1.desc.fallback
+			}
+		}
+	}
+	outcome = neutral
+
+	trigger = {
+		religion.group = religion_group:muslim
+		aqd_is_jihad_participant = yes
+		any_owned_location = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	}
+
+	illustration_tags = {
+		10 = angry
+		10 = exterior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+
+		random_owned_location = {
+			limit = { has_location_modifier = z_aqd_fatwa_pending_pick }
+			save_scope_as = target_location
+			province_definition = { save_scope_as = target_province }
+		}
+		if = {
+			limit = { exists = scope:target_location }
+			scope:target_location = { remove_location_modifier = z_aqd_fatwa_pending_pick }
+		}
+
+		if = {
+			limit = { is_member_of_international_organization_of_type = { type = jihad } }
+			# random_ (not any_) is the effect-context iterator that
+			# supports save_scope_as - any_international_organizations_
+			# member_of is trigger-only (confirmed usage: events/culture/
+			# haudenosaunee.txt, inside an OR trigger, no save_scope_as).
+			# Filter conditions belong inside limit, not as bare sibling
+			# fields alongside save_scope_as (confirmed pattern: events/
+			# situations/italian_wars.txt's own random_international_
+			# organizations_member_of calls). A country can only sensibly
+			# be a member of one jihad at a time, so random_ (grab
+			# whichever matches) is sufficient, same reasoning as that
+			# file's own use of random_ over every_.
+			random_international_organizations_member_of = {
+				limit = { international_organization_type = international_organization_type:jihad }
+				save_scope_as = jihad_io
+			}
+		}
+		if = {
+			limit = { exists = scope:jihad_io }
+			scope:jihad_io = {
+				international_organization_target = { save_scope_as = enemy }
+			}
+		}
+		if = {
+			limit = { NOT = { exists = scope:enemy } }
+			random_current_war = {
+				limit = {
+					is_an_attacker = root
+					casus_belli ?= casus_belli:cb_jihad
+				}
+				save_scope_as = target_war
+			}
+			if = {
+				limit = { exists = scope:target_war }
+				scope:target_war = { defender_leader = { save_scope_as = enemy } }
+			}
+		}
+	}
+
+	option = {
+		name = z_aqd_jfatwa.1.ok
+		if = {
+			limit = { exists = scope:target_location }
+			# add_manpower is a country-scoped effect (confirmed idiom:
+			# events/colonization/conquest_of_paradise.txt's own
+			# `add_manpower = { value = root.monthly_manpower ... }`, always
+			# called at the event's implicit root scope) - it must NOT be
+			# nested inside scope:target_location = { ... } the way
+			# add_location_modifier below correctly is. population is read
+			# cross-scope via scope:target_location.population instead.
+			add_manpower = { value = scope:target_location.population  multiply = 0.03 }
+			scope:target_location = {
+				aqd_apply_fatwa_of_jihad_for_seat = yes
+			}
+		}
+	}
+}

@@ -1,0 +1,99 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "Fatwa of Jihad".
+#
+# Applied by scripted_effects/z_aqd_jihad_fatwa_effects.txt's
+# aqd_apply_fatwa_of_jihad_for_seat when a jurist seat's approval roll
+# succeeds (events/religion/z_aqd_jihad_fatwa_events.txt's z_aqd_jfatwa.1),
+# from that event's own option so the tooltip preview renders (mirrors
+# events/religion/z_aqd_halqa_events.txt's own reasoning: effects placed
+# in immediate have no tooltip surface).
+#
+# NINE concrete objects, one per madhhab, NOT one shared key - mirrors
+# z_aqd_fatwa_displeased.txt's own convention: only the seat that actually
+# issued the fatwa gets the modifier, and its own key doubles as the
+# re-pick guard in scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's
+# aqd_jihad_seat_eligible (a seat already carrying an unexpired instance
+# of its own key cannot be picked again until it lapses).
+#
+# Calibration: local_manpower = 0.02 sits below the confirmed base-game
+# range (common/static_modifiers/location.txt's local_manpower = 0.05
+# flat tier); local_manpower_modifier = 0.1 sits well below the confirmed
+# ceiling (common/static_modifiers/institutions.txt's local_manpower_
+# modifier = 0.5). Deliberately small and temporary - this is a one-off
+# mobilization bonus, not a standing institution. No decaying = yes -
+# matches z_aqd_fatwa_displeased's non-tapering design; duration (4 years)
+# and refresh mode are set at the call site via add_location_modifier,
+# not baked in here.
+# =====================================================================
+
+z_aqd_fatwa_of_jihad_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
+
+z_aqd_fatwa_of_jihad_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
+
+z_aqd_fatwa_of_jihad_maliki = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
+
+z_aqd_fatwa_of_jihad_shafii = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
+
+z_aqd_fatwa_of_jihad_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
+
+z_aqd_fatwa_of_jihad_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
+
+z_aqd_fatwa_of_jihad_jafari = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
+
+z_aqd_fatwa_of_jihad_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
+
+z_aqd_fatwa_of_jihad_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_manpower = 0.02
+	local_manpower_modifier = 0.1
+}
