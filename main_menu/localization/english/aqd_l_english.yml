@@ -158,12 +158,61 @@
  # Matches z_aqd_establishment.1.desc's existing "a province of the
  # realm" phrasing below - not a location-naming bug specific to this
  # event, apparently an engine-wide limit on custom scope names in loc.
+ # This limit is about the LOCATION's name only - it says nothing about
+ # naming the MADHHAB, which var:aqd_halqa_madhhab (a plain variable, not
+ # a scope name) makes perfectly resolvable. The 4 keys below are now
+ # per-class FALLBACKS only (events/religion/z_aqd_halqa_events.txt's
+ # desc dispatches to a madhhab-specific variant first, same as z_aqd_
+ # jfatwa.1's own desc) - kept verbatim, generic wording and all, since
+ # they're only ever reached if var:aqd_halqa_madhhab is somehow unset.
  z_aqd_halqa.1.title: "A Circle Convenes"
  z_aqd_halqa.1.ok: "The circle continues"
  z_aqd_halqa.1.desc.state: "In a province of the realm, the qadis and students of the realm's own school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
  z_aqd_halqa.1.desc.orthodox: "The scholars of a school our own creed holds sound keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
  z_aqd_halqa.1.desc.heterodox: "In a province of the realm, the circle of a school our creed cannot abide meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
  z_aqd_halqa.1.desc.tolerated: "The teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+
+ # Madhhab-specific variants of the four keys above - same paragraphs,
+ # with the generic "the realm's own school of law" / "a school our own
+ # creed holds sound" / "a school our creed cannot abide" / (tolerated's
+ # unnamed circle) phrase replaced by the specific rite. Diacritic
+ # spellings match aqd_seat_madhhab_name_<X> elsewhere in this file.
+ z_aqd_halqa.1.desc.state.hanafi: "In a province of the realm, the qadis and students of the Ḥanafī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.state.hanbali: "In a province of the realm, the qadis and students of the Ḥanbalī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.state.maliki: "In a province of the realm, the qadis and students of the Mālikī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.state.shafii: "In a province of the realm, the qadis and students of the Shāfi'ī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.state.zahiri: "In a province of the realm, the qadis and students of the Ẓāhirī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.state.ismaili: "In a province of the realm, the qadis and students of the Ismā'īlī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.state.jafari: "In a province of the realm, the qadis and students of the Ja'farī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.state.zaidi: "In a province of the realm, the qadis and students of the Zaydī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.state.ibadi: "In a province of the realm, the qadis and students of the Ibāḍī school of law keep their teaching circle through the season. Its rulings run with the grain of the state, unrest eases, and waverers among the other Muslims are drawn back toward the ruler's rite - a fifth of them around the seat itself, a tenth more across the rest of the province."
+ z_aqd_halqa.1.desc.orthodox.hanafi: "The Ḥanafī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.orthodox.hanbali: "The Ḥanbalī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.orthodox.maliki: "The Mālikī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.orthodox.shafii: "The Shāfi'ī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.orthodox.zahiri: "The Ẓāhirī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.orthodox.ismaili: "The Ismā'īlī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.orthodox.jafari: "The Ja'farī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.orthodox.zaidi: "The Zaydī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.orthodox.ibadi: "The Ibāḍī scholars, a school our own creed holds sound, keep a teaching circle in a province of the realm. The muftis' answers settle more disputes than they raise, some of the province's dissenting Muslims are won over to the ruler's rite, and the realm's thinking turns a little further toward the spiritual for it."
+ z_aqd_halqa.1.desc.heterodox.hanafi: "In a province of the realm, the circle of the Ḥanafī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.heterodox.hanbali: "In a province of the realm, the circle of the Ḥanbalī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.heterodox.maliki: "In a province of the realm, the circle of the Mālikī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.heterodox.shafii: "In a province of the realm, the circle of the Shāfi'ī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.heterodox.zahiri: "In a province of the realm, the circle of the Ẓāhirī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.heterodox.ismaili: "In a province of the realm, the circle of the Ismā'īlī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.heterodox.jafari: "In a province of the realm, the circle of the Ja'farī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.heterodox.zaidi: "In a province of the realm, the circle of the Zaydī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.heterodox.ibadi: "In a province of the realm, the circle of the Ibāḍī school, one our creed cannot abide, meets all the same, its mudarris well attended. Our own clergy will not be swayed toward the visitors' rite at all, and the wider Muslim populace only slowly; word of the circle has stirred real unrest - and a fifth of the state-religion faithful around the seat itself, with a tenth more across the rest of the province, have already gone over to the visitors' way."
+ z_aqd_halqa.1.desc.tolerated.hanafi: "The Ḥanafī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ z_aqd_halqa.1.desc.tolerated.hanbali: "The Ḥanbalī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ z_aqd_halqa.1.desc.tolerated.maliki: "The Mālikī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ z_aqd_halqa.1.desc.tolerated.shafii: "The Shāfi'ī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ z_aqd_halqa.1.desc.tolerated.zahiri: "The Ẓāhirī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ z_aqd_halqa.1.desc.tolerated.ismaili: "The Ismā'īlī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ z_aqd_halqa.1.desc.tolerated.jafari: "The Ja'farī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ z_aqd_halqa.1.desc.tolerated.zaidi: "The Zaydī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
+ z_aqd_halqa.1.desc.tolerated.ibadi: "The Ibāḍī teaching circle in a province of the realm keeps its season under the ruler's doctrine of ṣulḥ-i kul, peace with all. No rite is pressed on anyone and none is driven out; the province simply goes about its learning, and is the calmer for being left alone."
  # Static-modifier descriptions: the engine resolves these ONLY via
  # STATIC_MODIFIER_DESC_<key> (mirroring STATIC_MODIFIER_NAME_<key> for
  # the name) - confirmed against base game's own static_modifiers_l_english.yml
@@ -323,89 +372,100 @@
  # aqd_jihad_fatwa_attempt), so there is no "declined" desc variant to
  # write - unlike z_aqd_fatwa.1/.2 above.
  z_aqd_jfatwa.1.title: "A Fatwa for the Jihad"
- z_aqd_jfatwa.1.desc.main: "The $aqd_seat_madhhab_name$ jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ # 9 concrete desc branches, NOT $aqd_seat_madhhab_name$ - that customizable
+ # localization (common/customizable_localization/z_aqd_seat_madhhab_name.txt)
+ # checks has_building, a LOCATION-scoped trigger, but was invoked bare from
+ # here, which renders at this event's default scope (root, the country),
+ # never at scope:target_location (the seat) - so every one of its 9
+ # branches silently failed to match and the name came out blank. Confirmed
+ # the failure the file's own header comment had flagged as unverified risk
+ # before shipping. Fixed per that same comment's documented fallback.
+ z_aqd_jfatwa.1.desc.hanafi: "The Ḥanafī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ z_aqd_jfatwa.1.desc.hanbali: "The Ḥanbalī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ z_aqd_jfatwa.1.desc.maliki: "The Mālikī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ z_aqd_jfatwa.1.desc.shafii: "The Shāfi'ī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ z_aqd_jfatwa.1.desc.zahiri: "The Ẓāhirī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ z_aqd_jfatwa.1.desc.ismaili: "The Ismā'īlī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ z_aqd_jfatwa.1.desc.jafari: "The Ja'farī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ z_aqd_jfatwa.1.desc.zaidi: "The Zaydī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
+ z_aqd_jfatwa.1.desc.ibadi: "The Ibāḍī jurists of [target_location.GetName] have proclaimed a fatwa: every able-bodied believer is called to take up arms in the jihad against [SCOPE.sCountry('enemy').GetName]."
  z_aqd_jfatwa.1.desc.fallback: "DEBUG/fallback: no matching jihad or jurist seat was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
  z_aqd_jfatwa.1.ok: "So it is proclaimed"
 
- # ---- $aqd_seat_madhhab_name$ (common/customizable_localization/
- # z_aqd_seat_madhhab_name.txt) - dynamic "which madhhab is this seat"
- # text shared by every current and future fatwa event. ----
- aqd_seat_madhhab_name_hanafi: "Ḥanafī"
- aqd_seat_madhhab_name_hanbali: "Ḥanbalī"
- aqd_seat_madhhab_name_maliki: "Mālikī"
- aqd_seat_madhhab_name_shafii: "Shāfi'ī"
- aqd_seat_madhhab_name_zahiri: "Ẓāhirī"
- aqd_seat_madhhab_name_ismaili: "Ismā'īlī"
- aqd_seat_madhhab_name_jafari: "Ja'farī"
- aqd_seat_madhhab_name_zaidi: "Zaydī"
- aqd_seat_madhhab_name_ibadi: "Ibāḍī"
-
- # ---- "Local Jurists Displeased" (main_menu/common/static_modifiers/
- # z_aqd_fatwa_displeased.txt) - 9 concrete per-madhhab keys, all
- # sharing this one displayed name; only the mechanical key differs, so
- # a refusal can ban one madhhab's ḥalqa without touching any other
- # madhhab's seat in the same province. ----
- z_aqd_fatwa_displeased_hanafi: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_hanafi: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_hanafi: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
- z_aqd_fatwa_displeased_hanbali: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_hanbali: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_hanbali: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
- z_aqd_fatwa_displeased_maliki: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_maliki: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_maliki: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
- z_aqd_fatwa_displeased_shafii: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_shafii: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_shafii: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
- z_aqd_fatwa_displeased_zahiri: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_zahiri: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_zahiri: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
- z_aqd_fatwa_displeased_ismaili: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_ismaili: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_ismaili: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
- z_aqd_fatwa_displeased_jafari: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_jafari: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_jafari: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
- z_aqd_fatwa_displeased_zaidi: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_zaidi: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_zaidi: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
- z_aqd_fatwa_displeased_ibadi: "Local Jurists Displeased"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_ibadi: "Local Jurists Displeased"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_ibadi: "The jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ # ---- "Local <Madhhab> Jurists Displeased" (main_menu/common/static_
+ # modifiers/z_aqd_fatwa_displeased.txt) - 9 concrete per-madhhab keys,
+ # each with its OWN madhhab name in both display name and desc now
+ # (previously all nine shared one generic "Local Jurists Displeased"
+ # string, mirroring how z_aqd_fatwa_of_jihad_<X> and the ḥalqa event's
+ # own desc were flavorized earlier) - the mechanical key still differs
+ # per madhhab regardless, so a refusal can ban one madhhab's ḥalqa
+ # without touching any other madhhab's seat in the same (or a co-
+ # located) province; this only changes what the player reads. Diacritic
+ # spellings match aqd_seat_madhhab_name_<X> elsewhere in this file. ----
+ z_aqd_fatwa_displeased_hanafi: "Local Ḥanafī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_hanafi: "Local Ḥanafī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_hanafi: "The Ḥanafī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_hanbali: "Local Ḥanbalī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_hanbali: "Local Ḥanbalī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_hanbali: "The Ḥanbalī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_maliki: "Local Mālikī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_maliki: "Local Mālikī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_maliki: "The Mālikī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_shafii: "Local Shāfi'ī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_shafii: "Local Shāfi'ī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_shafii: "The Shāfi'ī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_zahiri: "Local Ẓāhirī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_zahiri: "Local Ẓāhirī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_zahiri: "The Ẓāhirī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_ismaili: "Local Ismā'īlī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_ismaili: "Local Ismā'īlī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_ismaili: "The Ismā'īlī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_jafari: "Local Ja'farī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_jafari: "Local Ja'farī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_jafari: "The Ja'farī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_zaidi: "Local Zaydī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_zaidi: "Local Zaydī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_zaidi: "The Zaydī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
+ z_aqd_fatwa_displeased_ibadi: "Local Ibāḍī Jurists Displeased"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_displeased_ibadi: "Local Ibāḍī Jurists Displeased"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_displeased_ibadi: "The Ibāḍī jurists here issued a fatwa against an unjust war, and were refused. Unrest festers, the discontented look toward the rebellion's banner, and the province's works go undone."
 
  # ---- "Fatwa of Jihad" (main_menu/common/static_modifiers/
- # z_aqd_fatwa_of_jihad.txt) - 9 concrete per-madhhab keys, all sharing
- # this one displayed name; only the mechanical key differs, so the
- # re-pick guard (scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's
- # aqd_jihad_seat_eligible) can track one madhhab's seat here without
- # blocking a different madhhab's seat at the same location. ----
- z_aqd_fatwa_of_jihad_hanafi: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_hanafi: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_hanafi: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
- z_aqd_fatwa_of_jihad_hanbali: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_hanbali: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_hanbali: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
- z_aqd_fatwa_of_jihad_maliki: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_maliki: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_maliki: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
- z_aqd_fatwa_of_jihad_shafii: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_shafii: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_shafii: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
- z_aqd_fatwa_of_jihad_zahiri: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_zahiri: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_zahiri: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
- z_aqd_fatwa_of_jihad_ismaili: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_ismaili: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_ismaili: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
- z_aqd_fatwa_of_jihad_jafari: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_jafari: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_jafari: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
- z_aqd_fatwa_of_jihad_zaidi: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_zaidi: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_zaidi: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
- z_aqd_fatwa_of_jihad_ibadi: "Fatwa of Jihad"
- STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_ibadi: "Fatwa of Jihad"
- STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_ibadi: "The jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, and the province's levies recover faster while the fervour lasts."
+ # z_aqd_fatwa_of_jihad.txt) - 9 concrete per-madhhab keys, each with its
+ # OWN madhhab name in both display name and desc now (previously all
+ # nine shared one generic "Fatwa of Jihad" string) - the mechanical key
+ # still differs per madhhab regardless, so the re-pick guard (scripted_
+ # triggers/z_aqd_jihad_fatwa_triggers.txt's aqd_jihad_seat_eligible) can
+ # track one madhhab's seat here without blocking a different madhhab's
+ # seat at the same location; this only changes what the player reads.
+ # Diacritic spellings match aqd_seat_madhhab_name_<X> below exactly. ----
+ z_aqd_fatwa_of_jihad_hanafi: "Ḥanafī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_hanafi: "Ḥanafī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_hanafi: "The Ḥanafī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
+ z_aqd_fatwa_of_jihad_hanbali: "Ḥanbalī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_hanbali: "Ḥanbalī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_hanbali: "The Ḥanbalī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
+ z_aqd_fatwa_of_jihad_maliki: "Mālikī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_maliki: "Mālikī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_maliki: "The Mālikī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
+ z_aqd_fatwa_of_jihad_shafii: "Shāfi'ī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_shafii: "Shāfi'ī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_shafii: "The Shāfi'ī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
+ z_aqd_fatwa_of_jihad_zahiri: "Ẓāhirī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_zahiri: "Ẓāhirī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_zahiri: "The Ẓāhirī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
+ z_aqd_fatwa_of_jihad_ismaili: "Ismā'īlī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_ismaili: "Ismā'īlī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_ismaili: "The Ismā'īlī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
+ z_aqd_fatwa_of_jihad_jafari: "Ja'farī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_jafari: "Ja'farī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_jafari: "The Ja'farī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
+ z_aqd_fatwa_of_jihad_zaidi: "Zaydī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_zaidi: "Zaydī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_zaidi: "The Zaydī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
+ z_aqd_fatwa_of_jihad_ibadi: "Ibāḍī Fatwa of Jihad"
+ STATIC_MODIFIER_NAME_z_aqd_fatwa_of_jihad_ibadi: "Ibāḍī Fatwa of Jihad"
+ STATIC_MODIFIER_DESC_z_aqd_fatwa_of_jihad_ibadi: "The Ibāḍī jurists here have proclaimed a fatwa calling all able-bodied believers to the jihad. Recruits answer the call, swelling the province's levies and replenishing its manpower while the fervour lasts."
 
  # ---- Shared "pending pick" marker (main_menu/common/static_modifiers/
  # z_aqd_fatwa_pending_pick.txt) - always stamped and consumed within the

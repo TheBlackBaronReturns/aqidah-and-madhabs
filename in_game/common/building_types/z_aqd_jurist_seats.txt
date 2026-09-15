@@ -62,7 +62,10 @@
 # static_modifiers/z_aqd_halqa.txt) stamping a temporary province-wide
 # modifier whose character (state / orthodox / heterodox / tolerated)
 # depends on how the realm's aqidah judges the madhhab. One ḥalqa per
-# province at a time.
+# MADHHAB per province at a time, not one overall - a different madhhab's
+# seat in the same (or a co-located) province can run its own ḥalqa in
+# parallel (scripted_triggers/z_aqd_jurist_triggers.txt's aqd_halqa_
+# prov_ready_<X>, checked per madhhab).
 #
 # ICON: each seat_of_<X>_jurists uses its madhhab's religious-school
 # icon, supplied as main_menu/gfx/interface/icons/buildings/

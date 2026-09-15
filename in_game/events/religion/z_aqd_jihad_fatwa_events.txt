@@ -35,15 +35,66 @@ z_aqd_jfatwa.1 = {
 	title = z_aqd_jfatwa.1.title
 	desc = {
 		first_valid = {
-			# scope:target_location and scope:enemy are only ever set
-			# inside their own exists = guards below - under a real fire
-			# both will resolve, but this fallback keeps a debug force-fire
-			# (bypassing the normal pending-pick marker) from rendering an
-			# unresolved custom scope name, mirroring z_aqd_fatwa.1's own
-			# precedent for this exact failure class.
+			# 9 concrete branches, NOT $aqd_seat_madhhab_name$ - that
+			# customizable localization (common/customizable_localization/
+			# z_aqd_seat_madhhab_name.txt, since deleted) checked
+			# has_building, a LOCATION-scoped trigger, but was being invoked
+			# bare from a single shared desc key, which renders at this
+			# event's default scope (root) rather than scope:target_location
+			# - every branch silently failed to match and the seat's
+			# madhhab name came out blank.
+			#
+			# Checking var:aqd_jihad_fatwa_seat_madhhab (NOT scope:target_
+			# location's has_building either) is the fix: a location can
+			# legitimately hold more than one seat_of_<X>_jurists at once
+			# (building_types/z_aqd_jurist_seats.txt's location_potential
+			# only ever excludes a duplicate of the SAME madhhab), so even a
+			# location-scoped has_building re-check here could name the
+			# WRONG co-located seat. scripted_effects/z_aqd_jihad_fatwa_
+			# effects.txt's aqd_jihad_fatwa_pick_seat already resolved
+			# exactly which madhhab was picked and stamped it into this
+			# variable on root; reading it back is unambiguous. scope:
+			# target_location and scope:enemy are only ever set inside
+			# their own exists = guards below - under a real fire both will
+			# resolve, but the final fallback branch keeps a debug
+			# force-fire (bypassing the normal pending-pick marker) from
+			# rendering an unresolved custom scope name, mirroring
+			# z_aqd_fatwa.1's own precedent for this exact failure class.
 			triggered_desc = {
-				trigger = { exists = scope:target_location  exists = scope:enemy }
-				desc = z_aqd_jfatwa.1.desc.main
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 1 }
+				desc = z_aqd_jfatwa.1.desc.hanafi
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 2 }
+				desc = z_aqd_jfatwa.1.desc.hanbali
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 3 }
+				desc = z_aqd_jfatwa.1.desc.maliki
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 4 }
+				desc = z_aqd_jfatwa.1.desc.shafii
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 5 }
+				desc = z_aqd_jfatwa.1.desc.zahiri
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 6 }
+				desc = z_aqd_jfatwa.1.desc.ismaili
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 7 }
+				desc = z_aqd_jfatwa.1.desc.jafari
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 8 }
+				desc = z_aqd_jfatwa.1.desc.zaidi
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  exists = scope:enemy  var:aqd_jihad_fatwa_seat_madhhab = 9 }
+				desc = z_aqd_jfatwa.1.desc.ibadi
 			}
 			triggered_desc = {
 				desc = z_aqd_jfatwa.1.desc.fallback
@@ -122,12 +173,36 @@ z_aqd_jfatwa.1 = {
 			limit = { exists = scope:target_location }
 			# add_manpower is a country-scoped effect (confirmed idiom:
 			# events/colonization/conquest_of_paradise.txt's own
-			# `add_manpower = { value = root.monthly_manpower ... }`, always
-			# called at the event's implicit root scope) - it must NOT be
-			# nested inside scope:target_location = { ... } the way
-			# add_location_modifier below correctly is. population is read
-			# cross-scope via scope:target_location.population instead.
-			add_manpower = { value = scope:target_location.population  multiply = 0.03 }
+			# `add_manpower = { value = root.monthly_manpower multiply = N }`,
+			# always called at the event's implicit root scope) - it must NOT
+			# be nested inside scope:target_location = { ... } the way
+			# add_location_modifier below correctly is.
+			#
+			# Scaled off root.monthly_manpower, NOT scope:target_location.
+			# population (the previous version) - population's actual in-
+			# engine scale was never verified against anything else in this
+			# mod (every other calibration comment in this file cites a
+			# confirmed source; this line never did), and other confirmed
+			# population thresholds elsewhere in the base game (common/
+			# script_values/building_caps.txt's population * 0.05 feeding a
+			# small building-level cap; population > 2.0 / total_population >
+			# 10000 trigger thresholds) point to population being a heavily
+			# abstracted unit with no verified relationship to a country's
+			# own manpower economy - exactly the kind of unverified-scale
+			# assumption that already produced two other confirmed bugs in
+			# this mod. multiply = 1 ("one month's worth of mobilization")
+			# is deliberately more modest than the base game's own -2/-3
+			# usage for a one-off national event - this fatwa can now fire
+			# more than once per war (a different eligible seat each time,
+			# scripted_effects/z_aqd_jihad_fatwa_effects.txt's reservoir-
+			# sampling picker), so the per-firing grant needs to stay small
+			# enough that several of them stacking up over one long jihad
+			# doesn't itself become the excessive amount this was meant to
+			# fix. Tune the multiplier directly here if actual play still
+			# feels off in either direction. The option's tooltip is
+			# guaranteed to preview this accurately since it's the same
+			# confirmed idiom the base game itself relies on.
+			add_manpower = { value = root.monthly_manpower  multiply = 1 }
 			scope:target_location = {
 				aqd_apply_fatwa_of_jihad_for_seat = yes
 			}

@@ -25,33 +25,140 @@ aqd_is_jihad_participant = {
 	}
 }
 
-# Location-scoped (called inside a random_owned_location limit at root's
-# own scope, and directly as this file's own pulse prefilter via
-# any_owned_location). Heterodox exclusion is a HARD gate here - never
-# modulated by scripted_effects/z_aqd_madhhab_approval_effects.txt's
-# approval roll, unlike the state/orthodox distinction the roll itself
-# already accounts for. The other two exclusions stop a seat from being
-# picked twice: once already refused/displeased by the white-peace fatwa
-# (scripted_triggers/z_aqd_fatwa_triggers.txt's aqd_location_has_any_
-# fatwa_ban), and once already carrying an unexpired Fatwa of Jihad of
-# its OWN madhhab (main_menu/common/static_modifiers/z_aqd_fatwa_of_
-# jihad.txt) - a different madhhab's seat at the same location, if one
-# exists, is unaffected and remains independently eligible.
-aqd_jihad_seat_eligible = {
-	aqd_seat_madhhab_not_heterodox_to_root = yes
-	NOT = { aqd_location_has_any_fatwa_ban = yes }
+# Location-scoped, NINE concrete single-madhhab triggers (called inside
+# a random_owned_location limit at root's own scope, one call per
+# madhhab, from scripted_effects/z_aqd_jihad_fatwa_effects.txt's
+# aqd_jihad_fatwa_pick_seat). A location can legitimately hold MULTIPLE
+# different madhhab seats at once - building_types/z_aqd_jurist_seats.txt's
+# location_potential for each seat_of_<X>_jurists only excludes a
+# duplicate of the SAME madhhab, never a different one, and the
+# establishment event (events/religion/z_aqd_establishment_events.txt)
+# fires independently per madhhab once ITS OWN 3-madrasa threshold is
+# met, with no check for another madhhab's seat already standing there.
+# Each of these nine checks its own aqd_seat_madhhab_not_heterodox_to_
+# root_<X> (scripted_triggers/z_aqd_fatwa_triggers.txt - the single-
+# madhhab form, NOT the 9-way umbrella, which would wrongly let a
+# co-located seat of a DIFFERENT, acceptable madhhab paper over this
+# one's own heterodoxy) and its own single z_aqd_fatwa_displeased_<X> /
+# z_aqd_fatwa_of_jihad_<X> keys (NOT aqd_location_has_any_fatwa_ban's
+# blanket 9-way OR, for the same reason) - so a Hanafi seat already
+# banned or on cooldown never blocks a co-located Maliki seat, and vice
+# versa. has_location_modifier = z_aqd_fatwa_pending_pick stays a single
+# shared, blanket, LOCATION-wide check on all nine - it is a same-tick,
+# stamp-and-immediately-consume marker (scripted_effects/z_aqd_madhhab_
+# approval_effects.txt's aqd_stamp_pending_pick), never a standing
+# cooldown, so there is no real window where it would wrongly block a
+# second seat at the same location.
+#
+# z_aqd_jihad_declined_<X> (main_menu/common/static_modifiers/z_aqd_
+# jihad_declined.txt) is the "one shot per war" gate: stamped by
+# scripted_effects/z_aqd_jihad_fatwa_effects.txt's aqd_jihad_fatwa_
+# attempt the moment THIS exact seat's approval roll declines, so it
+# can never be re-picked for the rest of the current jihad - previously
+# a decline cost nothing, so the same silent-miss pulse just tried again
+# next month indefinitely, making eventual success for SOME seat a near-
+# certainty over a long enough war regardless of how low any individual
+# seat's own approval score was. z_aqd_jihad_blessed_<X> (main_menu/
+# common/static_modifiers/z_aqd_jihad_blessed.txt) is its SUCCESS-side
+# mirror - stamped instead of re-picking a seat that already blessed
+# this same war, so its own Fatwa of Jihad event doesn't pop up again
+# and again every time z_aqd_fatwa_of_jihad_<X>'s mobilization bonus
+# happens to lapse before the war does. Both are cleared realm-wide once
+# the jihad episode ends (on_action/00_aqd_game_start.txt's aqd_jihad_
+# episode_cleanup_pulse, and defensively again at the start of the next
+# episode), so a fresh jihad later gives every seat a clean slate. These
+# are SEPARATE, independent gates from z_aqd_fatwa_of_jihad_<X> itself
+# (that one is the real post-success throttle, deliberately persisting
+# ACROSS wars, untouched by episode boundaries) - all three apply, none
+# substitutes for another.
+aqd_jihad_seat_eligible_hanafi = {
+	aqd_seat_madhhab_not_heterodox_to_root_hanafi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanafi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
-	NOT = {
-		OR = {
-			has_location_modifier = z_aqd_fatwa_of_jihad_hanafi
-			has_location_modifier = z_aqd_fatwa_of_jihad_hanbali
-			has_location_modifier = z_aqd_fatwa_of_jihad_maliki
-			has_location_modifier = z_aqd_fatwa_of_jihad_shafii
-			has_location_modifier = z_aqd_fatwa_of_jihad_zahiri
-			has_location_modifier = z_aqd_fatwa_of_jihad_ismaili
-			has_location_modifier = z_aqd_fatwa_of_jihad_jafari
-			has_location_modifier = z_aqd_fatwa_of_jihad_zaidi
-			has_location_modifier = z_aqd_fatwa_of_jihad_ibadi
-		}
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_hanafi }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_hanafi }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_hanafi }
+}
+aqd_jihad_seat_eligible_hanbali = {
+	aqd_seat_madhhab_not_heterodox_to_root_hanbali = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanbali }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_hanbali }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_hanbali }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_hanbali }
+}
+aqd_jihad_seat_eligible_maliki = {
+	aqd_seat_madhhab_not_heterodox_to_root_maliki = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_maliki }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_maliki }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_maliki }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_maliki }
+}
+aqd_jihad_seat_eligible_shafii = {
+	aqd_seat_madhhab_not_heterodox_to_root_shafii = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_shafii }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_shafii }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_shafii }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_shafii }
+}
+aqd_jihad_seat_eligible_zahiri = {
+	aqd_seat_madhhab_not_heterodox_to_root_zahiri = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zahiri }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_zahiri }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_zahiri }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_zahiri }
+}
+aqd_jihad_seat_eligible_ismaili = {
+	aqd_seat_madhhab_not_heterodox_to_root_ismaili = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ismaili }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_ismaili }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_ismaili }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_ismaili }
+}
+aqd_jihad_seat_eligible_jafari = {
+	aqd_seat_madhhab_not_heterodox_to_root_jafari = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_jafari }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_jafari }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_jafari }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_jafari }
+}
+aqd_jihad_seat_eligible_zaidi = {
+	aqd_seat_madhhab_not_heterodox_to_root_zaidi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zaidi }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_zaidi }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_zaidi }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_zaidi }
+}
+aqd_jihad_seat_eligible_ibadi = {
+	aqd_seat_madhhab_not_heterodox_to_root_ibadi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ibadi }
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_ibadi }
+	NOT = { has_location_modifier = z_aqd_jihad_declined_ibadi }
+	NOT = { has_location_modifier = z_aqd_jihad_blessed_ibadi }
+}
+
+# Cheap "is there ANY eligible seat anywhere" prefilter, used only by
+# on_action/00_aqd_game_start.txt's aqd_jihad_fatwa_pulse trigger (an
+# any_owned_location gate before the pulse's own effect runs) - NOT used
+# by the picker itself (scripted_effects/z_aqd_jihad_fatwa_effects.txt's
+# aqd_jihad_fatwa_pick_seat calls each of the nine above individually).
+aqd_jihad_seat_eligible = {
+	OR = {
+		aqd_jihad_seat_eligible_hanafi = yes
+		aqd_jihad_seat_eligible_hanbali = yes
+		aqd_jihad_seat_eligible_maliki = yes
+		aqd_jihad_seat_eligible_shafii = yes
+		aqd_jihad_seat_eligible_zahiri = yes
+		aqd_jihad_seat_eligible_ismaili = yes
+		aqd_jihad_seat_eligible_jafari = yes
+		aqd_jihad_seat_eligible_zaidi = yes
+		aqd_jihad_seat_eligible_ibadi = yes
 	}
 }

@@ -12,88 +12,117 @@
 # z_aqd_fatwa_displeased.txt's own convention: only the seat that actually
 # issued the fatwa gets the modifier, and its own key doubles as the
 # re-pick guard in scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's
-# aqd_jihad_seat_eligible (a seat already carrying an unexpired instance
-# of its own key cannot be picked again until it lapses).
+# aqd_jihad_seat_eligible_<X> (a seat already carrying an unexpired
+# instance of its own key cannot be picked again until it lapses).
 #
-# Calibration: local_manpower = 0.02 sits below the confirmed base-game
-# range (common/static_modifiers/location.txt's local_manpower = 0.05
-# flat tier); local_manpower_modifier = 0.1 sits well below the confirmed
-# ceiling (common/static_modifiers/institutions.txt's local_manpower_
-# modifier = 0.5). Deliberately small and temporary - this is a one-off
-# mobilization bonus, not a standing institution. No decaying = yes -
-# matches z_aqd_fatwa_displeased's non-tapering design; duration (4 years)
-# and refresh mode are set at the call site via add_location_modifier,
-# not baked in here.
+# Calibration: ONE manpower field, not two - local_manpower_modifier was
+# removed (it used to stack a further +10% on top of the flat rate,
+# double-dipping the same "mobilization" idea twice). local_manpower =
+# 0.01 is now the sole direct-manpower source, landing squarely in the
+# confirmed ordinary-building range (common/building_types/manpower_
+# buildings.txt's whole family runs 0.0025-0.025, with 0.01 itself the
+# single most common value there; common/building_types/estate_
+# buildings.txt's own local_manpower = 0.01 too) - deliberately the
+# plain, unremarkable tier rather than the special/exclusive-condition
+# tier (0.03-0.05, e.g. unique_buildings.txt's culture-gated telpochcalli
+# or its Kurultai-gated steppe-horde building) an earlier pass had this
+# at, since this can now realistically stay active for a seat's entire
+# war (see below) and must not compound into something excessive over a
+# long campaign. local_levy_size_modifier = 0.1 is new - "a small max
+# levy increase, similar in range to regular buildings" was the ask, and
+# 0.1 (10%) is the exact confirmed building-tier value for this stat
+# (that same manpower_buildings.txt modifier block, and estate_
+# buildings.txt's own local_levy_size_modifier = 0.1 - both regular,
+# unremarkable buildings, not a unique/special-case tier).
+#
+# years = 50 at the apply site (scripted_effects/z_aqd_jihad_fatwa_
+# effects.txt) is a safety-net duration only, not the real controlling
+# lifetime - this seat's own separate z_aqd_jihad_blessed_<X> marker
+# (main_menu/common/static_modifiers/z_aqd_jihad_blessed.txt) is what
+# actually prevents a second "A Fatwa for the Jihad" popup for this same
+# seat during the SAME war (see that file's own header for why a second,
+# war-scoped marker is used instead of just relying on this modifier's
+# own duration or extending it repeatedly - the latter risks unbounded
+# stacking depending on add_and_extend's exact semantics, which could
+# not be confirmed with certainty). This modifier's own real 4-year-
+# equivalent throttling role is unchanged from before - it is NOT cleared
+# early when a war ends, so a seat that just blessed one war still can't
+# immediately bless a fresh one a few years later. In practice its
+# 50-year safety-net duration will almost always outlast any single war,
+# so its natural expiry rarely if ever actually fires; the still-active
+# 0.01/0.1 mobilization bonus simply persists for as long as the war
+# does, exactly as intended, with no monthly upkeep effect needed to
+# sustain it.
 # =====================================================================
 
 z_aqd_fatwa_of_jihad_hanafi = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }
 
 z_aqd_fatwa_of_jihad_hanbali = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }
 
 z_aqd_fatwa_of_jihad_maliki = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }
 
 z_aqd_fatwa_of_jihad_shafii = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }
 
 z_aqd_fatwa_of_jihad_zahiri = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }
 
 z_aqd_fatwa_of_jihad_ismaili = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }
 
 z_aqd_fatwa_of_jihad_jafari = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }
 
 z_aqd_fatwa_of_jihad_zaidi = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }
 
 z_aqd_fatwa_of_jihad_ibadi = {
 	game_data = {
 		category = location
 	}
-	local_manpower = 0.02
-	local_manpower_modifier = 0.1
+	local_manpower = 0.01
+	local_levy_size_modifier = 0.1
 }

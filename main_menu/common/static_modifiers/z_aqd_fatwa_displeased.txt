@@ -1,28 +1,36 @@
 # =====================================================================
-# AQIDAH SCHOOLS OF CREED - "Local Jurists Displeased".
+# AQIDAH SCHOOLS OF CREED - "Local <Madhhab> Jurists Displeased".
 #
 # Applied by scripted_effects/z_aqd_fatwa_effects.txt's
 # aqd_fatwa_apply_displeased_for_seat when the ruler refuses a fatwa
 # demanding peace in an unjust war against a fellow-sect, aqidah-
 # acceptable Muslim state (events/religion/z_aqd_fatwa_events.txt).
 #
-# NINE concrete objects, one per madhhab, NOT one shared key - a
-# province can hold seats of more than one madhhab, and only the
-# madhhab whose own jurists issued (and were refused) the fatwa should
-# have its ḥalqa eligibility blocked; the other seat(s) in the same
-# province must keep rolling normally. Mirrors static_modifiers/
-# z_aqd_halqa.txt's own convention of 9 distinct per-madhhab keys behind
-# one shared display concept - here all 9 share the one displayed name
-# "Local Jurists Displeased", only the mechanical key differs, so the
-# game can track which madhhab is banned without the player ever
-# needing to see nine different modifier names.
+# NINE concrete objects, one per madhhab - a province can hold seats of
+# more than one madhhab, and only the madhhab whose own jurists issued
+# (and were refused) the fatwa should have its ḥalqa eligibility
+# blocked; the other seat(s) in the same province must keep rolling
+# normally. Each now has its OWN madhhab name in both display name and
+# desc (main_menu/localization/english/aqd_l_english.yml - "Local <X>
+# Jurists Displeased", e.g. "Local Ḥanafī Jurists Displeased") rather
+# than all nine sharing one generic "Local Jurists Displeased" string -
+# mirrors z_aqd_fatwa_of_jihad.txt's own flavorizing pass. The
+# MECHANICAL reason for nine separate keys is unchanged either way and
+# would hold even without the name change: multiple of these can be
+# simultaneously active in the same province (different locations, or
+# even the same location if it hosts more than one seat) - see
+# aqd_fatwa_apply_displeased_for_seat's own header for why that's
+# always scoped to exactly one (location, madhhab) pair at a time.
 #
 # scripted_triggers/z_aqd_jurist_triggers.txt's 9 concrete
 # aqd_halqa_prov_ready_<madhhab> triggers each check for their OWN
-# matching key here to gate that one madhhab's ḥalqa eligibility -
-# aqd_location_has_active_halqa (that same file) is NOT touched by this
-# feature and keeps its separate, madhhab-agnostic meaning ("a circle
-# is actively running here right now").
+# matching key here to gate that one madhhab's ḥalqa eligibility,
+# alongside that same madhhab's own three ḥalqa-class keys (static_
+# modifiers/z_aqd_halqa.txt) - the old realm-wide aqd_location_has_
+# active_halqa umbrella this comment used to reference was removed
+# entirely (folded per-madhhab into aqd_halqa_prov_ready_<X> itself, so
+# a different madhhab's seat in the same province can run its own
+# ḥalqa in parallel instead of being blocked by this one).
 #
 # Calibration: local_unrest = 0.5 matches the highest flat-unrest
 # modifier found anywhere in the base game (cruel_overlord,

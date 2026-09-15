@@ -61,12 +61,66 @@ aqd_debug_force_jfatwa_1 = {
 
 # Clear every variable this feature uses, so a forced or real fire can
 # be repeated freely while testing (stage 1's own cooldown / stage 2's
-# gating would otherwise block a re-test for years).
+# gating would otherwise block a re-test for years). Neither fatwa has a
+# country-wide "just fired" cooldown blocking re-attempts any more - both
+# moved to per-seat location modifiers (scripted_triggers/z_aqd_jihad_
+# fatwa_triggers.txt's aqd_jihad_seat_eligible_<X> and z_aqd_fatwa_
+# triggers.txt's aqd_fatwa_stage1_seat_eligible_<X>) so a realm with
+# several eligible seats keeps rolling instead of the whole pulse going
+# dark - so clear those, and the two episode-active flags plus their own
+# per-episode markers, from the capital instead. aqd_fatwa_cooldown
+# itself is untouched here on purpose - that one is still a real, live
+# country-wide anti-spam gate for a fresh stage-1 EPISODE (unlike the
+# per-seat markers below), so clearing it is still exactly what a tester
+# wants when forcing a re-fire.
 aqd_debug_clear_fatwa_vars = {
 	remove_variable = aqd_fatwa_cooldown
 	remove_variable = aqd_fatwa_stage1_fired
 	remove_variable = aqd_fatwa_stage2_too_soon
-	remove_variable = aqd_jihad_fatwa_cooldown
+	remove_variable = aqd_fatwa_episode_active
+	remove_variable = aqd_jihad_episode_active
+	capital = {
+		province_definition = {
+			every_location_in_province_definition = {
+				remove_location_modifier = z_aqd_fatwa_of_jihad_hanafi
+				remove_location_modifier = z_aqd_fatwa_of_jihad_hanbali
+				remove_location_modifier = z_aqd_fatwa_of_jihad_maliki
+				remove_location_modifier = z_aqd_fatwa_of_jihad_shafii
+				remove_location_modifier = z_aqd_fatwa_of_jihad_zahiri
+				remove_location_modifier = z_aqd_fatwa_of_jihad_ismaili
+				remove_location_modifier = z_aqd_fatwa_of_jihad_jafari
+				remove_location_modifier = z_aqd_fatwa_of_jihad_zaidi
+				remove_location_modifier = z_aqd_fatwa_of_jihad_ibadi
+				remove_location_modifier = z_aqd_jihad_declined_hanafi
+				remove_location_modifier = z_aqd_jihad_declined_hanbali
+				remove_location_modifier = z_aqd_jihad_declined_maliki
+				remove_location_modifier = z_aqd_jihad_declined_shafii
+				remove_location_modifier = z_aqd_jihad_declined_zahiri
+				remove_location_modifier = z_aqd_jihad_declined_ismaili
+				remove_location_modifier = z_aqd_jihad_declined_jafari
+				remove_location_modifier = z_aqd_jihad_declined_zaidi
+				remove_location_modifier = z_aqd_jihad_declined_ibadi
+				remove_location_modifier = z_aqd_jihad_blessed_hanafi
+				remove_location_modifier = z_aqd_jihad_blessed_hanbali
+				remove_location_modifier = z_aqd_jihad_blessed_maliki
+				remove_location_modifier = z_aqd_jihad_blessed_shafii
+				remove_location_modifier = z_aqd_jihad_blessed_zahiri
+				remove_location_modifier = z_aqd_jihad_blessed_ismaili
+				remove_location_modifier = z_aqd_jihad_blessed_jafari
+				remove_location_modifier = z_aqd_jihad_blessed_zaidi
+				remove_location_modifier = z_aqd_jihad_blessed_ibadi
+				remove_location_modifier = z_aqd_fatwa_declined_hanafi
+				remove_location_modifier = z_aqd_fatwa_declined_hanbali
+				remove_location_modifier = z_aqd_fatwa_declined_maliki
+				remove_location_modifier = z_aqd_fatwa_declined_shafii
+				remove_location_modifier = z_aqd_fatwa_declined_zahiri
+				remove_location_modifier = z_aqd_fatwa_declined_ismaili
+				remove_location_modifier = z_aqd_fatwa_declined_jafari
+				remove_location_modifier = z_aqd_fatwa_declined_zaidi
+				remove_location_modifier = z_aqd_fatwa_declined_ibadi
+			}
+		}
+	}
 }
 
 # Strip any active ḥalqa modifier from the capital's province so the

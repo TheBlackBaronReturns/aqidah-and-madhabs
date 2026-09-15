@@ -1,0 +1,77 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "declined this jihad" markers.
+#
+# NINE concrete per-madhhab keys, one per seat_of_<X>_jurists, mirroring
+# z_aqd_fatwa_of_jihad.txt's own convention. Stamped by scripted_effects/
+# z_aqd_jihad_fatwa_effects.txt's aqd_jihad_fatwa_attempt when a seat's
+# approval roll DECLINES, and checked by scripted_triggers/z_aqd_jihad_
+# fatwa_triggers.txt's aqd_jihad_seat_eligible_<X> to exclude that exact
+# (location, madhhab) pair from ever being picked again for the rest of
+# THIS jihad - previously a decline cost nothing, so the same silent-miss
+# pulse just tried again next month indefinitely, making eventual success
+# for SOME seat a near-certainty over a long enough war regardless of how
+# low any individual seat's approval score was.
+#
+# years = 50 at the stamp site is a safety-net duration only, not load-
+# bearing - normal flow always clears this explicitly once the episode
+# ends (on_action/00_aqd_game_start.txt's aqd_jihad_episode_cleanup_pulse,
+# and defensively at the start of the next episode too), same reasoning
+# as z_aqd_fatwa_pending_pick.txt's own months = 1 note. No stat block
+# needed - local_unrest = 0 is a harmless placeholder, mirroring that
+# same file, since a purely-a-flag modifier still needs some field.
+# =====================================================================
+
+z_aqd_jihad_declined_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_declined_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_declined_maliki = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_declined_shafii = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_declined_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_declined_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_declined_jafari = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_declined_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_declined_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

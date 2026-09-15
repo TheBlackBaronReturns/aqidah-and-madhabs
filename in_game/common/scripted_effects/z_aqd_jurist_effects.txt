@@ -1393,15 +1393,15 @@ aqd_halqa_dispatch = {
 # establishment/exile/foreign-jurist placement earlier this project).
 # All nine variants have IDENTICAL fields - this only changes the name.
 aqd_halqa_apply_state = {
-	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_hanafi   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_hanbali  years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_maliki   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_shafii   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_zahiri   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_ismaili  years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_jafari   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_zaidi    years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_ibadi    years = 4 } } } }
+	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_hanafi   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_hanbali  years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_maliki   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_shafii   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_zahiri   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_ismaili  years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_jafari   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_zaidi    years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_ibadi    years = 12 } } } }
 	if = {
 		limit = { exists = scope:halqa_loc }
 		scope:halqa_loc = {
@@ -1442,15 +1442,15 @@ aqd_halqa_apply_state = {
 # comment above for why this reads var: directly rather than taking a
 # $MADHHAB$ parameter.
 aqd_halqa_apply_orthodox = {
-	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_hanafi   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_hanbali  years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_maliki   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_shafii   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_zahiri   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_ismaili  years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_jafari   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_zaidi    years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_ibadi    years = 4 } } } }
+	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_hanafi   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_hanbali  years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_maliki   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_shafii   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_zahiri   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_ismaili  years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_jafari   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_zaidi    years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_orthodox_ibadi    years = 12 } } } }
 	if = {
 		limit = { exists = scope:halqa_loc }
 		scope:halqa_loc = {
@@ -1518,15 +1518,15 @@ aqd_halqa_apply_orthodox = {
 # already takes - var:aqd_halqa_madhhab (which SECT was derived from, in
 # aqd_halqa_dispatch) is still a live root variable at this point.
 aqd_halqa_apply_heterodox = {
-	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_hanafi   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_hanbali  years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_maliki   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_shafii   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_zahiri   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_ismaili  years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_jafari   years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_zaidi    years = 4 } } } }
-	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_ibadi    years = 4 } } } }
+	if      = { limit = { var:aqd_halqa_madhhab = 1 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_hanafi   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 2 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_hanbali  years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 3 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_maliki   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 4 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_shafii   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 5 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_zahiri   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 6 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_ismaili  years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 7 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_jafari   years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_zaidi    years = 12 } } } }
+	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_heterodox_ibadi    years = 12 } } } }
 	if = {
 		limit = { NOT = { religion = religion:$SECT$ } }
 		if = {
@@ -1561,7 +1561,7 @@ aqd_halqa_apply_tolerated = {
 	scope:halqa_prov = {
 		every_location_in_province_definition = {
 			limit = { owner ?= root }
-			add_location_modifier = { modifier = z_aqd_halqa_tolerated  years = 4 }
+			add_location_modifier = { modifier = z_aqd_halqa_tolerated  years = 12 }
 		}
 	}
 }

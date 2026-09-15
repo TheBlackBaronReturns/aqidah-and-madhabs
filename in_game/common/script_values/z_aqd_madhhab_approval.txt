@@ -11,12 +11,16 @@
 # z_aqd_madhhab_approval_effects.txt's aqd_invert_approval_scratch (high
 # backing = LEAST likely to turn around and demand the ruler stop a war).
 #
-# Formula: a per-madhhab historical baseline (doubles as the old jihad-
-# specific "how doctrinally jihad-forward is this rite" precedent), plus
-# three societal-value terms (confirmed idiom: value = societal_value:X
-# + multiply, including negative multiply, in common/employment_systems/
-# 00_default.txt), plus a state/orthodox/heterodox term. Sign convention
-# for each axis matches its block name order in common/societal_values/
+# Formula: a SHARED flat baseline (50, identical across all 9 - no
+# madhhab gets a head start or handicap by identity alone), plus three
+# societal-value terms (confirmed idiom: value = societal_value:X +
+# multiply, including negative multiply, in common/employment_systems/
+# 00_default.txt), plus a state-madhab-choice/aqeedah term, plus a
+# tolerance term. Every point of separation between madhhabs now comes
+# from exactly four sources - the realm's aqeedah, its societal values,
+# its state madhab choice, and its tolerance of the true religion/of
+# heretics - never a bare per-madhhab constant. Sign convention for each
+# societal axis matches its block name order in common/societal_values/
 # 00_default.txt (left = negative, right = positive):
 #   traditionalist_vs_innovative   traditionalist = negative, innovative = positive
 #   individualism_vs_communalism   individualism  = negative, communalism = positive
@@ -24,9 +28,14 @@
 # (allow_mysticism_vs_jurisprudence is granted directly in common/
 # religions/muslim.txt's definition_modifier for every Muslim religion
 # variant, so this axis is always live for the countries that matter here
-# - no separate unlock needed.)
+# - no separate unlock needed.) The per-madhhab MULTIPLY coefficients on
+# these three terms stay differentiated by design - they react to a real
+# player-facing input (the realm's actual societal-value sliders), not a
+# flat identity constant, so a rite's lean here is earned each game from
+# where the player has actually pushed the realm, not assumed from turn
+# one.
 #
-# The state/orthodox/heterodox term reads var:aqd_seat_compat, NOT
+# The state-madhab-choice/aqeedah term reads var:aqd_seat_compat, NOT
 # var:aqd_jurist_compat - the latter (and var:aqd_compat_madhhab) is
 # already used by the white-peace fatwa's OWN immediate to classify the
 # ENEMY's madhhab (aqd_set_compat_madhhab_from_country), a different
@@ -36,15 +45,39 @@
 # so the two systems never collide. Never read var:aqd_jurist_compat
 # here.
 #
+# The tolerance term reads modifier:tolerance_own when var:aqd_seat_
+# compat >= 0 (a seat root's own aqeedah considers orthodox OR neutral -
+# i.e. "the true religion" in the sense that this seat's madhhab is not
+# doctrinally condemned) vs modifier:tolerance_heretic when var:aqd_seat_
+# compat = -1 (heterodox to root) - NOT modifier:tolerance_heathen, since
+# a heterodox madhhab is a deviant rite within the same faith, not a
+# different religion entirely. Confirmed idioms: modifier:tolerance_own
+# is a base country accumulator (common/auto_modifiers/country.txt);
+# modifier:tolerance_heretic is a real readable accumulated-modifier
+# value (events/situations/council_of_trent.txt's `modifier:tolerance_
+# heretic > -1` / `<= -1`; events/religion/hussite_flavor.txt's `>= 0`).
+# Heterodox seats are still hard-excluded from THIS mod's current fatwas
+# by aqd_seat_madhhab_not_heterodox_to_root (scripted_triggers/z_aqd_
+# fatwa_triggers.txt) before the roll ever happens, so the -1 branch
+# below is dead code for jihad/white-peace today - but it is scored
+# correctly regardless, so a future heterodox-inclusive fatwa can read
+# aqd_madhhab_approval_X directly with no separate heterodox-only
+# script_value needed. (The old aqd_madhhab_heterodox_approval_X reserve
+# block that used to live at the bottom of this file is gone - it added
+# its own modifier:tolerance_heretic term on top of a per-madhhab
+# constant this file no longer has, and would now double-apply tolerance
+# on top of the branch below.) x5 is a placeholder TUNABLE for both
+# tolerance terms - no in-game feature to calibrate either against yet.
+#
 # Callers must run aqd_compute_seat_approval (same effects file) before
 # reading any of these - it derives var:aqd_seat_madhhab and calls
 # aqd_classify_seat_compatibility for them. Clamped 5-95 so no madhhab is
 # ever a guaranteed yes/no regardless of how extreme a realm's societal
-# values get.
+# values or tolerance get.
 # =====================================================================
 
 aqd_madhhab_approval_hanafi = {
-	value = 60
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.25 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.20 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
@@ -54,12 +87,16 @@ aqd_madhhab_approval_hanafi = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }     value = -20 }
 		else    = { value = 0 }
 	}
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }
 
 aqd_madhhab_approval_hanbali = {
-	value = 75
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = -0.30 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.20 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
@@ -69,12 +106,16 @@ aqd_madhhab_approval_hanbali = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }     value = -20 }
 		else    = { value = 0 }
 	}
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }
 
 aqd_madhhab_approval_maliki = {
-	value = 65
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = -0.15 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.30 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
@@ -84,12 +125,16 @@ aqd_madhhab_approval_maliki = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }    value = -20 }
 		else    = { value = 0 }
 	}
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }
 
 aqd_madhhab_approval_shafii = {
-	value = 55
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.10 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = -0.15 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
@@ -99,12 +144,16 @@ aqd_madhhab_approval_shafii = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }    value = -20 }
 		else    = { value = 0 }
 	}
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }
 
 aqd_madhhab_approval_zahiri = {
-	value = 65
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = -0.35 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = -0.25 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
@@ -114,12 +163,16 @@ aqd_madhhab_approval_zahiri = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }    value = -20 }
 		else    = { value = 0 }
 	}
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }
 
 aqd_madhhab_approval_zaidi = {
-	value = 40
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.15 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.15 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
@@ -129,12 +182,16 @@ aqd_madhhab_approval_zaidi = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }   value = -20 }
 		else    = { value = 0 }
 	}
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }
 
 aqd_madhhab_approval_jafari = {
-	value = 30
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.20 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.15 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = -0.20 }
@@ -144,12 +201,16 @@ aqd_madhhab_approval_jafari = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }    value = -20 }
 		else    = { value = 0 }
 	}
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }
 
 aqd_madhhab_approval_ismaili = {
-	value = 25
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.30 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.30 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = -0.20 }
@@ -159,12 +220,16 @@ aqd_madhhab_approval_ismaili = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }     value = -20 }
 		else    = { value = 0 }
 	}
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }
 
 aqd_madhhab_approval_ibadi = {
-	value = 20
+	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = -0.15 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.25 }
 	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = -0.20 }
@@ -174,76 +239,10 @@ aqd_madhhab_approval_ibadi = {
 		else_if = { limit = { var:aqd_seat_compat = -1 }   value = -20 }
 		else    = { value = 0 }
 	}
-	min = 5
-	max = 95
-}
-
-# ---------------------------------------------------------------------
-# RESERVED - not consumed by anything yet. For a future fatwa event that
-# allows HETERODOX seat participation (both z_aqd_fatwa and the jihad
-# fatwa hard-exclude heterodox seats via aqd_seat_madhhab_not_heterodox_
-# to_root, scripted_triggers/z_aqd_fatwa_triggers.txt, so these values
-# are never read by either). Keyed on tolerance of HERETICS, not heathens -
-# a heterodox madhhab is doctrinally a deviant rite within the same faith,
-# not a different religion entirely, so tolerance_heretic is the correct
-# proxy for how forgivingly root's aqidah might treat it. Confirmed idiom:
-# modifier:tolerance_heretic is a real readable accumulated-modifier value
-# (events/situations/council_of_trent.txt's `modifier:tolerance_heretic
-# > -1` / `<= -1`; events/religion/hussite_flavor.txt's `>= 0`), used the
-# same way as societal_value:X above. x5 multiplier is a placeholder TUNABLE - no
-# in-game feature to calibrate it against yet.
-# ---------------------------------------------------------------------
-aqd_madhhab_heterodox_approval_hanafi = {
-	value = aqd_madhhab_approval_hanafi
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
-	min = 5
-	max = 95
-}
-aqd_madhhab_heterodox_approval_hanbali = {
-	value = aqd_madhhab_approval_hanbali
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
-	min = 5
-	max = 95
-}
-aqd_madhhab_heterodox_approval_maliki = {
-	value = aqd_madhhab_approval_maliki
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
-	min = 5
-	max = 95
-}
-aqd_madhhab_heterodox_approval_shafii = {
-	value = aqd_madhhab_approval_shafii
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
-	min = 5
-	max = 95
-}
-aqd_madhhab_heterodox_approval_zahiri = {
-	value = aqd_madhhab_approval_zahiri
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
-	min = 5
-	max = 95
-}
-aqd_madhhab_heterodox_approval_zaidi = {
-	value = aqd_madhhab_approval_zaidi
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
-	min = 5
-	max = 95
-}
-aqd_madhhab_heterodox_approval_jafari = {
-	value = aqd_madhhab_approval_jafari
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
-	min = 5
-	max = 95
-}
-aqd_madhhab_heterodox_approval_ismaili = {
-	value = aqd_madhhab_approval_ismaili
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
-	min = 5
-	max = 95
-}
-aqd_madhhab_heterodox_approval_ibadi = {
-	value = aqd_madhhab_approval_ibadi
-	add = { value = modifier:tolerance_heretic  multiply = 5 }
+	add = {
+		if   = { limit = { var:aqd_seat_compat = -1 }  value = { value = modifier:tolerance_heretic  multiply = 5 } }
+		else = { value = { value = modifier:tolerance_own     multiply = 5 } }
+	}
 	min = 5
 	max = 95
 }

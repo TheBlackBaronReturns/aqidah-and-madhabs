@@ -229,140 +229,350 @@ aqd_location_has_any_fatwa_ban = {
 }
 
 # ---------------------------------------------------------------------
-# aqd_seat_madhhab_not_heterodox_to_root: location-scoped ('this' = a
-# seat-holding location, root = the country judging it). Does this
-# location's seat belong to a madhhab root's own aqidah does NOT condemn?
+# aqd_seat_madhhab_not_heterodox_to_root_<X>: location-scoped ('this' = a
+# seat-holding location, root = the country judging it). Does THIS ONE
+# madhhab's seat belong to a rite root's own aqidah does NOT condemn?
+# NINE standalone single-madhhab triggers (not a parameterised one - EU5
+# does not substitute $PARAM$ when a scripted_trigger is invoked from
+# inside another scripted_trigger, same restriction as aqd_madhhab_
+# acceptable_to_root above), split out from what used to be one 9-branch
+# OR so a location holding MULTIPLE different seats (a real, intended
+# outcome of the establishment system - building_types/z_aqd_jurist_
+# seats.txt's location_potential only ever excludes a duplicate of the
+# SAME madhhab, never a different one) can have each of its seats judged
+# independently instead of the location as a whole passing or failing as
+# one unit. aqd_seat_madhhab_not_heterodox_to_root below OR's all nine
+# back together for callers that only care "is there SOME acceptable
+# seat here" (the white-peace fatwa); scripted_triggers/z_aqd_jihad_
+# fatwa_triggers.txt's per-madhhab jihad eligibility calls the single
+# relevant one directly instead, so a co-located seat of a DIFFERENT
+# madhhab can never leak into a madhhab it doesn't belong to.
+#
 # THIRD hand-maintained copy of the opposed-madhhab table - the other
 # two are scripted_effects/z_aqd_jurist_effects.txt's aqd_classify_
 # madhhab_compatibility and this file's own aqd_madhhab_acceptable_to_root
 # above (which asks the same question from a COUNTRY's has_policy, not a
 # LOCATION's has_building). MUST be re-diffed against both if the table
-# ever changes - there is no compiler link keeping any of the three in
-# sync. Effects cannot run inside a trigger field, so - same reasoning as
-# aqd_madhhab_acceptable_to_root - this is NINE concrete branches, not a
-# parameterised one.
-#
-# Used as a hard, score-independent exclusion (never modulated by
-# scripted_effects/z_aqd_madhhab_approval_effects.txt's approval roll) by
-# both events/religion/z_aqd_jihad_fatwa_events.txt's jihad fatwa
-# (scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's aqd_jihad_seat_
-# eligible) and the white-peace fatwa (scripted_effects/z_aqd_fatwa_
-# effects.txt's aqd_fatwa_pick_seat, and z_aqd_fatwa.2's refuse-option
-# loop, where it also REPLACES the old bare 9-way has_building OR since
-# every branch here already requires has_building = seat_of_<X>_jurists).
+# ever changes, WITH ONE DELIBERATE EXCEPTION: the zahiri branch below
+# diverges on purpose - Zahiri stays classified heterodox by the other
+# two (doctrine/scoring), but is allow-listed here for every Sunni
+# aqeedah (fatwa-event seat eligibility) - see that branch's own comment.
+# Every other branch must still match the other two exactly - there is
+# no compiler link keeping any of them in sync.
 # ---------------------------------------------------------------------
+aqd_seat_madhhab_not_heterodox_to_root_hanafi = {
+	has_building = building_type:seat_of_hanafi_jurists
+	NOT = { root = { OR = {
+		religious_school = religious_school:imamiya_school
+		religious_school = religious_school:ismaili_school
+		religious_school = religious_school:nizari_school
+		religious_school = religious_school:mustali_school
+		religious_school = religious_school:alevism_school
+		religious_school = religious_school:alawi_school
+	} } }
+}
+aqd_seat_madhhab_not_heterodox_to_root_hanbali = {
+	has_building = building_type:seat_of_hanbali_jurists
+	NOT = { root = { OR = {
+		religious_school = religious_school:imamiya_school
+		religious_school = religious_school:ismaili_school
+		religious_school = religious_school:nizari_school
+		religious_school = religious_school:mustali_school
+		religious_school = religious_school:alevism_school
+		religious_school = religious_school:alawi_school
+		religious_school = religious_school:mutazili_school
+		religious_school = religious_school:zaidi_school
+	} } }
+}
+aqd_seat_madhhab_not_heterodox_to_root_maliki = {
+	has_building = building_type:seat_of_maliki_jurists
+	NOT = { root = { OR = {
+		religious_school = religious_school:imamiya_school
+		religious_school = religious_school:ismaili_school
+		religious_school = religious_school:nizari_school
+		religious_school = religious_school:mustali_school
+		religious_school = religious_school:alevism_school
+		religious_school = religious_school:alawi_school
+		religious_school = religious_school:zaidi_school
+		religious_school = religious_school:azzaba_school
+	} } }
+}
+aqd_seat_madhhab_not_heterodox_to_root_shafii = {
+	has_building = building_type:seat_of_shafii_jurists
+	NOT = { root = { OR = {
+		religious_school = religious_school:imamiya_school
+		religious_school = religious_school:ismaili_school
+		religious_school = religious_school:nizari_school
+		religious_school = religious_school:mustali_school
+		religious_school = religious_school:alevism_school
+		religious_school = religious_school:alawi_school
+		religious_school = religious_school:mutazili_school
+		religious_school = religious_school:zaidi_school
+	} } }
+}
+# Zahiri is the ONE deliberate divergence from the other two copies of
+# this table (aqd_classify_madhhab_compatibility and this file's own
+# aqd_madhhab_acceptable_to_root both still condemn compat_madhhab/policy
+# 5 as heterodox for ashari/maturidi/athari - see their own branches - so
+# a Zahiri seat still eats the -20/tolerance_heretic penalty in script_
+# values/z_aqd_madhhab_approval.txt and still counts as "unacceptable"
+# for the unjust-war fatwa's enemy-madhhab check). Fatwa-event SEAT
+# ELIGIBILITY is different: Zahiri is a real, if minority, Sunni madhhab,
+# not a different-sect rite, so a Sunni ruler's own fatwa apparatus can
+# still ask it - and be refused more often than a favoured/neutral seat,
+# via the score penalty above - rather than never asking at all. Positive
+# allow-list (not a NOT-blacklist like every other branch here) because
+# the condition is "root's aqeedah IS Sunni", not "root's aqeedah ISN'T
+# one specific list of heterodox others" - ashari/maturidi/athari/
+# mutazili/wahhabi are every Sunni aqeedah this mod has (main_menu's own
+# tag line: "Ashari/Maturidi/Athari/Mutazili/Wahhabi for Sunnis"). Shia/
+# Zaidi/Ibadi roots fall through to no match, i.e. still excluded,
+# matching every other branch's behavior for them.
+aqd_seat_madhhab_not_heterodox_to_root_zahiri = {
+	has_building = building_type:seat_of_zahiri_jurists
+	root = { OR = {
+		religious_school = religious_school:ashari_school
+		religious_school = religious_school:maturidi_school
+		religious_school = religious_school:athari_school
+		religious_school = religious_school:mutazili_school
+		religious_school = religious_school:wahhabi_school
+	} }
+}
+aqd_seat_madhhab_not_heterodox_to_root_ismaili = {
+	has_building = building_type:seat_of_ismaili_jurists
+	NOT = { root = { OR = {
+		religious_school = religious_school:ashari_school
+		religious_school = religious_school:maturidi_school
+		religious_school = religious_school:athari_school
+		religious_school = religious_school:mutazili_school
+		religious_school = religious_school:wahhabi_school
+		religious_school = religious_school:wahbi_school
+		religious_school = religious_school:azzaba_school
+	} } }
+}
+aqd_seat_madhhab_not_heterodox_to_root_jafari = {
+	has_building = building_type:seat_of_jafari_jurists
+	NOT = { root = { OR = {
+		religious_school = religious_school:ashari_school
+		religious_school = religious_school:maturidi_school
+		religious_school = religious_school:athari_school
+		religious_school = religious_school:mutazili_school
+		religious_school = religious_school:wahhabi_school
+		religious_school = religious_school:wahbi_school
+		religious_school = religious_school:azzaba_school
+	} } }
+}
+aqd_seat_madhhab_not_heterodox_to_root_zaidi = {
+	has_building = building_type:seat_of_zaidi_jurists
+	NOT = { root = { OR = {
+		religious_school = religious_school:ashari_school
+		religious_school = religious_school:maturidi_school
+		religious_school = religious_school:athari_school
+		religious_school = religious_school:mutazili_school
+		religious_school = religious_school:wahhabi_school
+		religious_school = religious_school:wahbi_school
+		religious_school = religious_school:azzaba_school
+	} } }
+}
+aqd_seat_madhhab_not_heterodox_to_root_ibadi = {
+	has_building = building_type:seat_of_ibadi_jurists
+	NOT = { root = { OR = {
+		religious_school = religious_school:ashari_school
+		religious_school = religious_school:maturidi_school
+		religious_school = religious_school:athari_school
+		religious_school = religious_school:mutazili_school
+		religious_school = religious_school:wahhabi_school
+	} } }
+}
+
+# Pure doctrinal classification only - "is this madhhab heterodox to
+# root's aqeedah", nothing about whether a pick is currently in flight
+# here. Used directly (bare) as a hard, score-independent exclusion by
+# aqd_classify_... 's siblings. The jihad fatwa does NOT use this umbrella
+# - scripted_triggers/z_aqd_jihad_fatwa_triggers.txt calls each aqd_seat_
+# madhhab_not_heterodox_to_root_<X> directly, one madhhab at a time, so a
+# multi-seat location's seats never get judged as a single unit. The
+# white-peace fatwa doesn't call this umbrella bare either any more - see
+# aqd_fatwa_seat_eligible below, which wraps each of the nine with the
+# same in-flight-pick exclusion the jihad fatwa's own aqd_jihad_seat_
+# eligible_<X> already has.
 aqd_seat_madhhab_not_heterodox_to_root = {
 	OR = {
-		AND = {
-			has_building = building_type:seat_of_hanafi_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:imamiya_school
-				religious_school = religious_school:ismaili_school
-				religious_school = religious_school:nizari_school
-				religious_school = religious_school:mustali_school
-				religious_school = religious_school:alevism_school
-				religious_school = religious_school:alawi_school
-			} } }
-		}
-		AND = {
-			has_building = building_type:seat_of_hanbali_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:imamiya_school
-				religious_school = religious_school:ismaili_school
-				religious_school = religious_school:nizari_school
-				religious_school = religious_school:mustali_school
-				religious_school = religious_school:alevism_school
-				religious_school = religious_school:alawi_school
-				religious_school = religious_school:mutazili_school
-				religious_school = religious_school:zaidi_school
-			} } }
-		}
-		AND = {
-			has_building = building_type:seat_of_maliki_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:imamiya_school
-				religious_school = religious_school:ismaili_school
-				religious_school = religious_school:nizari_school
-				religious_school = religious_school:mustali_school
-				religious_school = religious_school:alevism_school
-				religious_school = religious_school:alawi_school
-				religious_school = religious_school:zaidi_school
-				religious_school = religious_school:azzaba_school
-			} } }
-		}
-		AND = {
-			has_building = building_type:seat_of_shafii_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:imamiya_school
-				religious_school = religious_school:ismaili_school
-				religious_school = religious_school:nizari_school
-				religious_school = religious_school:mustali_school
-				religious_school = religious_school:alevism_school
-				religious_school = religious_school:alawi_school
-				religious_school = religious_school:mutazili_school
-				religious_school = religious_school:zaidi_school
-			} } }
-		}
-		AND = {
-			has_building = building_type:seat_of_zahiri_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:ashari_school
-				religious_school = religious_school:maturidi_school
-				religious_school = religious_school:athari_school
-				religious_school = religious_school:imamiya_school
-				religious_school = religious_school:ismaili_school
-				religious_school = religious_school:nizari_school
-				religious_school = religious_school:mustali_school
-				religious_school = religious_school:alevism_school
-				religious_school = religious_school:alawi_school
-				religious_school = religious_school:zaidi_school
-			} } }
-		}
-		AND = {
-			has_building = building_type:seat_of_ismaili_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:ashari_school
-				religious_school = religious_school:maturidi_school
-				religious_school = religious_school:athari_school
-				religious_school = religious_school:mutazili_school
-				religious_school = religious_school:wahhabi_school
-				religious_school = religious_school:wahbi_school
-				religious_school = religious_school:azzaba_school
-			} } }
-		}
-		AND = {
-			has_building = building_type:seat_of_jafari_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:ashari_school
-				religious_school = religious_school:maturidi_school
-				religious_school = religious_school:athari_school
-				religious_school = religious_school:mutazili_school
-				religious_school = religious_school:wahhabi_school
-				religious_school = religious_school:wahbi_school
-				religious_school = religious_school:azzaba_school
-			} } }
-		}
-		AND = {
-			has_building = building_type:seat_of_zaidi_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:ashari_school
-				religious_school = religious_school:maturidi_school
-				religious_school = religious_school:athari_school
-				religious_school = religious_school:mutazili_school
-				religious_school = religious_school:wahhabi_school
-				religious_school = religious_school:wahbi_school
-				religious_school = religious_school:azzaba_school
-			} } }
-		}
-		AND = {
-			has_building = building_type:seat_of_ibadi_jurists
-			NOT = { root = { OR = {
-				religious_school = religious_school:ashari_school
-				religious_school = religious_school:maturidi_school
-				religious_school = religious_school:athari_school
-				religious_school = religious_school:mutazili_school
-				religious_school = religious_school:wahhabi_school
-			} } }
-		}
+		aqd_seat_madhhab_not_heterodox_to_root_hanafi = yes
+		aqd_seat_madhhab_not_heterodox_to_root_hanbali = yes
+		aqd_seat_madhhab_not_heterodox_to_root_maliki = yes
+		aqd_seat_madhhab_not_heterodox_to_root_shafii = yes
+		aqd_seat_madhhab_not_heterodox_to_root_zahiri = yes
+		aqd_seat_madhhab_not_heterodox_to_root_ismaili = yes
+		aqd_seat_madhhab_not_heterodox_to_root_jafari = yes
+		aqd_seat_madhhab_not_heterodox_to_root_zaidi = yes
+		aqd_seat_madhhab_not_heterodox_to_root_ibadi = yes
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_fatwa_seat_eligible_<X>: the white-peace fatwa's own per-madhhab
+# eligibility, layered on top of the pure doctrinal check above exactly
+# the way scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's aqd_jihad_
+# seat_eligible_<X> layers on top of it for the jihad fatwa. Adds the
+# ONE thing that was previously missing here: excluding a location that
+# already carries an in-flight z_aqd_fatwa_pending_pick marker.
+#
+# Without this, the "no double-booking" protection between the jihad
+# fatwa and this one existed only as a side effect of on_action/
+# 00_aqd_game_start.txt's monthly_country_pulse listing aqd_fatwa_pulse
+# before aqd_jihad_fatwa_pulse (so a location the white-peace fatwa just
+# stamped this same tick is correctly excluded from that month's jihad
+# pick, purely because jihad runs second) - reorder that list, or have
+# another mod interpose a third consumer of the same shared marker
+# between them, and the two systems could race to stamp/consume the same
+# location in one tick. This makes the exclusion explicit and order-
+# independent here too, rather than relying on which pulse happens to
+# run first.
+#
+# scripted_effects/z_aqd_fatwa_effects.txt's aqd_fatwa_pick_seat (both
+# the initial random_owned_location limit and its own per-madhhab
+# reservoir-sampling checks) and z_aqd_fatwa.2's refuse-option loop
+# (events/religion/z_aqd_fatwa_events.txt) all use these instead of the
+# bare aqd_seat_madhhab_not_heterodox_to_root_<X> checks now.
+# ---------------------------------------------------------------------
+aqd_fatwa_seat_eligible_hanafi = {
+	aqd_seat_madhhab_not_heterodox_to_root_hanafi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+aqd_fatwa_seat_eligible_hanbali = {
+	aqd_seat_madhhab_not_heterodox_to_root_hanbali = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+aqd_fatwa_seat_eligible_maliki = {
+	aqd_seat_madhhab_not_heterodox_to_root_maliki = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+aqd_fatwa_seat_eligible_shafii = {
+	aqd_seat_madhhab_not_heterodox_to_root_shafii = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+aqd_fatwa_seat_eligible_zahiri = {
+	aqd_seat_madhhab_not_heterodox_to_root_zahiri = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+aqd_fatwa_seat_eligible_ismaili = {
+	aqd_seat_madhhab_not_heterodox_to_root_ismaili = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+aqd_fatwa_seat_eligible_jafari = {
+	aqd_seat_madhhab_not_heterodox_to_root_jafari = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+aqd_fatwa_seat_eligible_zaidi = {
+	aqd_seat_madhhab_not_heterodox_to_root_zaidi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+aqd_fatwa_seat_eligible_ibadi = {
+	aqd_seat_madhhab_not_heterodox_to_root_ibadi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
+}
+
+# Umbrella "is there SOME eligible seat here" form, used only by z_aqd_
+# fatwa.2's refuse loop (events/religion/z_aqd_fatwa_events.txt) calling
+# the nine single-madhhab forms above directly, same reasoning as aqd_
+# jihad_seat_eligible's own umbrella. aqd_fatwa_pick_seat (scripted_
+# effects/z_aqd_fatwa_effects.txt) does NOT use either this umbrella or
+# the nine forms above directly any more - see aqd_fatwa_stage1_seat_
+# eligible_<X> below.
+aqd_fatwa_seat_eligible = {
+	OR = {
+		aqd_fatwa_seat_eligible_hanafi = yes
+		aqd_fatwa_seat_eligible_hanbali = yes
+		aqd_fatwa_seat_eligible_maliki = yes
+		aqd_fatwa_seat_eligible_shafii = yes
+		aqd_fatwa_seat_eligible_zahiri = yes
+		aqd_fatwa_seat_eligible_ismaili = yes
+		aqd_fatwa_seat_eligible_jafari = yes
+		aqd_fatwa_seat_eligible_zaidi = yes
+		aqd_fatwa_seat_eligible_ibadi = yes
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_fatwa_stage1_seat_eligible_<X>: stage-1-ONLY eligibility, layering
+# the shared aqd_fatwa_seat_eligible_<X> above with the "one shot per
+# war" gate - NOT folded into that shared form itself, because z_aqd_
+# fatwa.2's escalation loop also uses the shared form and its entire
+# point is asking seats again (including ones that stayed quiet during
+# stage 1); only stage 1's own silent-miss monthly retry loop had the
+# "keep trying forever, regardless of how low any one seat's odds are"
+# problem this fixes. z_aqd_jihad_declined_<X>'s jihad-fatwa equivalent
+# folds straight into aqd_jihad_seat_eligible_<X> instead, since the
+# jihad fatwa has no second-stage consumer to keep separate from.
+#
+# z_aqd_fatwa_declined_<X> (main_menu/common/static_modifiers/z_aqd_
+# fatwa_declined.txt - no "_stage1_" in the KEY name, unlike this trigger:
+# the marker itself has no stage-2 counterpart to disambiguate from and
+# never will, so it stays named after what it means, not the stage
+# structure of whichever fatwa stamps it - see that file's own header)
+# is stamped by scripted_effects/z_aqd_fatwa_effects.txt's aqd_fatwa_
+# attempt_stage1 the moment THIS exact seat's approval roll declines,
+# excluding it from being re-picked for the rest of the current unjust-
+# war episode. Cleared realm-wide once the episode ends (on_action/
+# 00_aqd_game_start.txt's aqd_fatwa_episode_cleanup_pulse, and
+# defensively again at the start of the next episode).
+#
+# scripted_effects/z_aqd_fatwa_effects.txt's aqd_fatwa_pick_seat (both
+# the initial random_owned_location limit and its own per-madhhab
+# reservoir-sampling checks) uses these instead of the bare aqd_fatwa_
+# seat_eligible_<X> checks now.
+# ---------------------------------------------------------------------
+aqd_fatwa_stage1_seat_eligible_hanafi = {
+	aqd_fatwa_seat_eligible_hanafi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_hanafi }
+}
+aqd_fatwa_stage1_seat_eligible_hanbali = {
+	aqd_fatwa_seat_eligible_hanbali = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_hanbali }
+}
+aqd_fatwa_stage1_seat_eligible_maliki = {
+	aqd_fatwa_seat_eligible_maliki = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_maliki }
+}
+aqd_fatwa_stage1_seat_eligible_shafii = {
+	aqd_fatwa_seat_eligible_shafii = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_shafii }
+}
+aqd_fatwa_stage1_seat_eligible_zahiri = {
+	aqd_fatwa_seat_eligible_zahiri = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_zahiri }
+}
+aqd_fatwa_stage1_seat_eligible_ismaili = {
+	aqd_fatwa_seat_eligible_ismaili = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_ismaili }
+}
+aqd_fatwa_stage1_seat_eligible_jafari = {
+	aqd_fatwa_seat_eligible_jafari = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_jafari }
+}
+aqd_fatwa_stage1_seat_eligible_zaidi = {
+	aqd_fatwa_seat_eligible_zaidi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_zaidi }
+}
+aqd_fatwa_stage1_seat_eligible_ibadi = {
+	aqd_fatwa_seat_eligible_ibadi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_declined_ibadi }
+}
+
+# Umbrella form, used only by aqd_fatwa_pick_seat's initial random_owned_
+# location limit - its own reservoir-sampling pass calls the nine single-
+# madhhab forms above directly.
+aqd_fatwa_stage1_seat_eligible = {
+	OR = {
+		aqd_fatwa_stage1_seat_eligible_hanafi = yes
+		aqd_fatwa_stage1_seat_eligible_hanbali = yes
+		aqd_fatwa_stage1_seat_eligible_maliki = yes
+		aqd_fatwa_stage1_seat_eligible_shafii = yes
+		aqd_fatwa_stage1_seat_eligible_zahiri = yes
+		aqd_fatwa_stage1_seat_eligible_ismaili = yes
+		aqd_fatwa_stage1_seat_eligible_jafari = yes
+		aqd_fatwa_stage1_seat_eligible_zaidi = yes
+		aqd_fatwa_stage1_seat_eligible_ibadi = yes
 	}
 }

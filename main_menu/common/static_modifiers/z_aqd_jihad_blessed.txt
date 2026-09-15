@@ -1,0 +1,94 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "already blessed this war" markers.
+#
+# NINE concrete per-madhhab keys, mirroring z_aqd_jihad_declined.txt's
+# own convention exactly - the SUCCESS-side counterpart to that file's
+# decline-side marker. Stamped by scripted_effects/z_aqd_jihad_fatwa_
+# effects.txt's aqd_apply_fatwa_of_jihad_for_seat alongside the real
+# z_aqd_fatwa_of_jihad_<X> mobilization bonus (main_menu/common/static_
+# modifiers/z_aqd_fatwa_of_jihad.txt) the moment a seat's approval roll
+# SUCCEEDS, and checked by scripted_triggers/z_aqd_jihad_fatwa_triggers.
+# txt's aqd_jihad_seat_eligible_<X> to exclude that exact seat from ever
+# being re-picked for the rest of the current jihad.
+#
+# Kept as a SEPARATE marker from z_aqd_fatwa_of_jihad_<X> itself rather
+# than just relying on that modifier's own presence/duration, for two
+# reasons:
+#   - z_aqd_fatwa_of_jihad_<X> is the real, pre-existing 4-year-equivalent
+#     cross-war throttle (deliberately NOT reset by a jihad ending, so a
+#     seat that just blessed one war still can't immediately bless the
+#     next) - its own lifecycle must stay untouched by episode boundaries.
+#   - Repeatedly re-extending that same modifier every month to keep it
+#     alive for however long the war lasts would need mode = add_and_
+#     extend applied on a recurring cadence, whose exact stacking
+#     semantics (does a repeated extend ADD onto remaining duration
+#     unboundedly, or ceiling-refresh it?) could not be confirmed with
+#     certainty from the base game - a wrong assumption either way risks
+#     either a runaway-duration bug or a renewal that silently does
+#     nothing. A second, purpose-built, safety-net-duration marker
+#     side-steps that ambiguity entirely: no repeated application of
+#     anything, ever - just stamp once on success, clear once at episode
+#     end (on_action/00_aqd_game_start.txt's aqd_jihad_episode_cleanup_
+#     pulse, and defensively again at the start of the next episode).
+#
+# years = 50 at the stamp site is the same safety-net-only duration
+# convention as every other marker in this mod - not load-bearing, since
+# normal flow always clears it explicitly well before then.  No stat
+# block needed - local_unrest = 0 is a harmless placeholder, mirroring
+# z_aqd_fatwa_pending_pick.txt's own shape.
+# =====================================================================
+
+z_aqd_jihad_blessed_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_blessed_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_blessed_maliki = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_blessed_shafii = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_blessed_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_blessed_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_blessed_jafari = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_blessed_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_jihad_blessed_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

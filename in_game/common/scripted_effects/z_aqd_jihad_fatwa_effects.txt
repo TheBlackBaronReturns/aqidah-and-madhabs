@@ -2,54 +2,432 @@
 # AQIDAH SCHOOLS OF CREED - the Fatwa of Jihad: effects.
 # =====================================================================
 
+# ---------------------------------------------------------------------
+# aqd_jihad_fatwa_pick_seat: picks ONE random eligible owned location
+# (uniform over locations, via the umbrella aqd_jihad_seat_eligible OR,
+# scripted_triggers/z_aqd_jihad_fatwa_triggers.txt), then - since that
+# location can legitimately hold more than one eligible seat at once
+# (building_types/z_aqd_jurist_seats.txt's location_potential for each
+# seat_of_<X>_jurists only ever excludes a duplicate of the SAME
+# madhhab, never a different one, and the establishment event fires
+# independently per madhhab with no check for another madhhab's seat
+# already standing there) - picks uniformly among however many of its
+# seats are ACTUALLY eligible right now via classic reservoir sampling
+# (Algorithm R): walk the 9 madhhabs in a fixed order, and each time an
+# eligible one is found, replace the current pick with probability
+# 1/(running count so far). EU5's random_list only accepts literal
+# integer weights (script_values/z_aqd_madhhab_approval.txt's own header
+# notes the identical constraint), so the promotion odds are hardcoded
+# per possible running-count value (1 through the position's own index -
+# the most that count could ever be there, since at most that many
+# madhhabs could have preceded it) rather than computed - this still
+# yields an exactly uniform pick over N eligible seats for any N from 1
+# to 9, regardless of which specific madhhabs turned out to be present.
+#
+# Sets var:aqd_jihad_fatwa_seat_madhhab (1-9) to the winner.
+# aqd_jihad_fatwa_attempt below reads it straight into aqd_compute_seat_
+# approval (scripted_effects/z_aqd_madhhab_approval_effects.txt, which
+# skips its own has_building auto-detection whenever this is already
+# set) instead of letting that effect re-guess from building presence -
+# re-guessing would just reintroduce the same "first match in a fixed
+# priority order always wins, even when a different co-located seat is
+# the one that actually got picked" bug this whole file exists to fix.
+# ---------------------------------------------------------------------
 aqd_jihad_fatwa_pick_seat = {
 	random_owned_location = {
 		limit = { aqd_jihad_seat_eligible = yes }
 		save_scope_as = target_location
 		province_definition = { save_scope_as = target_province }
 	}
+	if = {
+		limit = { exists = scope:target_location }
+		set_variable = { name = aqd_jihad_fatwa_seat_count  value = 0 }
+
+		# Hanafi (1) - always checked first, so a match here is
+		# unconditionally the running count's first entry - no promotion
+		# roll needed yet.
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_hanafi = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 1 }
+		}
+		# Hanbali (2)
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_hanbali = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 1 }
+				set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 2 }
+			}
+			else = {
+				random_list = {
+					1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 2 } }
+					1 = {}
+				}
+			}
+		}
+		# Maliki (3)
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_maliki = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 1 }
+				set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 3 }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 2 }
+				random_list = {
+					1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 3 } }
+					1 = {}
+				}
+			}
+			else = {
+				random_list = {
+					1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 3 } }
+					2 = {}
+				}
+			}
+		}
+		# Shafii (4)
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_shafii = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 1 }
+				set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 4 }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 2 }
+				random_list = {
+					1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 4 } }
+					1 = {}
+				}
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 3 }
+				random_list = {
+					1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 4 } }
+					2 = {}
+				}
+			}
+			else = {
+				random_list = {
+					1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 4 } }
+					3 = {}
+				}
+			}
+		}
+		# Zahiri (5)
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_zahiri = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 1 }
+				set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 5 }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 5 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 5 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 5 } }  3 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 5 } }  4 = {} }
+			}
+		}
+		# Ismaili (6)
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_ismaili = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 1 }
+				set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 6 }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 6 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 6 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 6 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 6 } }  4 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 6 } }  5 = {} }
+			}
+		}
+		# Jafari (7)
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_jafari = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 1 }
+				set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 7 }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 7 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 7 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 7 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 7 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 7 } }  5 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 7 } }  6 = {} }
+			}
+		}
+		# Zaidi (8)
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_zaidi = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 1 }
+				set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 8 }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 8 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 8 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 8 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 8 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 8 } }  5 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 7 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 8 } }  6 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 8 } }  7 = {} }
+			}
+		}
+		# Ibadi (9)
+		if = {
+			limit = { scope:target_location = { aqd_jihad_seat_eligible_ibadi = yes } }
+			change_variable = { name = aqd_jihad_fatwa_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 1 }
+				set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 } }  5 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 7 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 } }  6 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_jihad_fatwa_seat_count = 8 }
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 } }  7 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_jihad_fatwa_seat_madhhab  value = 9 } }  8 = {} }
+			}
+		}
+
+		remove_variable = aqd_jihad_fatwa_seat_count
+	}
 }
 
 # 9-branch dispatch, mirrors scripted_effects/z_aqd_fatwa_effects.txt's
 # aqd_fatwa_apply_displeased_for_seat in shape. Called from the event's
 # own option (not immediate) so the manpower/modifier grant renders in
-# the option's tooltip preview.
+# the option's tooltip preview. Reads root's var:aqd_jihad_fatwa_seat_
+# madhhab (set by the picker above, still alive - aqd_jihad_fatwa_attempt
+# only cleans it up on a declined roll, and the event's own option below
+# removes it once consumed) rather than re-deriving from has_building -
+# a location can hold more than one seat, so re-deriving here would risk
+# stamping the WRONG madhhab's modifier if a different one happens to be
+# checked first.
+#
+# Each branch now stamps TWO modifiers, not one:
+#   - z_aqd_fatwa_of_jihad_<X> (main_menu/common/static_modifiers/z_aqd_
+#     fatwa_of_jihad.txt) - the real manpower/levy mobilization bonus.
+#     years = 50 here is a safety-net duration only (see that file's own
+#     header) - its REAL post-success cross-war throttle role is
+#     unaffected by this change, since nothing clears it early any more
+#     than it always could have naturally expired before.
+#   - z_aqd_jihad_blessed_<X> (main_menu/common/static_modifiers/z_aqd_
+#     jihad_blessed.txt) - the war-scoped "don't ask this seat again"
+#     gate, checked by scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's
+#     aqd_jihad_seat_eligible_<X> and cleared at episode end (on_action/
+#     00_aqd_game_start.txt's aqd_jihad_episode_cleanup_pulse) - this is
+#     what actually stops "A Fatwa for the Jihad" from popping up again
+#     for the same seat every time the mobilization bonus happens to
+#     lapse before the war itself does.
 aqd_apply_fatwa_of_jihad_for_seat = {
 	if = {
-		limit = { has_building = building_type:seat_of_hanafi_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_hanafi  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 1 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_hanafi  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_hanafi   years = 50  mode = add_and_extend }
 	}
 	else_if = {
-		limit = { has_building = building_type:seat_of_hanbali_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_hanbali  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 2 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_hanbali  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_hanbali   years = 50  mode = add_and_extend }
 	}
 	else_if = {
-		limit = { has_building = building_type:seat_of_maliki_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_maliki  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 3 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_maliki  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_maliki   years = 50  mode = add_and_extend }
 	}
 	else_if = {
-		limit = { has_building = building_type:seat_of_shafii_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_shafii  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 4 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_shafii  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_shafii   years = 50  mode = add_and_extend }
 	}
 	else_if = {
-		limit = { has_building = building_type:seat_of_zahiri_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_zahiri  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 5 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_zahiri  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_zahiri   years = 50  mode = add_and_extend }
 	}
 	else_if = {
-		limit = { has_building = building_type:seat_of_ismaili_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_ismaili  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 6 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_ismaili  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_ismaili   years = 50  mode = add_and_extend }
 	}
 	else_if = {
-		limit = { has_building = building_type:seat_of_jafari_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_jafari  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 7 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_jafari  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_jafari   years = 50  mode = add_and_extend }
 	}
 	else_if = {
-		limit = { has_building = building_type:seat_of_zaidi_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_zaidi  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 8 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_zaidi  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_zaidi   years = 50  mode = add_and_extend }
 	}
 	else_if = {
-		limit = { has_building = building_type:seat_of_ibadi_jurists }
-		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_ibadi  years = 4  mode = add_and_extend }
+		limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 9 } }
+		add_location_modifier = { modifier = z_aqd_fatwa_of_jihad_ibadi  years = 50  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jihad_blessed_ibadi   years = 50  mode = add_and_extend }
+	}
+	root = { remove_variable = aqd_jihad_fatwa_seat_madhhab }
+}
+
+# 9-branch dispatch, same shape and same reasoning as aqd_apply_fatwa_of_
+# jihad_for_seat above, for the OPPOSITE outcome: stamps z_aqd_jihad_
+# declined_<X> (main_menu/common/static_modifiers/z_aqd_jihad_declined.
+# txt) on the SPECIFIC seat that just declined, reading root's var:aqd_
+# jihad_fatwa_seat_madhhab rather than re-deriving from has_building for
+# the same multi-seat-location reason. Called from aqd_jihad_fatwa_
+# attempt's own decline branch, at scope:target_location, BEFORE that
+# variable is cleaned up. years = 50 is a safety-net duration only - the
+# marker is always cleared explicitly once the jihad episode ends
+# (on_action/00_aqd_game_start.txt's aqd_jihad_episode_cleanup_pulse).
+# This is the "one shot per war" fix: previously a decline cost this
+# seat nothing, so the very next month's pulse could - and eventually,
+# given a long enough war, would - pick it again, making eventual
+# success for SOME seat in the realm a near-certainty regardless of how
+# low any individual seat's own approval score was.
+aqd_jihad_fatwa_stamp_declined_for_seat = {
+	if      = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 1 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_hanafi   years = 50  mode = add_and_extend } }
+	else_if = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 2 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_hanbali  years = 50  mode = add_and_extend } }
+	else_if = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 3 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_maliki   years = 50  mode = add_and_extend } }
+	else_if = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 4 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_shafii   years = 50  mode = add_and_extend } }
+	else_if = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 5 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_zahiri   years = 50  mode = add_and_extend } }
+	else_if = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 6 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_ismaili  years = 50  mode = add_and_extend } }
+	else_if = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 7 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_jafari   years = 50  mode = add_and_extend } }
+	else_if = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 8 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_zaidi    years = 50  mode = add_and_extend } }
+	else_if = { limit = { root = { var:aqd_jihad_fatwa_seat_madhhab = 9 } }  add_location_modifier = { modifier = z_aqd_jihad_declined_ibadi    years = 50  mode = add_and_extend } }
+}
+
+# ---------------------------------------------------------------------
+# aqd_jihad_episode_start_check: country-scoped, called at the top of
+# the pulse's effect (on_action/00_aqd_game_start.txt's aqd_jihad_fatwa_
+# pulse) - i.e. every month root qualifies as aqd_is_jihad_participant.
+# var:aqd_jihad_episode_active is the flag-toggle half of a start/end
+# pair with aqd_jihad_episode_cleanup_pulse (same on_action file): the
+# FIRST month of a fresh jihad (flag not set yet) sweeps every owned
+# location clear of all nine z_aqd_jihad_declined_<X> AND all nine
+# z_aqd_jihad_blessed_<X> markers before setting the flag, so a seat that
+# declined OR already blessed a PREVIOUS, already-concluded jihad starts
+# this new one with a clean slate. Deliberately does NOT touch z_aqd_
+# fatwa_of_jihad_<X> itself - that one's real cross-war throttle role is
+# untouched by episode boundaries on purpose. On every subsequent month
+# of the SAME ongoing jihad the flag is already set, so this is a single
+# cheap has_variable check and nothing else runs - the sweep only ever
+# fires once per episode. The actual "already asked this seat, one way or
+# the other" cost is meant to persist ONLY for the remainder of one war;
+# the cleanup pulse handles the normal end-of-war clearing, this is
+# purely the defensive backstop for the (should never happen, but not
+# load-bearing to prevent) case where that cleanup somehow didn't run.
+aqd_jihad_episode_start_check = {
+	if = {
+		limit = { NOT = { has_variable = aqd_jihad_episode_active } }
+		set_variable = { name = aqd_jihad_episode_active  value = 1 }
+		every_owned_location = {
+			remove_location_modifier = z_aqd_jihad_declined_hanafi
+			remove_location_modifier = z_aqd_jihad_declined_hanbali
+			remove_location_modifier = z_aqd_jihad_declined_maliki
+			remove_location_modifier = z_aqd_jihad_declined_shafii
+			remove_location_modifier = z_aqd_jihad_declined_zahiri
+			remove_location_modifier = z_aqd_jihad_declined_ismaili
+			remove_location_modifier = z_aqd_jihad_declined_jafari
+			remove_location_modifier = z_aqd_jihad_declined_zaidi
+			remove_location_modifier = z_aqd_jihad_declined_ibadi
+			remove_location_modifier = z_aqd_jihad_blessed_hanafi
+			remove_location_modifier = z_aqd_jihad_blessed_hanbali
+			remove_location_modifier = z_aqd_jihad_blessed_maliki
+			remove_location_modifier = z_aqd_jihad_blessed_shafii
+			remove_location_modifier = z_aqd_jihad_blessed_zahiri
+			remove_location_modifier = z_aqd_jihad_blessed_ismaili
+			remove_location_modifier = z_aqd_jihad_blessed_jafari
+			remove_location_modifier = z_aqd_jihad_blessed_zaidi
+			remove_location_modifier = z_aqd_jihad_blessed_ibadi
+		}
 	}
 }
 
@@ -61,21 +439,54 @@ aqd_apply_fatwa_of_jihad_for_seat = {
 # On success, stamps the shared pending-pick marker (scripted_effects/
 # z_aqd_madhhab_approval_effects.txt's aqd_stamp_pending_pick) and fires
 # the narration event non-silently; the event's own immediate re-finds
-# the seat via that marker (saved scopes do not survive trigger_event).
-# On failure - no eligible seat at all, or the roll declines - this does
-# nothing, a true silent miss.
+# the seat via that marker (saved scopes do not survive trigger_event -
+# var:aqd_jihad_fatwa_seat_madhhab, a plain country variable rather than
+# a saved scope, DOES survive it, which is exactly why the event reads
+# that instead of re-deriving the madhhab from the re-found location's
+# buildings). On failure - no eligible seat at all, or the roll declines
+# - this does nothing, a true silent miss.
+#
+# NO country-wide cooldown here any more - a per-seat one already exists
+# and is enough: a successful pick stamps a 4-year z_aqd_fatwa_of_jihad_
+# <X> modifier on that SPECIFIC (location, madhhab) pair (scripted_
+# triggers/z_aqd_jihad_fatwa_triggers.txt's aqd_jihad_seat_eligible_<X>
+# checks it directly), so THAT seat can't fire again for 4 years while
+# every OTHER eligible seat - a different madhhab at the same location
+# included - stays independently pickable next month. A blanket root-
+# scoped cooldown here would have defeated that: it used to block the
+# entire pulse for 5 years after any single success, regardless of which
+# seat or madhhab, which is why a whole jihad war (usually well under 5
+# years) only ever produced one fatwa event no matter how many other
+# eligible seats existed.
 # ---------------------------------------------------------------------
 aqd_jihad_fatwa_attempt = {
 	aqd_jihad_fatwa_pick_seat = yes
 	if = {
 		limit = { exists = scope:target_location }
+		# Pre-seed aqd_compute_seat_approval's own var:aqd_seat_madhhab
+		# from the reservoir pick's result BEFORE calling it - the two
+		# variables are deliberately named differently (aqd_seat_madhhab
+		# is the shared scratch var scripted_effects/z_aqd_madhhab_
+		# approval_effects.txt's aqd_compute_seat_approval and the white-
+		# peace fatwa both read/clear every call; aqd_jihad_fatwa_seat_
+		# madhhab is this file's own persistent result that survives all
+		# the way to the event). Without this copy, aqd_compute_seat_
+		# approval's "skip auto-detection if already set" guard would
+		# never trigger (it checks aqd_seat_madhhab specifically), and it
+		# would silently fall back to re-guessing the seat's madhhab from
+		# has_building - exactly the ambiguous-at-a-multi-seat-location
+		# behavior this whole file exists to avoid.
+		set_variable = { name = aqd_seat_madhhab  value = var:aqd_jihad_fatwa_seat_madhhab }
 		scope:target_location = { aqd_compute_seat_approval = yes }
 		aqd_roll_approval_percentage = yes
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			scope:target_location = { aqd_stamp_pending_pick = yes }
-			set_variable = { name = aqd_jihad_fatwa_cooldown  years = 5 }
 			trigger_event_non_silently = { id = z_aqd_jfatwa.1  days = 1 }
+		}
+		else = {
+			scope:target_location = { aqd_jihad_fatwa_stamp_declined_for_seat = yes }
+			remove_variable = aqd_jihad_fatwa_seat_madhhab
 		}
 	}
 	remove_variable = aqd_seat_madhhab

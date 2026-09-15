@@ -1,0 +1,89 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "declined this war" markers, unjust-war fatwa.
+#
+# NINE concrete per-madhhab keys, mirroring z_aqd_jihad_declined.txt's
+# own convention exactly, for the white-peace fatwa's stage 1 (the
+# Jurists' Fatwa Against an Unjust War). Stamped by scripted_effects/
+# z_aqd_fatwa_effects.txt's aqd_fatwa_attempt_stage1 when a seat's
+# approval roll DECLINES, and checked by scripted_triggers/z_aqd_fatwa_
+# triggers.txt's aqd_fatwa_stage1_seat_eligible_<X> - a stage-1-ONLY
+# eligibility layer, deliberately NOT folded into the shared aqd_fatwa_
+# seat_eligible_<X> that z_aqd_fatwa.2's escalation loop also uses, since
+# stage 2's entire point is asking seats again (including ones that
+# stayed quiet during stage 1) and never repeats/retries the way stage
+# 1's own silent-miss monthly pulse does - only THAT retry loop had the
+# "keep trying forever" problem this fixes, so only it needs this marker.
+#
+# No "_stage1_" in the key name (unlike the trigger that consumes it,
+# which legitimately needs that qualifier to distinguish itself from the
+# shared stage-1-and-2 form) - this marker itself has no stage-2
+# counterpart to disambiguate from and never will, so baking a stage
+# number into the on-disk modifier key would just be a short-sighted
+# template for every future fatwa's own equivalent marker to blindly
+# copy. Kept symmetric with z_aqd_jihad_declined_<X>'s own plain naming
+# instead: name the marker after what it universally means (declined,
+# excluded for the rest of THIS war), not after the internal stage
+# structure of whichever specific fatwa happens to stamp it.
+#
+# years = 50 at the stamp site is a safety-net duration only, not load-
+# bearing - normal flow always clears this explicitly once the episode
+# ends (on_action/00_aqd_game_start.txt's aqd_fatwa_episode_cleanup_
+# pulse, and defensively again at the start of the next episode). No stat
+# block needed - local_unrest = 0 is a harmless placeholder, mirroring
+# z_aqd_fatwa_pending_pick.txt's own shape.
+# =====================================================================
+
+z_aqd_fatwa_declined_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_fatwa_declined_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_fatwa_declined_maliki = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_fatwa_declined_shafii = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_fatwa_declined_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_fatwa_declined_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_fatwa_declined_jafari = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_fatwa_declined_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_fatwa_declined_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

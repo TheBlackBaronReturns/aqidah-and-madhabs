@@ -92,7 +92,7 @@ aqd_seat_establishment_pulse = {
 # subscribers - same merge-not-override guarantee documented above for
 # on_game_start.
 monthly_country_pulse = {
-	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_jihad_fatwa_pulse }
+	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_fatwa_episode_cleanup_pulse  aqd_jihad_fatwa_pulse  aqd_jihad_episode_cleanup_pulse }
 }
 
 # The Jurists' Fatwa Against an Unjust War (events/religion/
@@ -116,9 +116,45 @@ aqd_fatwa_pulse = {
 		any_current_war = { attacker_leader = root }
 	}
 	effect = {
+		# aqd_fatwa_episode_start_check (scripted_effects/z_aqd_fatwa_
+		# effects.txt) runs first every month this trigger passes - a cheap
+		# has_variable check once var:aqd_fatwa_episode_active is already
+		# set, and a one-time realm-wide sweep of stale z_aqd_fatwa_
+		# declined_<X> markers the first month of a fresh unjust-war episode.
+		aqd_fatwa_episode_start_check = yes
 		random = {
 			chance = 15
 			aqd_fatwa_attempt_stage1 = yes
+		}
+	}
+}
+
+# Episode-end half of aqd_fatwa_episode_start_check's flag-toggle pair
+# (scripted_effects/z_aqd_fatwa_effects.txt) - fires the one month root
+# stops qualifying as any_current_war = { attacker_leader = root } while
+# still carrying the "episode active" flag from a previous month, clears
+# it, and sweep-clears the nine z_aqd_fatwa_declined_<X> "one shot per
+# war" markers realm-wide so the NEXT unjust-war episode starts with
+# every seat's slate wiped clean rather than inheriting this one's
+# declines.
+aqd_fatwa_episode_cleanup_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		has_variable = aqd_fatwa_episode_active
+		NOT = { any_current_war = { attacker_leader = root } }
+	}
+	effect = {
+		remove_variable = aqd_fatwa_episode_active
+		every_owned_location = {
+			remove_location_modifier = z_aqd_fatwa_declined_hanafi
+			remove_location_modifier = z_aqd_fatwa_declined_hanbali
+			remove_location_modifier = z_aqd_fatwa_declined_maliki
+			remove_location_modifier = z_aqd_fatwa_declined_shafii
+			remove_location_modifier = z_aqd_fatwa_declined_zahiri
+			remove_location_modifier = z_aqd_fatwa_declined_ismaili
+			remove_location_modifier = z_aqd_fatwa_declined_jafari
+			remove_location_modifier = z_aqd_fatwa_declined_zaidi
+			remove_location_modifier = z_aqd_fatwa_declined_ibadi
 		}
 	}
 }
@@ -128,17 +164,69 @@ aqd_fatwa_pulse = {
 # z_aqd_jihad_fatwa_effects.txt's aqd_jihad_fatwa_attempt does the seat
 # pick + centralized approval roll before any event exists, and only
 # fires the narration event on a YES.
+#
+# NO country-wide cooldown gate here - the per-seat 4-year z_aqd_fatwa_
+# of_jihad_<X> modifier (checked inside aqd_jihad_seat_eligible's own
+# per-madhhab branches, scripted_triggers/z_aqd_jihad_fatwa_triggers.txt)
+# is the only cooldown, so a country with several eligible seats keeps
+# rolling for whichever ones are still off cooldown instead of the whole
+# pulse going dark for 5 years after any single success.
 aqd_jihad_fatwa_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
-		NOT = { has_variable = aqd_jihad_fatwa_cooldown }
 		aqd_is_jihad_participant = yes
 		any_owned_location = { aqd_jihad_seat_eligible = yes }
 	}
 	effect = {
+		# aqd_jihad_episode_start_check (scripted_effects/z_aqd_jihad_
+		# fatwa_effects.txt) runs first every month this trigger passes -
+		# same reasoning as aqd_fatwa_pulse's own aqd_fatwa_episode_start_
+		# check above.
+		aqd_jihad_episode_start_check = yes
 		random = {
 			chance = 20
 			aqd_jihad_fatwa_attempt = yes
+		}
+	}
+}
+
+# Episode-end half of aqd_jihad_episode_start_check's flag-toggle pair
+# (scripted_effects/z_aqd_jihad_fatwa_effects.txt) - fires the one month
+# root stops qualifying as aqd_is_jihad_participant while still carrying
+# the "episode active" flag from a previous month, clears it, and sweep-
+# clears the nine z_aqd_jihad_declined_<X> "one shot per war" markers AND
+# the nine z_aqd_jihad_blessed_<X> "already asked and said yes this war"
+# markers realm-wide so the NEXT jihad starts with every seat's slate
+# wiped clean. Deliberately does NOT touch z_aqd_fatwa_of_jihad_<X> - its
+# own real cross-war throttle keeps running on its own duration
+# regardless of this war ending, exactly as before this whole feature.
+aqd_jihad_episode_cleanup_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		has_variable = aqd_jihad_episode_active
+		NOT = { aqd_is_jihad_participant = yes }
+	}
+	effect = {
+		remove_variable = aqd_jihad_episode_active
+		every_owned_location = {
+			remove_location_modifier = z_aqd_jihad_declined_hanafi
+			remove_location_modifier = z_aqd_jihad_declined_hanbali
+			remove_location_modifier = z_aqd_jihad_declined_maliki
+			remove_location_modifier = z_aqd_jihad_declined_shafii
+			remove_location_modifier = z_aqd_jihad_declined_zahiri
+			remove_location_modifier = z_aqd_jihad_declined_ismaili
+			remove_location_modifier = z_aqd_jihad_declined_jafari
+			remove_location_modifier = z_aqd_jihad_declined_zaidi
+			remove_location_modifier = z_aqd_jihad_declined_ibadi
+			remove_location_modifier = z_aqd_jihad_blessed_hanafi
+			remove_location_modifier = z_aqd_jihad_blessed_hanbali
+			remove_location_modifier = z_aqd_jihad_blessed_maliki
+			remove_location_modifier = z_aqd_jihad_blessed_shafii
+			remove_location_modifier = z_aqd_jihad_blessed_zahiri
+			remove_location_modifier = z_aqd_jihad_blessed_ismaili
+			remove_location_modifier = z_aqd_jihad_blessed_jafari
+			remove_location_modifier = z_aqd_jihad_blessed_zaidi
+			remove_location_modifier = z_aqd_jihad_blessed_ibadi
 		}
 	}
 }
