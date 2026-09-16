@@ -11,17 +11,24 @@
 # z_aqd_fatwa.1 (the demand): one of the realm's own jurist-seat
 # provinces issues a fatwa. Refusing stamps "Local <Madhhab> Jurists
 # Displeased" (main_menu/common/static_modifiers/z_aqd_fatwa_displeased.
-# txt) on THAT seat's own location, keyed to its own madhhab only -
-# other madhhabs' seats elsewhere in the same province are unaffected.
-# Accepting ends the war outright via white_peace.
+# txt) on THAT seat's own location for a flat 12 years, keyed to its own
+# madhhab only - other madhhabs' seats elsewhere in the same province are
+# unaffected. The ban ALWAYS also cancels that same madhhab's currently-
+# active ḥalqa across the seat's WHOLE province (scripted_effects/
+# z_aqd_fatwa_effects.txt's aqd_fatwa_apply_displeased_for_seat), matching
+# the ḥalqa's own province-wide footprint - a repudiated circle can never
+# keep running elsewhere in the province just because only the seat's own
+# location was swept. Accepting ends the war outright via white_peace.
 #
 # z_aqd_fatwa.2 (the escalation): if the war drags on further (more war
 # exhaustion, and enough time has passed since stage 1 was refused -
 # scripted_effects/z_aqd_fatwa_effects.txt / the variable scheme below),
-# a rare pulse may fire a second event: every OTHER jurist-seat location
-# in the same province joins the original in demanding peace. Refusing
-# re-extends the original seat's ban to the full 10 years alongside a
-# fresh 10-year ban on every other seat that joined in.
+# a rare pulse may fire a second event: every OTHER eligible jurist-seat
+# location in the same AREA (not just the same province) as the original
+# seat joins in demanding peace. Refusing re-extends the original seat's
+# ban to the same flat 12 years alongside a fresh 12-year ban - and its
+# own province-wide ḥalqa cancellation - on every other seat that joined
+# in.
 #
 # Saved scopes do not survive trigger_event, so both immediates
 # re-derive their own war/enemy/target from scratch - mirroring
@@ -163,7 +170,7 @@ z_aqd_fatwa.1 = {
 			# seat_madhhab resolves against root, where it actually lives.
 			# aqd_fatwa_apply_displeased_for_seat re-enters the location
 			# itself via its own $LOCATION$ parameter for the modifier calls.
-			aqd_fatwa_apply_displeased_for_seat = { YEARS = 5  MADHHAB = var:aqd_fatwa_seat_madhhab  LOCATION = scope:target_location }
+			aqd_fatwa_apply_displeased_for_seat = { MADHHAB = var:aqd_fatwa_seat_madhhab  LOCATION = scope:target_location }
 		}
 		set_variable = { name = aqd_fatwa_cooldown  years = 5 }
 		set_variable = { name = aqd_fatwa_stage1_fired  years = 6 }
@@ -182,8 +189,11 @@ z_aqd_fatwa.2 = {
 	desc = {
 		first_valid = {
 			# Same guard as z_aqd_fatwa.1's desc - see its comment. Here
-			# scope:target_province stands in for the location (stage 2
-			# names the whole province, not one seat).
+			# scope:target_province just proves a real anchor seat was
+			# found (stage 2's own loop runs over scope:target_area, not
+			# this province - see the refuse option below - but the desc
+			# text no longer names the province, so target_province is only
+			# an existence check here, not a display value).
 			triggered_desc = {
 				trigger = { exists = scope:target_province  exists = scope:enemy  var:aqd_jurist_compat = 1 }
 				desc = z_aqd_fatwa.2.desc.favored
@@ -253,13 +263,17 @@ z_aqd_fatwa.2 = {
 		}
 		aqd_classify_madhhab_compatibility = { COUNTRY = root }
 
-		# Re-find the SAME province via the stage-1 anchor (the ban
-		# itself), not a fresh pick - scope:target_province then covers
-		# every seat-holding location that joins in below.
+		# Re-find the SAME seat via the stage-1 anchor (the ban itself), not
+		# a fresh pick - scope:target_area then covers every seat-holding
+		# location in the same AREA (not just the same province) that joins
+		# in below; scope:target_province is kept only for the event's own
+		# flavor desc (naming the originating province), the escalation loop
+		# itself no longer uses it.
 		random_owned_location = {
 			limit = { aqd_location_has_any_fatwa_ban = yes }
 			save_scope_as = target_location
 			province_definition = { save_scope_as = target_province }
+			area = { save_scope_as = target_area }
 		}
 	}
 
@@ -278,8 +292,8 @@ z_aqd_fatwa.2 = {
 	option = {
 		name = z_aqd_fatwa.2.refuse
 		if = {
-			limit = { exists = scope:target_province }
-			scope:target_province = {
+			limit = { exists = scope:target_area }
+			scope:target_area = {
 				# Iterates per (location, madhhab) PAIR, not just per
 				# location - a location can legitimately hold more than one
 				# eligible seat at once (building_types/z_aqd_jurist_seats.
@@ -310,30 +324,51 @@ z_aqd_fatwa.2 = {
 				# this option runs; do not "fix" this into per-seat unique
 				# scratch names.
 				#
+				# every_location_in_area (not _in_province_definition): the
+				# escalation now pulls in every eligible seat across the
+				# whole AREA the anchor seat sits in, not just its own
+				# province - a madhhab's juristic network reads as a
+				# regional body, not one bounded strictly by a single
+				# province's borders.
+				#
 				# The actual ban/ḥalqa-clear per branch is applied INLINE
-				# here (bare add_location_modifier/remove_location_modifier,
-				# at this loop's own implicit location scope) rather than via
-				# scripted_effects/z_aqd_fatwa_effects.txt's aqd_fatwa_apply_
-				# displeased_for_seat - that shared function exists for z_aqd_
-				# fatwa.1's refuse option, which only learns its madhhab at
-				# RUNTIME (a variable, root-scoped, needing the location
-				# re-entered separately for the actual modifier calls). Here
-				# the madhhab is already known statically at each of the 9
+				# here (bare add_location_modifier + a province_definition
+				# sweep for the ḥalqa clear, at this loop's own implicit
+				# location scope) rather than via scripted_effects/
+				# z_aqd_fatwa_effects.txt's aqd_fatwa_apply_displeased_for_
+				# seat - that shared function exists for z_aqd_fatwa.1's
+				# refuse option, which only learns its madhhab at RUNTIME (a
+				# variable, root-scoped, needing the location re-entered
+				# separately for the actual modifier calls). Here the
+				# madhhab is already known statically at each of the 9
 				# branches below, so no runtime comparison or cross-scope
 				# parameter juggling is needed - the same reasoning the
 				# reservoir-sampling pickers use throughout this mod for
-				# their own literal per-position values.
-				every_location_in_province_definition = {
+				# their own literal per-position values. The ḥalqa clear is
+				# swept over EACH eligible seat's own province_definition
+				# (not the anchor's), same reasoning as aqd_fatwa_apply_
+				# displeased_for_seat's own header: a ḥalqa's class modifier
+				# is stamped uniformly across its whole originating province,
+				# so cancelling it only at the one seat location that just
+				# joined the escalation would leave every other location of
+				# THAT seat's own province still carrying the repudiated
+				# circle.
+				every_location_in_area = {
 					limit = { owner ?= root }
 					if = {
 						limit = { aqd_fatwa_seat_eligible_hanafi = yes }
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 1 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_hanafi  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_hanafi
-							remove_location_modifier = z_aqd_halqa_orthodox_hanafi
-							remove_location_modifier = z_aqd_halqa_heterodox_hanafi
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_hanafi  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_hanafi
+									remove_location_modifier = z_aqd_halqa_orthodox_hanafi
+									remove_location_modifier = z_aqd_halqa_heterodox_hanafi
+								}
+							}
 						}
 					}
 					if = {
@@ -341,10 +376,15 @@ z_aqd_fatwa.2 = {
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 2 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_hanbali  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_hanbali
-							remove_location_modifier = z_aqd_halqa_orthodox_hanbali
-							remove_location_modifier = z_aqd_halqa_heterodox_hanbali
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_hanbali  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_hanbali
+									remove_location_modifier = z_aqd_halqa_orthodox_hanbali
+									remove_location_modifier = z_aqd_halqa_heterodox_hanbali
+								}
+							}
 						}
 					}
 					if = {
@@ -352,10 +392,15 @@ z_aqd_fatwa.2 = {
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 3 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_maliki  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_maliki
-							remove_location_modifier = z_aqd_halqa_orthodox_maliki
-							remove_location_modifier = z_aqd_halqa_heterodox_maliki
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_maliki  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_maliki
+									remove_location_modifier = z_aqd_halqa_orthodox_maliki
+									remove_location_modifier = z_aqd_halqa_heterodox_maliki
+								}
+							}
 						}
 					}
 					if = {
@@ -363,10 +408,15 @@ z_aqd_fatwa.2 = {
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 4 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_shafii  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_shafii
-							remove_location_modifier = z_aqd_halqa_orthodox_shafii
-							remove_location_modifier = z_aqd_halqa_heterodox_shafii
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_shafii  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_shafii
+									remove_location_modifier = z_aqd_halqa_orthodox_shafii
+									remove_location_modifier = z_aqd_halqa_heterodox_shafii
+								}
+							}
 						}
 					}
 					if = {
@@ -374,10 +424,15 @@ z_aqd_fatwa.2 = {
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 5 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_zahiri  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_zahiri
-							remove_location_modifier = z_aqd_halqa_orthodox_zahiri
-							remove_location_modifier = z_aqd_halqa_heterodox_zahiri
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_zahiri  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_zahiri
+									remove_location_modifier = z_aqd_halqa_orthodox_zahiri
+									remove_location_modifier = z_aqd_halqa_heterodox_zahiri
+								}
+							}
 						}
 					}
 					if = {
@@ -385,10 +440,15 @@ z_aqd_fatwa.2 = {
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 6 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_ismaili  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_ismaili
-							remove_location_modifier = z_aqd_halqa_orthodox_ismaili
-							remove_location_modifier = z_aqd_halqa_heterodox_ismaili
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_ismaili  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_ismaili
+									remove_location_modifier = z_aqd_halqa_orthodox_ismaili
+									remove_location_modifier = z_aqd_halqa_heterodox_ismaili
+								}
+							}
 						}
 					}
 					if = {
@@ -396,10 +456,15 @@ z_aqd_fatwa.2 = {
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 7 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_jafari  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_jafari
-							remove_location_modifier = z_aqd_halqa_orthodox_jafari
-							remove_location_modifier = z_aqd_halqa_heterodox_jafari
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_jafari  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_jafari
+									remove_location_modifier = z_aqd_halqa_orthodox_jafari
+									remove_location_modifier = z_aqd_halqa_heterodox_jafari
+								}
+							}
 						}
 					}
 					if = {
@@ -407,10 +472,15 @@ z_aqd_fatwa.2 = {
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 8 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_zaidi  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_zaidi
-							remove_location_modifier = z_aqd_halqa_orthodox_zaidi
-							remove_location_modifier = z_aqd_halqa_heterodox_zaidi
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_zaidi  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_zaidi
+									remove_location_modifier = z_aqd_halqa_orthodox_zaidi
+									remove_location_modifier = z_aqd_halqa_heterodox_zaidi
+								}
+							}
 						}
 					}
 					if = {
@@ -418,10 +488,15 @@ z_aqd_fatwa.2 = {
 						aqd_fatwa_evaluate_seat_demand = { MADHHAB = 9 }
 						if = {
 							limit = { root = { var:aqd_madhhab_approval_result = 1 } }
-							add_location_modifier = { modifier = z_aqd_fatwa_displeased_ibadi  years = 10  mode = add_and_extend }
-							remove_location_modifier = z_aqd_halqa_state_ibadi
-							remove_location_modifier = z_aqd_halqa_orthodox_ibadi
-							remove_location_modifier = z_aqd_halqa_heterodox_ibadi
+							add_location_modifier = { modifier = z_aqd_fatwa_displeased_ibadi  years = 12  mode = add_and_extend }
+							province_definition = {
+								every_location_in_province_definition = {
+									limit = { owner ?= root }
+									remove_location_modifier = z_aqd_halqa_state_ibadi
+									remove_location_modifier = z_aqd_halqa_orthodox_ibadi
+									remove_location_modifier = z_aqd_halqa_heterodox_ibadi
+								}
+							}
 						}
 					}
 				}

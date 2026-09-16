@@ -132,8 +132,11 @@ aqd_change_madhhab = {
 # The action itself has no price. aqd_crackdown_effect applies the cost:
 #  - confiscation gold GAINED, scaled to the number of buildings razed
 #  - a stability hit scaled to how widespread the school was
-#  - "Legal School Persecuted" (z_aqd_jurist_evicted) on every location
-#    nationwide that holds the school's buildings - significant unrest
+#  - "Legal School Persecuted" (z_aqd_jurist_evicted_<madhhab>, the
+#    per-madhhab key) on every location nationwide that holds the
+#    school's buildings - significant unrest - and, in the same pass,
+#    cancellation of that madhhab's own currently-active ḥalqa across
+#    each such location's whole province
 #  - a national modifier: base game's ulema_displeased for a fellow
 #    school, or z_aqd_heretics_suppressed if the school is a heresy of
 #    the state religion (SECT param differs from root.religion)

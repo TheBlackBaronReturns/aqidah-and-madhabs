@@ -1,17 +1,95 @@
 # =====================================================================
-# AQIDAH SCHOOLS OF CREED - "Legal School Persecuted" (key kept as
-# z_aqd_jurist_evicted so existing references need no churn; display
-# name is in localisation/english/aqd_l_english.yml).
+# AQIDAH SCHOOLS OF CREED - "Legal School Persecuted".
+#
+# NINE concrete objects, one per madhhab - mirrors z_aqd_fatwa_displeased.
+# txt's own reasoning exactly: a location can hold buildings of more than
+# one madhhab (building_types/z_aqd_madrasas.txt's location_potential only
+# ever excludes a duplicate of the SAME madhhab, never a different one),
+# so a single shared z_aqd_jurist_evicted key would let a crackdown on ONE
+# madhhab's colleges also block/exclude a co-located, uninvolved madhhab's
+# own ḥalqa readiness (scripted_triggers/z_aqd_jurist_triggers.txt's
+# aqd_halqa_prov_ready_<X>, which checks this key for its own madhhab
+# only) - exactly the cross-madhhab bleed this mod has repeatedly
+# designed against elsewhere. Was previously one shared key (z_aqd_jurist_
+# evicted); split the same way fatwa_displeased was, the first time
+# something other than aqd_crackdown_effect itself needed to read it
+# per-madhhab.
 #
 # Applied by scripted_effects/z_aqd_jurist_effects.txt's
 # aqd_crackdown_effect to EVERY owned location that holds a madrasa or
 # seat of the cracked-down madhhab across the whole realm - not only the
 # locations that lost a building - representing the nationwide backlash
 # when the state moves against a school of law. Significant unrest and
-# raised revolt risk for the duration.
+# raised revolt risk for the duration. Same crackdown pass also cancels
+# that madhhab's own currently-active ḥalqa across each such location's
+# whole province (see aqd_crackdown_effect's own header).
 # =====================================================================
 
-z_aqd_jurist_evicted = {
+z_aqd_jurist_evicted_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
+}
+
+z_aqd_jurist_evicted_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
+}
+
+z_aqd_jurist_evicted_maliki = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
+}
+
+z_aqd_jurist_evicted_shafii = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
+}
+
+z_aqd_jurist_evicted_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
+}
+
+z_aqd_jurist_evicted_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
+}
+
+z_aqd_jurist_evicted_jafari = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
+}
+
+z_aqd_jurist_evicted_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.4
+	local_pop_join_rebel_threshold = -0.1
+}
+
+z_aqd_jurist_evicted_ibadi = {
 	game_data = {
 		category = location
 	}

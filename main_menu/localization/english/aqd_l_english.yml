@@ -110,9 +110,37 @@
  # STATIC_MODIFIER_NAME_<key> loc key (a bare <key> is never read - see
  # STATIC_MODIFIER_NAME_muslim_madrassa etc. below). Bare keys kept for
  # any custom_tooltip/prose reference.
- z_aqd_jurist_evicted: "Legal School Persecuted"
- STATIC_MODIFIER_NAME_z_aqd_jurist_evicted: "Legal School Persecuted"
- STATIC_MODIFIER_DESC_z_aqd_jurist_evicted: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ # NINE concrete keys, one per madhhab (z_aqd_jurist_evicted_<X>) - see
+ # main_menu/common/static_modifiers/z_aqd_jurist_evicted.txt's own header
+ # for why the old single shared z_aqd_jurist_evicted key was split.
+ # Identical display name/desc across all nine, same as before the split.
+ z_aqd_jurist_evicted_hanafi: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_hanafi: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_hanafi: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ z_aqd_jurist_evicted_hanbali: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_hanbali: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_hanbali: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ z_aqd_jurist_evicted_maliki: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_maliki: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_maliki: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ z_aqd_jurist_evicted_shafii: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_shafii: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_shafii: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ z_aqd_jurist_evicted_zahiri: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_zahiri: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_zahiri: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ z_aqd_jurist_evicted_ismaili: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_ismaili: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_ismaili: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ z_aqd_jurist_evicted_jafari: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_jafari: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_jafari: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ z_aqd_jurist_evicted_zaidi: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_zaidi: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_zaidi: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
+ z_aqd_jurist_evicted_ibadi: "Legal School Persecuted"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_evicted_ibadi: "Legal School Persecuted"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_evicted_ibadi: "The state has moved against this school of law. Wherever its madrasas and jurists' seats stand, the faithful seethe and the call to revolt spreads."
  # Moving against a fellow school of law now grants the base-game
  # modifier ulema_displeased ("'Ulamā' Privileges Infringed").
  z_aqd_heretics_suppressed: "Heretical School Suppressed"
@@ -360,8 +388,8 @@
  z_aqd_fatwa.1.refuse: "The war will continue"
 
  z_aqd_fatwa.2.title: "The Jurists Speak as One"
- z_aqd_fatwa.2.desc.favored: "Word of the fatwa against [SCOPE.sCountry('enemy').GetName] has spread. Other jurists' seats of [target_province.GetName] are adding their voice to the first: this war against a fellow Muslim state whose own rite our scholars hold sound has dragged on far too long, and must end."
- z_aqd_fatwa.2.desc.neutral: "Word of the fatwa against [SCOPE.sCountry('enemy').GetName] has spread. Other jurists' seats of [target_province.GetName] are adding their voice to the first: this war against a fellow Muslim state whose own rite our scholars do not condemn has dragged on far too long, and must end."
+ z_aqd_fatwa.2.desc.favored: "Word of the fatwa against [SCOPE.sCountry('enemy').GetName] has spread. Other jurists' seats across the region are adding their voice to the first: this war against a fellow Muslim state whose own rite our scholars hold sound has dragged on far too long, and must end."
+ z_aqd_fatwa.2.desc.neutral: "Word of the fatwa against [SCOPE.sCountry('enemy').GetName] has spread. Other jurists' seats across the region are adding their voice to the first: this war against a fellow Muslim state whose own rite our scholars do not condemn has dragged on far too long, and must end."
  z_aqd_fatwa.2.desc.fallback: "DEBUG/fallback: no matching war or jurist seat was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
  z_aqd_fatwa.2.accept: "Make peace, as they demand"
  z_aqd_fatwa.2.refuse: "Their displeasure changes nothing"

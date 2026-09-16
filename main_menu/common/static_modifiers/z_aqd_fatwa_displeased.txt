@@ -42,8 +42,13 @@
 # largest named production-penalty tier
 # (large_production_efficiency_penalty). No decaying = yes - matches
 # z_aqd_jurist_evicted's non-tapering design; the displeasure holds at
-# full strength until the term ends (5 years at stage 1, re-extended to
-# 10 for every affected seat if stage 2 is also refused).
+# full strength until the term ends - a flat 12 years, both at stage 1
+# and on re-extension for every affected seat if stage 2 is also refused
+# (scripted_effects/z_aqd_fatwa_effects.txt's aqd_fatwa_apply_displeased_
+# for_seat and events/religion/z_aqd_fatwa_events.txt's z_aqd_fatwa.2
+# refuse option both apply the same fixed duration via mode =
+# add_and_extend, so no seat ever ends up on a shorter or longer clock
+# depending on which stage angered it).
 # =====================================================================
 
 z_aqd_fatwa_displeased_hanafi = {
