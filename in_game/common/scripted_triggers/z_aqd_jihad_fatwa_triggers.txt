@@ -1,5 +1,15 @@
 # =====================================================================
 # AQIDAH SCHOOLS OF CREED - the Fatwa of Jihad: triggers.
+#
+# Covers TWO participation paths that share the whole rest of this
+# feature (same event z_aqd_jfatwa.1, same z_aqd_fatwa_of_jihad_<X>/
+# z_aqd_jihad_blessed_<X>/z_aqd_jihad_declined_<X> modifier keys, same
+# picker/approval engine) - aqd_is_jihad_participant (OFFENSIVE: root is
+# fighting under cb_jihad or is a jihad IO member) and aqd_is_defensive_
+# jihad_participant (DEFENSIVE: a heathen power has declared a religious
+# war on root). The only behavioural difference between the two paths is
+# that heterodox seats are excluded from the offensive call but allowed
+# to answer the defensive one - see aqd_jihad_seat_eligible_<X> below.
 # =====================================================================
 
 # Country-scoped: is root part of a jihad right now, either as a formal
@@ -14,13 +24,48 @@
 # is_member_of_international_organization_of_type = { type = jihad } is
 # the confirmed bare-key form for a TYPE, not a single named IO instance -
 # common/government_reforms/republic.txt's / events/debug/qa_debug.txt's
-# own type = union usage).
+# own type = union usage). This is the OFFENSIVE path only - see aqd_is_
+# defensive_jihad_participant below for the mirror-image defensive one.
 aqd_is_jihad_participant = {
 	OR = {
 		is_member_of_international_organization_of_type = { type = jihad }
 		any_current_war = {
 			is_an_attacker = root
 			casus_belli ?= casus_belli:cb_jihad
+		}
+	}
+}
+
+# Country-scoped: is root currently defending against a heathen (non-
+# Muslim) power's RELIGIOUS war - the defensive counterpart to aqd_is_
+# jihad_participant above. is_a_defender = root (not defender_leader)
+# deliberately catches every co-defender - a subject/ally dragged in by
+# alliance/call-to-arms counts too, mirroring is_an_attacker's own
+# inclusive semantics on the offensive side (base game common/
+# scripted_triggers/war_triggers.txt confirms both is_a_defender and
+# is_an_attacker exist as symmetric war-scoped triggers). is_religious_war
+# (same file) reads the war's own casus_belli custom_tags = {
+# religious_casus_belli } - it is true for cb_jihad, cb_crusade,
+# cb_heretic, deus_vult, crush_hussitism and cb_religious_conformance
+# alike, so no hand-maintained CB allow-list is needed here (contrast
+# scripted_triggers/z_aqd_fatwa_triggers.txt's aqd_fatwa_core_conditions,
+# which has to blacklist specific weak-CB types for an unrelated reason).
+#
+# NOT = { religion.group = root.religion.group } on attacker_leader is
+# what excludes heretic-on-heretic wars (e.g. Shia declaring on Sunni via
+# cb_heretic) while still catching a genuine heathen aggressor - and it
+# does so for free, with no extra logic: cb_heretic's own declare_enabled
+# requires attacker and defender to share the same religion.group, so a
+# heretic-CB attacker can never fail this check to begin with. Likewise
+# cb_jihad can only ever be declared BY a Muslim, so a Muslim root can
+# never legitimately be its defender either - both classes of false
+# positive are structurally impossible, not merely filtered out.
+aqd_is_defensive_jihad_participant = {
+	any_current_war = {
+		is_a_defender = root
+		is_religious_war = yes
+		attacker_leader = {
+			NOT = { religion.group = root.religion.group }
 		}
 	}
 }
@@ -39,7 +84,17 @@ aqd_is_jihad_participant = {
 # root_<X> (scripted_triggers/z_aqd_fatwa_triggers.txt - the single-
 # madhhab form, NOT the 9-way umbrella, which would wrongly let a
 # co-located seat of a DIFFERENT, acceptable madhhab paper over this
-# one's own heterodoxy) and its own single z_aqd_fatwa_displeased_<X> /
+# one's own heterodoxy) UNLESS root is currently a defensive jihad
+# participant (aqd_is_defensive_jihad_participant above), in which case a
+# heterodox seat is allowed through too - a heathen assault on Islam is
+# meant to draw in every school's jurists, not only the ruler's own; an
+# offensive call to arms is not. This is the ONLY difference between the
+# two participation paths - everything else below applies identically
+# regardless of which one is currently true, including the approval roll
+# itself: a heterodox seat still scores its full tolerance_heretic
+# penalty (script_values/z_aqd_madhhab_approval.txt), so it remains
+# naturally less likely to bless than an orthodox one even once eligible.
+# Each branch also checks its own single z_aqd_fatwa_displeased_<X> /
 # z_aqd_fatwa_of_jihad_<X> keys (NOT aqd_location_has_any_fatwa_ban's
 # blanket 9-way OR, for the same reason) - so a Hanafi seat already
 # banned or on cooldown never blocks a co-located Maliki seat, and vice
@@ -72,7 +127,10 @@ aqd_is_jihad_participant = {
 # ACROSS wars, untouched by episode boundaries) - all three apply, none
 # substitutes for another.
 aqd_jihad_seat_eligible_hanafi = {
-	aqd_seat_madhhab_not_heterodox_to_root_hanafi = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_hanafi = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanafi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_hanafi }
@@ -80,7 +138,10 @@ aqd_jihad_seat_eligible_hanafi = {
 	NOT = { has_location_modifier = z_aqd_jihad_blessed_hanafi }
 }
 aqd_jihad_seat_eligible_hanbali = {
-	aqd_seat_madhhab_not_heterodox_to_root_hanbali = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_hanbali = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanbali }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_hanbali }
@@ -88,7 +149,10 @@ aqd_jihad_seat_eligible_hanbali = {
 	NOT = { has_location_modifier = z_aqd_jihad_blessed_hanbali }
 }
 aqd_jihad_seat_eligible_maliki = {
-	aqd_seat_madhhab_not_heterodox_to_root_maliki = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_maliki = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_maliki }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_maliki }
@@ -96,7 +160,10 @@ aqd_jihad_seat_eligible_maliki = {
 	NOT = { has_location_modifier = z_aqd_jihad_blessed_maliki }
 }
 aqd_jihad_seat_eligible_shafii = {
-	aqd_seat_madhhab_not_heterodox_to_root_shafii = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_shafii = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_shafii }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_shafii }
@@ -104,7 +171,10 @@ aqd_jihad_seat_eligible_shafii = {
 	NOT = { has_location_modifier = z_aqd_jihad_blessed_shafii }
 }
 aqd_jihad_seat_eligible_zahiri = {
-	aqd_seat_madhhab_not_heterodox_to_root_zahiri = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_zahiri = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zahiri }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_zahiri }
@@ -112,7 +182,10 @@ aqd_jihad_seat_eligible_zahiri = {
 	NOT = { has_location_modifier = z_aqd_jihad_blessed_zahiri }
 }
 aqd_jihad_seat_eligible_ismaili = {
-	aqd_seat_madhhab_not_heterodox_to_root_ismaili = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_ismaili = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ismaili }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_ismaili }
@@ -120,7 +193,10 @@ aqd_jihad_seat_eligible_ismaili = {
 	NOT = { has_location_modifier = z_aqd_jihad_blessed_ismaili }
 }
 aqd_jihad_seat_eligible_jafari = {
-	aqd_seat_madhhab_not_heterodox_to_root_jafari = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_jafari = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_jafari }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_jafari }
@@ -128,7 +204,10 @@ aqd_jihad_seat_eligible_jafari = {
 	NOT = { has_location_modifier = z_aqd_jihad_blessed_jafari }
 }
 aqd_jihad_seat_eligible_zaidi = {
-	aqd_seat_madhhab_not_heterodox_to_root_zaidi = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_zaidi = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zaidi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_zaidi }
@@ -136,7 +215,10 @@ aqd_jihad_seat_eligible_zaidi = {
 	NOT = { has_location_modifier = z_aqd_jihad_blessed_zaidi }
 }
 aqd_jihad_seat_eligible_ibadi = {
-	aqd_seat_madhhab_not_heterodox_to_root_ibadi = yes
+	OR = {
+		aqd_seat_madhhab_not_heterodox_to_root_ibadi = yes
+		root = { aqd_is_defensive_jihad_participant = yes }
+	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ibadi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_ibadi }

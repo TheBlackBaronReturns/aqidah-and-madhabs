@@ -387,7 +387,11 @@ aqd_jihad_fatwa_stamp_declined_for_seat = {
 # ---------------------------------------------------------------------
 # aqd_jihad_episode_start_check: country-scoped, called at the top of
 # the pulse's effect (on_action/00_aqd_game_start.txt's aqd_jihad_fatwa_
-# pulse) - i.e. every month root qualifies as aqd_is_jihad_participant.
+# pulse) - i.e. every month root qualifies as EITHER aqd_is_jihad_
+# participant OR aqd_is_defensive_jihad_participant (scripted_triggers/
+# z_aqd_jihad_fatwa_triggers.txt) - offensive and defensive jihads share
+# one episode-boundary flag, so switching from one to the other (or being
+# in both at once) never itself resets or re-triggers this sweep.
 # var:aqd_jihad_episode_active is the flag-toggle half of a start/end
 # pair with aqd_jihad_episode_cleanup_pulse (same on_action file): the
 # FIRST month of a fresh jihad (flag not set yet) sweeps every owned
@@ -436,6 +440,13 @@ aqd_jihad_episode_start_check = {
 # 00_aqd_game_start.txt's aqd_jihad_fatwa_pulse), NOT from an event -
 # this is the silent-miss design: the roll happens here, before any
 # popup exists, so a declining seat produces no event at all this month.
+# Runs identically regardless of WHICH of the two participation paths
+# (scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's aqd_is_jihad_
+# participant or aqd_is_defensive_jihad_participant) is what let the
+# pulse fire this month - this effect never needs to know or care which
+# one it was, since the only path-dependent behaviour (heterodox seats
+# allowed only when defending) already lives entirely inside aqd_jihad_
+# seat_eligible_<X>, upstream of everything here.
 # On success, stamps the shared pending-pick marker (scripted_effects/
 # z_aqd_madhhab_approval_effects.txt's aqd_stamp_pending_pick) and fires
 # the narration event non-silently; the event's own immediate re-finds

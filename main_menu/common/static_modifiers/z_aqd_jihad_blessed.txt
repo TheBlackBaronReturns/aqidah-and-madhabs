@@ -9,7 +9,11 @@
 # modifiers/z_aqd_fatwa_of_jihad.txt) the moment a seat's approval roll
 # SUCCEEDS, and checked by scripted_triggers/z_aqd_jihad_fatwa_triggers.
 # txt's aqd_jihad_seat_eligible_<X> to exclude that exact seat from ever
-# being re-picked for the rest of the current jihad.
+# being re-picked for the rest of the current jihad. Shared across BOTH
+# participation paths (aqd_is_jihad_participant - offensive - and aqd_is_
+# defensive_jihad_participant - a heathen power declaring religious war
+# on root) - a seat that already blessed one doesn't get re-asked by the
+# other either, for the rest of the same episode.
 #
 # Kept as a SEPARATE marker from z_aqd_fatwa_of_jihad_<X> itself rather
 # than just relying on that modifier's own presence/duration, for two

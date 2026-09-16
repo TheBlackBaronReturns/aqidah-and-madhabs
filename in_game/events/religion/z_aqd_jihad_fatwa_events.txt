@@ -2,14 +2,23 @@
 # AQIDAH SCHOOLS OF CREED - the Fatwa of Jihad.
 #
 # Fired by on_action/00_aqd_game_start.txt's aqd_jihad_fatwa_pulse
-# (monthly_country_pulse) on any Muslim realm currently party to a jihad -
-# leader, IO joiner, or a subject/ally fighting under casus_belli:cb_jihad
-# without formal IO membership alike (scripted_triggers/z_aqd_jihad_
-# fatwa_triggers.txt's aqd_is_jihad_participant). One of the realm's own
-# eligible jurist-seat provinces (aqd_jihad_seat_eligible - heterodox
-# seats, already-displeased seats, and seats already carrying an
-# unexpired Fatwa of Jihad of their own madhhab are all hard-excluded)
-# issues a fatwa calling all able-bodied believers to the jihad.
+# (monthly_country_pulse) on any Muslim realm currently party to a jihad,
+# via EITHER of two participation paths (scripted_triggers/z_aqd_jihad_
+# fatwa_triggers.txt): OFFENSIVE - leader, IO joiner, or a subject/ally
+# fighting under casus_belli:cb_jihad without formal IO membership alike
+# (aqd_is_jihad_participant) - or DEFENSIVE - a heathen (non-Muslim) power
+# has declared a religious war on root's own territory (aqd_is_defensive_
+# jihad_participant; heretic-on-heretic wars, e.g. Shia declaring on
+# Sunni, never qualify - see that trigger's own header for why). One of
+# the realm's own eligible jurist-seat provinces (aqd_jihad_seat_eligible
+# - already-displeased seats and seats already carrying an unexpired
+# Fatwa of Jihad of their own madhhab are always excluded; HETERODOX seats
+# are excluded only from the offensive path, and are eligible to answer a
+# defensive call) issues a fatwa calling all able-bodied believers to the
+# jihad. Both paths share this one event, its flavor text, and its
+# modifier keys - "defensive jihad" is itself a standard classical-fiqh
+# concept, so the existing "called to take up arms in the jihad against
+# [enemy]" desc reads correctly for either case with no wording changes.
 #
 # SILENT MISS BY DESIGN: unlike z_aqd_fatwa.1, this event never shows a
 # "the jurists declined" popup. The per-madhhab approval roll (scripted_
@@ -105,7 +114,10 @@ z_aqd_jfatwa.1 = {
 
 	trigger = {
 		religion.group = religion_group:muslim
-		aqd_is_jihad_participant = yes
+		OR = {
+			aqd_is_jihad_participant = yes
+			aqd_is_defensive_jihad_participant = yes
+		}
 		any_owned_location = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	}
 
@@ -163,6 +175,30 @@ z_aqd_jfatwa.1 = {
 			if = {
 				limit = { exists = scope:target_war }
 				scope:target_war = { defender_leader = { save_scope_as = enemy } }
+			}
+		}
+		# Defensive fallback: only reached if neither the jihad-IO nor the
+		# cb_jihad-attacker branch above resolved scope:enemy - i.e. this
+		# firing came from aqd_is_defensive_jihad_participant instead
+		# (scripted_triggers/z_aqd_jihad_fatwa_triggers.txt). Re-finds the
+		# SAME war/attacker condition that trigger checks, then saves the
+		# ATTACKER (not defender_leader - root is the one being attacked
+		# here) as scope:enemy for the desc/tooltip to name.
+		if = {
+			limit = { NOT = { exists = scope:enemy } }
+			random_current_war = {
+				limit = {
+					is_a_defender = root
+					is_religious_war = yes
+					attacker_leader = {
+						NOT = { religion.group = root.religion.group }
+					}
+				}
+				save_scope_as = target_war
+			}
+			if = {
+				limit = { exists = scope:target_war }
+				scope:target_war = { attacker_leader = { save_scope_as = enemy } }
 			}
 		}
 	}

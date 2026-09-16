@@ -6,7 +6,11 @@
 # succeeds (events/religion/z_aqd_jihad_fatwa_events.txt's z_aqd_jfatwa.1),
 # from that event's own option so the tooltip preview renders (mirrors
 # events/religion/z_aqd_halqa_events.txt's own reasoning: effects placed
-# in immediate have no tooltip surface).
+# in immediate have no tooltip surface). Shared across BOTH participation
+# paths (scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's aqd_is_jihad_
+# participant - offensive - and aqd_is_defensive_jihad_participant - a
+# heathen power declaring religious war on root) - a seat's mobilization
+# bonus reads the same regardless of which kind of jihad it blessed.
 #
 # NINE concrete objects, one per madhhab, NOT one shared key - mirrors
 # z_aqd_fatwa_displeased.txt's own convention: only the seat that actually

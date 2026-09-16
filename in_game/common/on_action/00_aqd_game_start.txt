@@ -165,6 +165,15 @@ aqd_fatwa_episode_cleanup_pulse = {
 # pick + centralized approval roll before any event exists, and only
 # fires the narration event on a YES.
 #
+# The OR covers BOTH participation paths (scripted_triggers/z_aqd_jihad_
+# fatwa_triggers.txt) - aqd_is_jihad_participant (offensive: root fighting
+# under cb_jihad or a jihad IO member) and aqd_is_defensive_jihad_
+# participant (defensive: a heathen power has declared a religious war on
+# root). Both share this same pulse, picker, approval engine, event and
+# modifier keys - the only behavioural difference is which seats are
+# eligible (aqd_jihad_seat_eligible_<X> allows heterodox seats through
+# specifically for the defensive path).
+#
 # NO country-wide cooldown gate here - the per-seat 4-year z_aqd_fatwa_
 # of_jihad_<X> modifier (checked inside aqd_jihad_seat_eligible's own
 # per-madhhab branches, scripted_triggers/z_aqd_jihad_fatwa_triggers.txt)
@@ -174,7 +183,10 @@ aqd_fatwa_episode_cleanup_pulse = {
 aqd_jihad_fatwa_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
-		aqd_is_jihad_participant = yes
+		OR = {
+			aqd_is_jihad_participant = yes
+			aqd_is_defensive_jihad_participant = yes
+		}
 		any_owned_location = { aqd_jihad_seat_eligible = yes }
 	}
 	effect = {
@@ -192,19 +204,31 @@ aqd_jihad_fatwa_pulse = {
 
 # Episode-end half of aqd_jihad_episode_start_check's flag-toggle pair
 # (scripted_effects/z_aqd_jihad_fatwa_effects.txt) - fires the one month
-# root stops qualifying as aqd_is_jihad_participant while still carrying
-# the "episode active" flag from a previous month, clears it, and sweep-
-# clears the nine z_aqd_jihad_declined_<X> "one shot per war" markers AND
-# the nine z_aqd_jihad_blessed_<X> "already asked and said yes this war"
-# markers realm-wide so the NEXT jihad starts with every seat's slate
-# wiped clean. Deliberately does NOT touch z_aqd_fatwa_of_jihad_<X> - its
-# own real cross-war throttle keeps running on its own duration
-# regardless of this war ending, exactly as before this whole feature.
+# root stops qualifying as EITHER aqd_is_jihad_participant OR aqd_is_
+# defensive_jihad_participant (scripted_triggers/z_aqd_jihad_fatwa_
+# triggers.txt) while still carrying the "episode active" flag from a
+# previous month, clears it, and sweep-clears the nine z_aqd_jihad_
+# declined_<X> "one shot per war" markers AND the nine z_aqd_jihad_
+# blessed_<X> "already asked and said yes this war" markers realm-wide so
+# the NEXT jihad (offensive or defensive) starts with every seat's slate
+# wiped clean. A realm that is simultaneously offensive-jihading in one
+# war and defending against a heathen in another keeps the episode open
+# until BOTH end, not just one - the OR mirrors the pulse's own gate
+# above exactly, so the episode boundary always matches whichever
+# condition actually kept the pulse firing. Deliberately does NOT touch
+# z_aqd_fatwa_of_jihad_<X> - its own real cross-war throttle keeps
+# running on its own duration regardless of this war ending, exactly as
+# before this whole feature.
 aqd_jihad_episode_cleanup_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
 		has_variable = aqd_jihad_episode_active
-		NOT = { aqd_is_jihad_participant = yes }
+		NOT = {
+			OR = {
+				aqd_is_jihad_participant = yes
+				aqd_is_defensive_jihad_participant = yes
+			}
+		}
 	}
 	effect = {
 		remove_variable = aqd_jihad_episode_active

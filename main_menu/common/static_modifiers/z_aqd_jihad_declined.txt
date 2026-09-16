@@ -10,7 +10,11 @@
 # THIS jihad - previously a decline cost nothing, so the same silent-miss
 # pulse just tried again next month indefinitely, making eventual success
 # for SOME seat a near-certainty over a long enough war regardless of how
-# low any individual seat's approval score was.
+# low any individual seat's approval score was. Shared across BOTH
+# participation paths (aqd_is_jihad_participant - offensive - and aqd_is_
+# defensive_jihad_participant - a heathen power declaring religious war
+# on root) - a seat that already declined one doesn't get re-asked by the
+# other either, for the rest of the same episode.
 #
 # years = 50 at the stamp site is a safety-net duration only, not load-
 # bearing - normal flow always clears this explicitly once the episode
