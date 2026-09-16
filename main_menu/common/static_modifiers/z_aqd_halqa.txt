@@ -75,6 +75,8 @@
 #                20%/10% (seat/rest of province) of cross-sect Muslims
 #                convert to the state religion - same shape as
 #                heterodox's own conversion, just aimed at root.religion.
+#                Ḥanbalī and Ismāʿīlī double this to 30%/20% (scripted_
+#                effects/z_aqd_jurist_effects.txt's aqd_halqa_apply_state).
 #                TODO: local_monthly_control's 0.05 default is a
 #                PLACEHOLDER - the user asked for this to mirror "the
 #                parliament center modifier" (halved), but no building/
@@ -86,9 +88,9 @@
 #   orthodox   - the creed favours the madhhab, or is neutral to it
 #                (var:aqd_jurist_compat 1 or 0). Calm + minor uplift +
 #                a heretic conversion HALF of state's (10%/5%,
-#                seat/rest); a tiny nudge of the realm toward
-#                spiritualism (mirrors heterodox's humanism nudge, same
-#                magnitude, opposite pole).
+#                seat/rest). No societal-value nudge - a merely-tolerated
+#                orthodoxy is deliberately neutral on that axis; only
+#                heterodoxy still pushes it (toward humanism).
 #   heterodox  - the creed opposes the madhhab (var:aqd_jurist_compat
 #                -1). Raises unrest (a provocation, not a calming
 #                presence); blocks clergy conversion outright (any
@@ -98,7 +100,10 @@
 #                One-shot (event-side, not this modifier): 20% of the
 #                state-religion population converts to the seat's own
 #                sect at the seat's own location, 10% elsewhere in the
-#                province; a tiny nudge of the realm toward humanism.
+#                province (30%/20% for Ḥanbalī/Ismāʿīlī, same as state -
+#                scripted_effects/z_aqd_jurist_effects.txt's aqd_halqa_
+#                apply_heterodox); a tiny nudge of the realm toward
+#                humanism.
 #                monthly_towards_humanist (the periodic societal-value
 #                push) is country-scope-only (game_data category =
 #                country) and so cannot live in this location modifier -

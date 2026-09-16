@@ -1409,7 +1409,12 @@ aqd_halqa_dispatch = {
 # (seat/rest of province) shape as aqd_halqa_apply_heterodox's own
 # conversion - just aimed at root.religion instead of a SECT param, and
 # with no "already that religion" guard needed (root can never already
-# be cross-sect of itself).
+# be cross-sect of itself). Ḥanbalī and Ismāʿīlī are doubled to 30%/20% -
+# same two madhhabs (and the same reasoning: Ḥanbalī's Miḥna-precedent
+# assertiveness, Ismāʿīlī's daʿwa) already called out for the strongest
+# push in every other conversion-flavoured field in this file (their own
+# local_heretic_pop_conversion_speed_modifier is likewise double the
+# 0.15 class baseline at 0.3 - static_modifiers/z_aqd_halqa.txt).
 #
 # The modifier key itself is one of nine (z_aqd_halqa_state_hanafi ...
 # _ibadi, static_modifiers/z_aqd_halqa.txt) so the display NAME reads
@@ -1431,6 +1436,21 @@ aqd_halqa_apply_state = {
 	else_if = { limit = { var:aqd_halqa_madhhab = 8 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_zaidi    years = 12 } } } }
 	else_if = { limit = { var:aqd_halqa_madhhab = 9 }  scope:halqa_prov = { every_location_in_province_definition = { limit = { owner ?= root }  add_location_modifier = { modifier = z_aqd_halqa_state_ibadi    years = 12 } } } }
 	if = {
+		limit = {
+			exists = scope:halqa_loc
+			OR = { var:aqd_halqa_madhhab = 2  var:aqd_halqa_madhhab = 6 }
+		}
+		scope:halqa_loc = {
+			every_pop = {
+				limit = {
+					religion.group = religion_group:muslim
+					NOT = { religion = root.religion }
+				}
+				split_pop = { fraction = 0.3  religion = root.religion }
+			}
+		}
+	}
+	else_if = {
 		limit = { exists = scope:halqa_loc }
 		scope:halqa_loc = {
 			every_pop = {
@@ -1442,29 +1462,53 @@ aqd_halqa_apply_state = {
 			}
 		}
 	}
-	scope:halqa_prov = {
-		every_location_in_province_definition = {
-			limit = {
-				owner ?= root
-				NOT = { this = scope:halqa_loc }
-			}
-			every_pop = {
+	if = {
+		limit = { OR = { var:aqd_halqa_madhhab = 2  var:aqd_halqa_madhhab = 6 } }
+		scope:halqa_prov = {
+			every_location_in_province_definition = {
 				limit = {
-					religion.group = religion_group:muslim
-					NOT = { religion = root.religion }
+					owner ?= root
+					NOT = { this = scope:halqa_loc }
 				}
-				split_pop = { fraction = 0.1  religion = root.religion }
+				every_pop = {
+					limit = {
+						religion.group = religion_group:muslim
+						NOT = { religion = root.religion }
+					}
+					split_pop = { fraction = 0.2  religion = root.religion }
+				}
+			}
+		}
+	}
+	else = {
+		scope:halqa_prov = {
+			every_location_in_province_definition = {
+				limit = {
+					owner ?= root
+					NOT = { this = scope:halqa_loc }
+				}
+				every_pop = {
+					limit = {
+						religion.group = religion_group:muslim
+						NOT = { religion = root.religion }
+					}
+					split_pop = { fraction = 0.1  religion = root.religion }
+				}
 			}
 		}
 	}
 }
 
 # ORTHODOX - calm + minor uplift + a heretic conversion HALF of state's
-# own (10%/5%, seat/rest of province - state's 20%/10% halved), plus a
-# tiny nudge of the realm toward spiritualism - the mirror of
-# aqd_halqa_apply_heterodox's humanism nudge, same magnitude
-# (societal_value_tiny_move), opposite pole of the spiritualist_vs_
-# humanist axis (to_left here vs to_right there).
+# own (10%/5%, seat/rest of province - state's 20%/10% halved, or 30%/20%
+# halved for Ḥanbalī/Ismāʿīlī... no: orthodox intentionally does NOT
+# double for those two - halving only ever applies to the class baseline,
+# never compounds with the state-class doubling, since orthodox is a
+# weaker, non-state relationship with the seat's madhhab to begin with.
+# No societal-value nudge here any more (previously a tiny push toward
+# spiritualism) - merely-tolerated orthodoxy is deliberately neutral on
+# that axis now; only heterodoxy still pushes the realm's societal values
+# (toward humanism, below).
 #
 # Modifier key picked by var:aqd_halqa_madhhab - see aqd_halqa_apply_state's
 # comment above for why this reads var: directly rather than taking a
@@ -1506,7 +1550,6 @@ aqd_halqa_apply_orthodox = {
 			}
 		}
 	}
-	change_societal_value = { type = spiritualist_vs_humanist  value = societal_value_tiny_move_to_left }
 }
 
 # HETERODOX { SECT } - a provocation, not a calming presence: unrest
@@ -1535,7 +1578,9 @@ aqd_halqa_apply_orthodox = {
 # same as aqd_halqa_apply_state / _orthodox above: 20% of the
 # state-religion population AT THE SEAT'S OWN LOCATION (scope:halqa_loc)
 # converts to SECT, and 10% at every OTHER owned location in the
-# province (scope:halqa_prov, excluding scope:halqa_loc). Both only run
+# province (scope:halqa_prov, excluding scope:halqa_loc) - 30%/20% for
+# Ḥanbalī/Ismāʿīlī specifically, same doubling and same reasoning as
+# aqd_halqa_apply_state's own header above. Both only run
 # when SECT differs from the realm's own religion - a same-sect
 # disfavoured school (e.g. a Ẓāhirī seat opposed by an Athari Sunnī
 # realm) changes no one's sect.
@@ -1558,6 +1603,18 @@ aqd_halqa_apply_heterodox = {
 	if = {
 		limit = { NOT = { religion = religion:$SECT$ } }
 		if = {
+			limit = {
+				exists = scope:halqa_loc
+				OR = { var:aqd_halqa_madhhab = 2  var:aqd_halqa_madhhab = 6 }
+			}
+			scope:halqa_loc = {
+				every_pop = {
+					limit = { religion = root.religion }
+					split_pop = { fraction = 0.3  religion = religion:$SECT$ }
+				}
+			}
+		}
+		else_if = {
 			limit = { exists = scope:halqa_loc }
 			scope:halqa_loc = {
 				every_pop = {
@@ -1566,15 +1623,32 @@ aqd_halqa_apply_heterodox = {
 				}
 			}
 		}
-		scope:halqa_prov = {
-			every_location_in_province_definition = {
-				limit = {
-					owner ?= root
-					NOT = { this = scope:halqa_loc }
+		if = {
+			limit = { OR = { var:aqd_halqa_madhhab = 2  var:aqd_halqa_madhhab = 6 } }
+			scope:halqa_prov = {
+				every_location_in_province_definition = {
+					limit = {
+						owner ?= root
+						NOT = { this = scope:halqa_loc }
+					}
+					every_pop = {
+						limit = { religion = root.religion }
+						split_pop = { fraction = 0.2  religion = religion:$SECT$ }
+					}
 				}
-				every_pop = {
-					limit = { religion = root.religion }
-					split_pop = { fraction = 0.1  religion = religion:$SECT$ }
+			}
+		}
+		else = {
+			scope:halqa_prov = {
+				every_location_in_province_definition = {
+					limit = {
+						owner ?= root
+						NOT = { this = scope:halqa_loc }
+					}
+					every_pop = {
+						limit = { religion = root.religion }
+						split_pop = { fraction = 0.1  religion = religion:$SECT$ }
+					}
 				}
 			}
 		}
