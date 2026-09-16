@@ -92,7 +92,7 @@ aqd_seat_establishment_pulse = {
 # subscribers - same merge-not-override guarantee documented above for
 # on_game_start.
 monthly_country_pulse = {
-	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_fatwa_episode_cleanup_pulse  aqd_jihad_fatwa_pulse  aqd_jihad_episode_cleanup_pulse }
+	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_fatwa_episode_cleanup_pulse  aqd_jihad_fatwa_pulse  aqd_jihad_episode_cleanup_pulse  aqd_debate_pulse }
 }
 
 # The Jurists' Fatwa Against an Unjust War (events/religion/
@@ -251,6 +251,33 @@ aqd_jihad_episode_cleanup_pulse = {
 			remove_location_modifier = z_aqd_jihad_blessed_jafari
 			remove_location_modifier = z_aqd_jihad_blessed_zaidi
 			remove_location_modifier = z_aqd_jihad_blessed_ibadi
+		}
+	}
+}
+
+# The Jurists' Fiqh Debate (events/religion/z_aqd_debate_events.txt).
+# Same silent-miss shape as every other pulse here: scripted_effects/
+# z_aqd_debate_effects.txt's aqd_debate_attempt does the full pair pick
+# (pivot seat, then a same-location-or-area partner) before any event
+# exists, and only fires the event on a confirmed find.
+#
+# The trigger's own aqd_debate_seat_eligible check is a cheap "does at
+# least one eligible seat exist anywhere" prefilter only - it cannot
+# cheaply confirm a same-area PARTNER also exists (scripted_triggers/
+# z_aqd_debate_triggers.txt's own header explains why), so aqd_debate_
+# attempt itself is the real gate; a realm with only one isolated
+# eligible seat just silently fails most months. chance = 10 is a
+# starting guess, easy to retune like every other pulse here.
+aqd_debate_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		has_policy = sharia_law_policy
+		aqd_debate_seat_eligible = yes
+	}
+	effect = {
+		random = {
+			chance = 10
+			aqd_debate_attempt = yes
 		}
 	}
 }

@@ -1,0 +1,31 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "Independent Jurists".
+#
+# National modifier granted by events/religion/z_aqd_debate_events.txt's
+# z_aqd_debate.1, option "Leave the fiqh debate to the specialists" -
+# the ruler declines to referee a dispute between two of the realm's own
+# jurist seats (scripted_effects/z_aqd_debate_effects.txt), letting
+# scholarship self-govern. Both seats still get z_aqd_fatwa_displeased_
+# <X> (they were left to squabble unresolved), but the realm as a whole
+# is credited for staying above an internal doctrinal quarrel.
+#
+# tolerance_own (main_menu/common/modifier_type_definitions/
+# 00_modifier_types.txt, a real country-scoped accumulator already read
+# elsewhere in this mod via modifier:tolerance_own, script_values/
+# z_aqd_madhhab_approval.txt) and stability_cost_efficiency (same file,
+# country-scoped, percent, color = good - the standard "cheaper to buy
+# stability" idiom; EU5 has no flat "stability" static modifier field to
+# grant directly). Magnitudes are a starting guess in the same range as
+# ulema_displeased/z_aqd_heretics_suppressed's own scale (main_menu/
+# common/static_modifiers/z_aqd_heretics_suppressed.txt, country.txt) -
+# retune if actual play feels off. years = 10 at the apply site, mode =
+# add_and_extend.
+# =====================================================================
+
+z_aqd_independent_jurists = {
+	game_data = {
+		category = country
+	}
+	tolerance_own = 1
+	stability_cost_efficiency = 0.05
+}

@@ -1,0 +1,85 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "Local <Madhhab> Jurists Vindicated".
+#
+# NINE concrete objects, one per madhhab, mirroring z_aqd_fatwa_
+# displeased.txt's own file shape - same reasoning applies unchanged: a
+# location can hold seats of more than one madhhab, so only the madhhab
+# the ruler actually sided with in a fiqh debate (events/religion/
+# z_aqd_debate_events.txt's z_aqd_debate.1, scripted_effects/z_aqd_
+# debate_effects.txt's aqd_debate_apply_vindicated_for_seat) should carry
+# this - any other seat at the same location is untouched.
+#
+# Deliberately the mirror image of z_aqd_fatwa_displeased.txt's own
+# -0.10 local_production_efficiency, at the same confirmed base-game
+# production-efficiency tier, just flipped: local_production_efficiency
+# = 0.10. No unrest/rebel-threshold terms - this is a straightforward
+# reward, not a punishment with a side of instability. years = 10 at the
+# apply site is fixed (aqd_debate_apply_vindicated_for_seat), mode =
+# add_and_extend. Deliberately NO ḥalqa interaction anywhere in this
+# feature for the vindicated side - a seat's own currently-active ḥalqa
+# (if any) keeps running undisturbed; winning a debate doesn't
+# retroactively bless or extend it either.
+# =====================================================================
+
+z_aqd_jurist_vindicated_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}
+
+z_aqd_jurist_vindicated_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}
+
+z_aqd_jurist_vindicated_maliki = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}
+
+z_aqd_jurist_vindicated_shafii = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}
+
+z_aqd_jurist_vindicated_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}
+
+z_aqd_jurist_vindicated_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}
+
+z_aqd_jurist_vindicated_jafari = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}
+
+z_aqd_jurist_vindicated_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}
+
+z_aqd_jurist_vindicated_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_production_efficiency = 0.10
+}

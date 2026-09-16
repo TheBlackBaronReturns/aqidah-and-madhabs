@@ -1,0 +1,741 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - the Jurists' Fiqh Debate: effects.
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# aqd_debate_pick_pair: picks a PIVOT eligible seat (uniformly among
+# owned locations via the umbrella aqd_debate_seat_eligible OR, then a
+# reservoir-sampled madhhab among however many that location actually
+# has eligible - identical idiom to scripted_effects/z_aqd_jihad_fatwa_
+# effects.txt's aqd_jihad_fatwa_pick_seat, see that file's own header for
+# the full Algorithm-R reasoning), then a PARTNER seat drawn from the
+# pivot's own AREA.
+#
+# The partner draw is two steps, not one, because EU5's random_list only
+# takes literal integer weights (script_values/z_aqd_madhhab_approval.txt's
+# own header notes this constraint) - fine for a fixed set of 9 madhhabs
+# at one location, but an area can hold an open-ended number of owned
+# locations, so there is no way to hardcode reservoir-promotion odds for
+# "the Nth eligible location in this area" the way the existing pickers
+# do for "the Nth eligible madhhab at this location". Base game's own
+# random_location_in_area (confirmed usage: events/institution_events.txt)
+# already does a uniform pick over locations in an area scope, so step
+# one reuses THAT for the location, and step two re-runs the same
+# fixed-9 Algorithm-R idiom used elsewhere in this mod to pick which
+# madhhab at whichever location won.
+#
+# scope:debate_area is captured via area = { save_scope_as = ... } at the
+# pivot's own location scope - the confirmed "location -> area scope"
+# transition idiom (events/religion/z_aqd_fatwa_events.txt's z_aqd_
+# fatwa.2 already does exactly this: area = { save_scope_as = target_area }
+# from inside its own random_owned_location block).
+#
+# The partner draw's own random_location_in_area limit is deliberately
+# the CHEAP umbrella check (aqd_debate_seat_eligible = yes, "does this
+# location have ANY eligible seat"), not a smarter "has an eligible seat
+# OTHER than the pivot's own madhhab" check - the pivot's own location
+# always trivially satisfies the cheap check too, so it can legitimately
+# be drawn as its own "partner location" candidate. That is fine: the
+# second reservoir pass below (at scope:debate_location_b) is what
+# actually excludes the exact (pivot location, pivot madhhab) PAIR - it
+# still allows a DIFFERENT eligible madhhab at that same location. If the
+# draw lands on the pivot's own location and that location turns out to
+# hold no OTHER eligible madhhab, the second pass simply finds nothing
+# and var:aqd_debate_seat_b_madhhab is left unset - the attempt aborts
+# silently (aqd_debate_attempt below) and tries again next pulse, same
+# "good enough, retry later" tolerance this mod's other silent-miss
+# systems already rely on rather than guaranteeing perfect uniformity.
+# ---------------------------------------------------------------------
+aqd_debate_pick_pair = {
+	random_owned_location = {
+		limit = { aqd_debate_seat_eligible = yes }
+		save_scope_as = debate_location_a
+		area = { save_scope_as = debate_area }
+	}
+
+	if = {
+		limit = { exists = scope:debate_location_a }
+			set_variable = { name = aqd_debate_seat_a_count  value = 0 }
+
+			# Hanafi (1) - always checked first, unconditional first entry.
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_hanafi = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				set_variable = { name = aqd_debate_seat_a_madhhab  value = 1 }
+			}
+			# Hanbali (2)
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_hanbali = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				if = {
+					limit = { var:aqd_debate_seat_a_count = 1 }
+					set_variable = { name = aqd_debate_seat_a_madhhab  value = 2 }
+				}
+				else = {
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 2 } }  1 = {} }
+				}
+			}
+			# Maliki (3)
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_maliki = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				if = {
+					limit = { var:aqd_debate_seat_a_count = 1 }
+					set_variable = { name = aqd_debate_seat_a_madhhab  value = 3 }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 2 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 3 } }  1 = {} }
+				}
+				else = {
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 3 } }  2 = {} }
+				}
+			}
+			# Shafii (4)
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_shafii = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				if = {
+					limit = { var:aqd_debate_seat_a_count = 1 }
+					set_variable = { name = aqd_debate_seat_a_madhhab  value = 4 }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 2 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 4 } }  1 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 3 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 4 } }  2 = {} }
+				}
+				else = {
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 4 } }  3 = {} }
+				}
+			}
+			# Zahiri (5)
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_zahiri = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				if = {
+					limit = { var:aqd_debate_seat_a_count = 1 }
+					set_variable = { name = aqd_debate_seat_a_madhhab  value = 5 }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 2 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 5 } }  1 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 3 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 5 } }  2 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 4 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 5 } }  3 = {} }
+				}
+				else = {
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 5 } }  4 = {} }
+				}
+			}
+			# Ismaili (6)
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_ismaili = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				if = {
+					limit = { var:aqd_debate_seat_a_count = 1 }
+					set_variable = { name = aqd_debate_seat_a_madhhab  value = 6 }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 2 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 6 } }  1 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 3 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 6 } }  2 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 4 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 6 } }  3 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 5 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 6 } }  4 = {} }
+				}
+				else = {
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 6 } }  5 = {} }
+				}
+			}
+			# Jafari (7)
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_jafari = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				if = {
+					limit = { var:aqd_debate_seat_a_count = 1 }
+					set_variable = { name = aqd_debate_seat_a_madhhab  value = 7 }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 2 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 7 } }  1 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 3 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 7 } }  2 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 4 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 7 } }  3 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 5 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 7 } }  4 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 6 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 7 } }  5 = {} }
+				}
+				else = {
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 7 } }  6 = {} }
+				}
+			}
+			# Zaidi (8)
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_zaidi = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				if = {
+					limit = { var:aqd_debate_seat_a_count = 1 }
+					set_variable = { name = aqd_debate_seat_a_madhhab  value = 8 }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 2 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 8 } }  1 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 3 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 8 } }  2 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 4 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 8 } }  3 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 5 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 8 } }  4 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 6 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 8 } }  5 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 7 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 8 } }  6 = {} }
+				}
+				else = {
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 8 } }  7 = {} }
+				}
+			}
+			# Ibadi (9)
+			if = {
+				limit = { scope:debate_location_a = { aqd_debate_seat_eligible_ibadi = yes } }
+				change_variable = { name = aqd_debate_seat_a_count  add = 1 }
+				if = {
+					limit = { var:aqd_debate_seat_a_count = 1 }
+					set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 2 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 } }  1 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 3 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 } }  2 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 4 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 } }  3 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 5 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 } }  4 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 6 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 } }  5 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 7 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 } }  6 = {} }
+				}
+				else_if = {
+					limit = { var:aqd_debate_seat_a_count = 8 }
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 } }  7 = {} }
+				}
+				else = {
+					random_list = { 1 = { set_variable = { name = aqd_debate_seat_a_madhhab  value = 9 } }  8 = {} }
+				}
+			}
+
+			remove_variable = aqd_debate_seat_a_count
+
+			# --- Stage B: draw a partner location from the pivot's area. ---
+			scope:debate_area = {
+				random_location_in_area = {
+					limit = {
+						owner ?= root
+						aqd_debate_seat_eligible = yes
+					}
+					save_scope_as = debate_location_b
+				}
+			}
+
+			if = {
+				limit = { exists = scope:debate_location_b }
+					set_variable = { name = aqd_debate_seat_b_count  value = 0 }
+
+					# Each branch excludes ONLY the exact (pivot location, pivot
+					# madhhab) pair - not the pivot's madhhab index globally, which
+					# would wrongly also block a genuine same-madhhab pair at a
+					# DIFFERENT location (explicitly allowed - "two Hanafi jurists
+					# disagreeing with each other").
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_hanafi = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 1 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						set_variable = { name = aqd_debate_seat_b_madhhab  value = 1 }
+					}
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_hanbali = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 2 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						if = {
+							limit = { var:aqd_debate_seat_b_count = 1 }
+							set_variable = { name = aqd_debate_seat_b_madhhab  value = 2 }
+						}
+						else = {
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 2 } }  1 = {} }
+						}
+					}
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_maliki = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 3 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						if = {
+							limit = { var:aqd_debate_seat_b_count = 1 }
+							set_variable = { name = aqd_debate_seat_b_madhhab  value = 3 }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 2 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 3 } }  1 = {} }
+						}
+						else = {
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 3 } }  2 = {} }
+						}
+					}
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_shafii = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 4 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						if = {
+							limit = { var:aqd_debate_seat_b_count = 1 }
+							set_variable = { name = aqd_debate_seat_b_madhhab  value = 4 }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 2 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 4 } }  1 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 3 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 4 } }  2 = {} }
+						}
+						else = {
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 4 } }  3 = {} }
+						}
+					}
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_zahiri = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 5 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						if = {
+							limit = { var:aqd_debate_seat_b_count = 1 }
+							set_variable = { name = aqd_debate_seat_b_madhhab  value = 5 }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 2 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 5 } }  1 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 3 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 5 } }  2 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 4 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 5 } }  3 = {} }
+						}
+						else = {
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 5 } }  4 = {} }
+						}
+					}
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_ismaili = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 6 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						if = {
+							limit = { var:aqd_debate_seat_b_count = 1 }
+							set_variable = { name = aqd_debate_seat_b_madhhab  value = 6 }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 2 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 6 } }  1 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 3 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 6 } }  2 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 4 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 6 } }  3 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 5 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 6 } }  4 = {} }
+						}
+						else = {
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 6 } }  5 = {} }
+						}
+					}
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_jafari = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 7 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						if = {
+							limit = { var:aqd_debate_seat_b_count = 1 }
+							set_variable = { name = aqd_debate_seat_b_madhhab  value = 7 }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 2 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 7 } }  1 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 3 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 7 } }  2 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 4 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 7 } }  3 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 5 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 7 } }  4 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 6 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 7 } }  5 = {} }
+						}
+						else = {
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 7 } }  6 = {} }
+						}
+					}
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_zaidi = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 8 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						if = {
+							limit = { var:aqd_debate_seat_b_count = 1 }
+							set_variable = { name = aqd_debate_seat_b_madhhab  value = 8 }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 2 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 8 } }  1 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 3 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 8 } }  2 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 4 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 8 } }  3 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 5 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 8 } }  4 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 6 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 8 } }  5 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 7 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 8 } }  6 = {} }
+						}
+						else = {
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 8 } }  7 = {} }
+						}
+					}
+					if = {
+						limit = {
+							scope:debate_location_b = { aqd_debate_seat_eligible_ibadi = yes }
+							NOT = { AND = { scope:debate_location_b = scope:debate_location_a  var:aqd_debate_seat_a_madhhab = 9 } }
+						}
+						change_variable = { name = aqd_debate_seat_b_count  add = 1 }
+						if = {
+							limit = { var:aqd_debate_seat_b_count = 1 }
+							set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 2 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 } }  1 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 3 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 } }  2 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 4 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 } }  3 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 5 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 } }  4 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 6 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 } }  5 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 7 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 } }  6 = {} }
+						}
+						else_if = {
+							limit = { var:aqd_debate_seat_b_count = 8 }
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 } }  7 = {} }
+						}
+						else = {
+							random_list = { 1 = { set_variable = { name = aqd_debate_seat_b_madhhab  value = 9 } }  8 = {} }
+						}
+					}
+
+					remove_variable = aqd_debate_seat_b_count
+			}
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_debate_attempt: country-scoped, called from the pulse's effect
+# (on_action/00_aqd_game_start.txt's aqd_debate_pulse), NOT from an
+# event - same silent-miss shape as every other fatwa pulse in this mod:
+# the full pick happens here, before any popup exists, so a failed pick
+# (no valid area-mate found this month) produces no event at all.
+#
+# On success, stamps two fully dedicated markers - z_aqd_debate_pending_
+# pick_a on the pivot's location, z_aqd_debate_pending_pick_b on the
+# partner's - rather than reusing the older shared z_aqd_fatwa_pending_
+# pick for either (see that pair of static-modifier files' own headers
+# for why: this feature always stamps two markers in the same tick, so
+# sharing one with an unrelated pulse's own single pick would risk a
+# same-tick collision that two fully dedicated keys make structurally
+# impossible instead of merely unlikely). The event's own immediate can
+# then unambiguously re-find each location via its own has_location_
+# modifier check without any risk of either random_owned_location call
+# resolving to the wrong one.
+# ---------------------------------------------------------------------
+aqd_debate_attempt = {
+	aqd_debate_pick_pair = yes
+	if = {
+		limit = {
+			exists = scope:debate_location_a
+			exists = scope:debate_location_b
+			exists = var:aqd_debate_seat_a_madhhab
+			exists = var:aqd_debate_seat_b_madhhab
+		}
+		scope:debate_location_a = { add_location_modifier = { modifier = z_aqd_debate_pending_pick_a  months = 1 } }
+		scope:debate_location_b = { add_location_modifier = { modifier = z_aqd_debate_pending_pick_b  months = 1 } }
+		trigger_event_non_silently = { id = z_aqd_debate.1  days = 1 }
+	}
+	else = {
+		remove_variable = aqd_debate_seat_a_madhhab
+		remove_variable = aqd_debate_seat_b_madhhab
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_debate_apply_displeased_for_seat = { MADHHAB  LOCATION  YEARS }:
+# 9-branch dispatch, same shape and same $MADHHAB$/$LOCATION$ re-entry
+# idiom as scripted_effects/z_aqd_fatwa_effects.txt's aqd_fatwa_apply_
+# displeased_for_seat (see that function's own header for the full
+# "why $LOCATION$ is re-entered, never called from inside it" reasoning -
+# identical here). Deliberately a SEPARATE function rather than reusing
+# that one directly, only because that one hardcodes years = 12 and this
+# event needs a 6y/12y choice depending on which option applied it - but
+# it keeps that function's full effect body, ḥalqa-clear included: a seat
+# publicly rebuked by a fiqh debate is exactly as repudiated as one
+# refused in the unjust-war fatwa, so its own currently-active ḥalqa is
+# cleared PROVINCE-WIDE here too (a ḥalqa's class modifier is stamped
+# uniformly across its whole originating province by aqd_halqa_apply_
+# state/_orthodox/_heterodox, scripted_effects/z_aqd_jurist_effects.txt),
+# and aqd_halqa_prov_ready_<X>'s own check of this same z_aqd_fatwa_
+# displeased_<X> key then blocks a fresh ḥalqa from starting there for as
+# long as $YEARS$ lasts - no separate "block" logic needed beyond
+# applying the real modifier.
+# ---------------------------------------------------------------------
+aqd_debate_apply_displeased_for_seat = {
+	if = {
+		limit = { $MADHHAB$ = 1 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_hanafi  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_hanafi
+					remove_location_modifier = z_aqd_halqa_orthodox_hanafi
+					remove_location_modifier = z_aqd_halqa_heterodox_hanafi
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 2 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_hanbali  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_hanbali
+					remove_location_modifier = z_aqd_halqa_orthodox_hanbali
+					remove_location_modifier = z_aqd_halqa_heterodox_hanbali
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 3 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_maliki  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_maliki
+					remove_location_modifier = z_aqd_halqa_orthodox_maliki
+					remove_location_modifier = z_aqd_halqa_heterodox_maliki
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 4 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_shafii  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_shafii
+					remove_location_modifier = z_aqd_halqa_orthodox_shafii
+					remove_location_modifier = z_aqd_halqa_heterodox_shafii
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 5 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_zahiri  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_zahiri
+					remove_location_modifier = z_aqd_halqa_orthodox_zahiri
+					remove_location_modifier = z_aqd_halqa_heterodox_zahiri
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 6 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_ismaili  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_ismaili
+					remove_location_modifier = z_aqd_halqa_orthodox_ismaili
+					remove_location_modifier = z_aqd_halqa_heterodox_ismaili
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 7 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_jafari  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_jafari
+					remove_location_modifier = z_aqd_halqa_orthodox_jafari
+					remove_location_modifier = z_aqd_halqa_heterodox_jafari
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 8 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_zaidi  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_zaidi
+					remove_location_modifier = z_aqd_halqa_orthodox_zaidi
+					remove_location_modifier = z_aqd_halqa_heterodox_zaidi
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 9 }
+		$LOCATION$ = {
+			add_location_modifier = { modifier = z_aqd_fatwa_displeased_ibadi  years = $YEARS$  mode = add_and_extend }
+			province_definition = {
+				every_location_in_province_definition = {
+					limit = { owner ?= root }
+					remove_location_modifier = z_aqd_halqa_state_ibadi
+					remove_location_modifier = z_aqd_halqa_orthodox_ibadi
+					remove_location_modifier = z_aqd_halqa_heterodox_ibadi
+				}
+			}
+		}
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_debate_apply_vindicated_for_seat = { MADHHAB  LOCATION }: 9-branch
+# dispatch, same $MADHHAB$/$LOCATION$ re-entry shape as the displeased
+# dispatcher above, but stamps ONLY z_aqd_jurist_vindicated_$MADHHAB$ at
+# a flat 10 years - deliberately NO ḥalqa interaction at all: a
+# vindicated seat's own currently-active ḥalqa (if any) keeps running
+# undisturbed, and winning a debate doesn't retroactively bless or extend
+# it either.
+# ---------------------------------------------------------------------
+aqd_debate_apply_vindicated_for_seat = {
+	if      = { limit = { $MADHHAB$ = 1 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_hanafi   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 2 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_hanbali  years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 3 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_maliki   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 4 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_shafii   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 5 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_zahiri   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 6 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_ismaili  years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 7 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_jafari   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 8 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_zaidi    years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 9 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_jurist_vindicated_ibadi    years = 10  mode = add_and_extend } } }
+}

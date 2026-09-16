@@ -898,7 +898,7 @@ aqd_crackdown_effect = {
 				has_building = building_type:seat_of_$MADHHAB$_jurists
 			}
 		}
-		add_location_modifier = { modifier = z_aqd_jurist_evicted_$MADHHAB$  years = 10  mode = add_and_extend }
+		add_location_modifier = { modifier = z_aqd_jurist_evicted_$MADHHAB$  years = 20  mode = add_and_extend }
 		province_definition = {
 			every_location_in_province_definition = {
 				limit = { owner ?= scope:aqd_crackdown_country }

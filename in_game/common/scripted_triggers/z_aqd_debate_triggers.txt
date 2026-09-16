@@ -1,0 +1,138 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - the Jurists' Fiqh Debate: triggers.
+#
+# NINE concrete per-madhhab eligibility triggers, location-scoped, same
+# shape as scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's own
+# aqd_jihad_seat_eligible_<X> family, but with this feature's own
+# exclusion set - nothing here is about an ongoing war or a fatwa ban, so
+# none of that state is checked. A seat is eligible to take part in a
+# fiqh debate (either as the pivot or as its area-mate, scripted_effects/
+# z_aqd_debate_effects.txt) whenever its madhhab is not heterodox to
+# root's own aqeedah - single-direction check only, the two debating
+# seats are never compared to EACH OTHER, only each to root, so a
+# same-madhhab pair is explicitly allowed (e.g. two Ḥanafī seats
+# disagreeing with each other) - and it isn't currently carrying any
+# modifier this feature (or a related one) would consider "already
+# spoken for":
+#   - z_aqd_fatwa_displeased_<X> (main_menu/common/static_modifiers/
+#     z_aqd_fatwa_displeased.txt) - reused as-is from the unjust-war
+#     fatwa system (scripted_effects/z_aqd_debate_effects.txt's own
+#     aqd_debate_apply_displeased_for_seat stamps this same key, at this
+#     feature's own 6y/12y durations depending on which option picked
+#     it) - a seat already publicly rebuked, by either system, can't be
+#     dragged into a fresh debate until it lapses. This IS the whole
+#     "already resolved" throttle for this feature - no separate cooldown
+#     variable exists anywhere in this file or z_aqd_debate_effects.txt.
+#   - z_aqd_jurist_evicted_<X> (main_menu/common/static_modifiers/
+#     z_aqd_jurist_evicted.txt) - a crackdown-suppressed seat has no
+#     standing left to argue a point of fiqh.
+#   - z_aqd_jurist_vindicated_<X> (main_menu/common/static_modifiers/
+#     z_aqd_jurist_vindicated.txt) - a seat that just won a debate
+#     shouldn't immediately be dragged into another one.
+#   - z_aqd_debate_pending_pick_a / z_aqd_debate_pending_pick_b (this
+#     feature's own two dedicated same-tick stamp-and-consume hand-off
+#     markers, scripted_effects/z_aqd_debate_effects.txt's aqd_debate_
+#     attempt - deliberately NOT the older shared z_aqd_fatwa_pending_
+#     pick the white-peace/jihad fatwas use, since this feature always
+#     stamps two markers at once and sharing either with an unrelated
+#     pulse's own single pick would risk a same-tick collision) - never
+#     a standing cooldown, checked here only so a pick already mid-flight
+#     this exact tick can never be re-picked as its own partner.
+# =====================================================================
+
+aqd_debate_seat_eligible_hanafi = {
+	aqd_seat_madhhab_not_heterodox_to_root_hanafi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanafi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanafi }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_hanafi }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+aqd_debate_seat_eligible_hanbali = {
+	aqd_seat_madhhab_not_heterodox_to_root_hanbali = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanbali }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanbali }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_hanbali }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+aqd_debate_seat_eligible_maliki = {
+	aqd_seat_madhhab_not_heterodox_to_root_maliki = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_maliki }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_maliki }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_maliki }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+aqd_debate_seat_eligible_shafii = {
+	aqd_seat_madhhab_not_heterodox_to_root_shafii = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_shafii }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_shafii }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_shafii }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+aqd_debate_seat_eligible_zahiri = {
+	aqd_seat_madhhab_not_heterodox_to_root_zahiri = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zahiri }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_zahiri }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_zahiri }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+aqd_debate_seat_eligible_ismaili = {
+	aqd_seat_madhhab_not_heterodox_to_root_ismaili = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ismaili }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_ismaili }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_ismaili }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+aqd_debate_seat_eligible_jafari = {
+	aqd_seat_madhhab_not_heterodox_to_root_jafari = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_jafari }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_jafari }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_jafari }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+aqd_debate_seat_eligible_zaidi = {
+	aqd_seat_madhhab_not_heterodox_to_root_zaidi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zaidi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_zaidi }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_zaidi }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+aqd_debate_seat_eligible_ibadi = {
+	aqd_seat_madhhab_not_heterodox_to_root_ibadi = yes
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ibadi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_ibadi }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_ibadi }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_a }
+	NOT = { has_location_modifier = z_aqd_debate_pending_pick_b }
+}
+
+# Cheap "is there ANY eligible seat anywhere" prefilter, used only by
+# on_action/00_aqd_game_start.txt's aqd_debate_pulse trigger - NOT a
+# guarantee a same-location/same-area PARTNER also exists for it; that
+# can't be cheaply pre-checked (no "count matches" primitive available
+# for an open-ended number of area-mates the way the fixed-9-madhhab
+# pickers elsewhere in this mod can hardcode). scripted_effects/
+# z_aqd_debate_effects.txt's aqd_debate_pick_pair is what actually
+# confirms a valid pair exists - same "cheap prefilter, expensive picker
+# does the real check" division of labor as aqd_jihad_seat_eligible /
+# aqd_jihad_fatwa_pick_seat.
+aqd_debate_seat_eligible = {
+	OR = {
+		aqd_debate_seat_eligible_hanafi = yes
+		aqd_debate_seat_eligible_hanbali = yes
+		aqd_debate_seat_eligible_maliki = yes
+		aqd_debate_seat_eligible_shafii = yes
+		aqd_debate_seat_eligible_zahiri = yes
+		aqd_debate_seat_eligible_ismaili = yes
+		aqd_debate_seat_eligible_jafari = yes
+		aqd_debate_seat_eligible_zaidi = yes
+		aqd_debate_seat_eligible_ibadi = yes
+	}
+}

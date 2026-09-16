@@ -20,9 +20,22 @@
 # seat of the cracked-down madhhab across the whole realm - not only the
 # locations that lost a building - representing the nationwide backlash
 # when the state moves against a school of law. Significant unrest and
-# raised revolt risk for the duration. Same crackdown pass also cancels
-# that madhhab's own currently-active ḥalqa across each such location's
-# whole province (see aqd_crackdown_effect's own header).
+# raised revolt risk for a flat 20 years (raised from 10 - a persecuted
+# school's standing takes a generation to recover, not a decade). Same
+# crackdown pass also cancels that madhhab's own currently-active ḥalqa
+# across each such location's whole province (see aqd_crackdown_effect's
+# own header).
+#
+# A location carrying this key is excluded from every seat-eligibility
+# check across the mod, not just ḥalqa readiness: scripted_triggers/
+# z_aqd_jurist_triggers.txt's aqd_halqa_prov_ready_<X>, z_aqd_fatwa_
+# triggers.txt's aqd_fatwa_seat_eligible_<X> (the unjust-war fatwa),
+# z_aqd_jihad_fatwa_triggers.txt's aqd_jihad_seat_eligible_<X> (the
+# jihad fatwa, offensive and defensive alike), and z_aqd_debate_
+# triggers.txt's aqd_debate_seat_eligible_<X> (the fiqh debate) all check
+# their own madhhab's copy of this key - a persecuted school's jurists
+# have no standing left to bless a war, demand one end, or argue a point
+# of fiqh, for as long as the persecution lasts.
 # =====================================================================
 
 z_aqd_jurist_evicted_hanafi = {

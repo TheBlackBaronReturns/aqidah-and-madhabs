@@ -126,12 +126,21 @@ aqd_is_defensive_jihad_participant = {
 # (that one is the real post-success throttle, deliberately persisting
 # ACROSS wars, untouched by episode boundaries) - all three apply, none
 # substitutes for another.
+#
+# z_aqd_jurist_evicted_<X> (main_menu/common/static_modifiers/z_aqd_
+# jurist_evicted.txt, a flat 20 years, scripted_effects/z_aqd_jurist_
+# effects.txt's aqd_crackdown_effect) is also excluded - a crackdown-
+# persecuted seat has no standing left to bless a jihad either, same
+# reasoning aqd_fatwa_seat_eligible_<X> (scripted_triggers/z_aqd_fatwa_
+# triggers.txt) and aqd_debate_seat_eligible_<X> (scripted_triggers/
+# z_aqd_debate_triggers.txt) both apply for their own features.
 aqd_jihad_seat_eligible_hanafi = {
 	OR = {
 		aqd_seat_madhhab_not_heterodox_to_root_hanafi = yes
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanafi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanafi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_hanafi }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_hanafi }
@@ -143,6 +152,7 @@ aqd_jihad_seat_eligible_hanbali = {
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanbali }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanbali }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_hanbali }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_hanbali }
@@ -154,6 +164,7 @@ aqd_jihad_seat_eligible_maliki = {
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_maliki }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_maliki }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_maliki }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_maliki }
@@ -165,6 +176,7 @@ aqd_jihad_seat_eligible_shafii = {
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_shafii }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_shafii }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_shafii }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_shafii }
@@ -176,6 +188,7 @@ aqd_jihad_seat_eligible_zahiri = {
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zahiri }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_zahiri }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_zahiri }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_zahiri }
@@ -187,6 +200,7 @@ aqd_jihad_seat_eligible_ismaili = {
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ismaili }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_ismaili }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_ismaili }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_ismaili }
@@ -198,6 +212,7 @@ aqd_jihad_seat_eligible_jafari = {
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_jafari }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_jafari }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_jafari }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_jafari }
@@ -209,6 +224,7 @@ aqd_jihad_seat_eligible_zaidi = {
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zaidi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_zaidi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_zaidi }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_zaidi }
@@ -220,6 +236,7 @@ aqd_jihad_seat_eligible_ibadi = {
 		root = { aqd_is_defensive_jihad_participant = yes }
 	}
 	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ibadi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_ibadi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 	NOT = { has_location_modifier = z_aqd_fatwa_of_jihad_ibadi }
 	NOT = { has_location_modifier = z_aqd_jihad_declined_ibadi }

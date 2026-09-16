@@ -1,0 +1,28 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - fiqh debate's own "partner pending pick"
+# marker.
+#
+# Purely a same-tick re-derivation anchor for the PARTNER seat in
+# scripted_effects/z_aqd_debate_effects.txt's aqd_debate_attempt - the
+# second of two fully dedicated keys this feature uses (the pivot seat
+# gets its own z_aqd_debate_pending_pick_a, not the older shared
+# z_aqd_fatwa_pending_pick - see that file's own header for why sharing
+# it would risk a same-tick collision with an unrelated fatwa pulse).
+# Two dedicated keys mean events/religion/z_aqd_debate_events.txt's
+# z_aqd_debate.1 can re-find each of the two locations via its own
+# has_location_modifier check without any risk of either random_owned_
+# location call in its immediate resolving to the wrong location.
+# Stamped on a successful pick, then consumed
+# (remove_location_modifier) in the very next line of the event's own
+# immediate that finds it - it should never be visible to the player for
+# more than an instant. months = 1 at the stamp site is a safety-net
+# duration only, not load-bearing: normal flow always removes this
+# explicitly before the player ever sees the event's own text render.
+# =====================================================================
+
+z_aqd_debate_pending_pick_b = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

@@ -502,3 +502,65 @@
  z_aqd_fatwa_pending_pick: "A Fatwa Is Being Weighed"
  STATIC_MODIFIER_NAME_z_aqd_fatwa_pending_pick: "A Fatwa Is Being Weighed"
  STATIC_MODIFIER_DESC_z_aqd_fatwa_pending_pick: "The jurists here are weighing a fatwa. This should resolve immediately."
+
+ # ---- The Jurists' Fiqh Debate (events/religion/z_aqd_debate_events.txt) ----
+ # Both seats are named by LOCATION throughout, never by madhhab school -
+ # see that event file's own header for why. Same silent-miss design as
+ # the other fatwa systems, so there is no "declined" desc variant here
+ # either.
+ z_aqd_debate.1.title: "A Dispute of Doctors"
+ z_aqd_debate.1.desc.main: "The jurists of [scope:debate_location_a.GetName] and the jurists of [scope:debate_location_b.GetName] have come to blows over a fine point of fiqh, each convinced the other has strayed from sound doctrine. Students take sides in the streets, and the dispute threatens to spill beyond the walls of the madrasa unless the throne intervenes - or wisely does not."
+ z_aqd_debate.1.desc.fallback: "DEBUG/fallback: no matching jurist-seat pair was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
+ z_aqd_debate.1.leave_it: "Leave the fiqh debate to the specialists"
+ z_aqd_debate.1.side_a: "Side with the Jurists of [scope:debate_location_a.GetName]"
+ z_aqd_debate.1.side_b: "Side with the Jurists of [scope:debate_location_b.GetName]"
+
+ # ---- "Local <Madhhab> Jurists Vindicated" (main_menu/common/static_
+ # modifiers/z_aqd_jurist_vindicated.txt) - 9 concrete per-madhhab keys,
+ # mirror image of "Local <Madhhab> Jurists Displeased" above. ----
+ z_aqd_jurist_vindicated_hanafi: "Local Ḥanafī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_hanafi: "Local Ḥanafī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_hanafi: "The Ḥanafī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+ z_aqd_jurist_vindicated_hanbali: "Local Ḥanbalī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_hanbali: "Local Ḥanbalī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_hanbali: "The Ḥanbalī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+ z_aqd_jurist_vindicated_maliki: "Local Mālikī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_maliki: "Local Mālikī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_maliki: "The Mālikī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+ z_aqd_jurist_vindicated_shafii: "Local Shāfi'ī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_shafii: "Local Shāfi'ī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_shafii: "The Shāfi'ī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+ z_aqd_jurist_vindicated_zahiri: "Local Ẓāhirī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_zahiri: "Local Ẓāhirī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_zahiri: "The Ẓāhirī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+ z_aqd_jurist_vindicated_ismaili: "Local Ismā'īlī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_ismaili: "Local Ismā'īlī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_ismaili: "The Ismā'īlī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+ z_aqd_jurist_vindicated_jafari: "Local Ja'farī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_jafari: "Local Ja'farī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_jafari: "The Ja'farī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+ z_aqd_jurist_vindicated_zaidi: "Local Zaydī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_zaidi: "Local Zaydī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_zaidi: "The Zaydī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+ z_aqd_jurist_vindicated_ibadi: "Local Ibāḍī Jurists Vindicated"
+ STATIC_MODIFIER_NAME_z_aqd_jurist_vindicated_ibadi: "Local Ibāḍī Jurists Vindicated"
+ STATIC_MODIFIER_DESC_z_aqd_jurist_vindicated_ibadi: "The Ibāḍī jurists here prevailed in a fiqh debate, with the throne's own backing. Their students work with renewed purpose."
+
+ # ---- "Independent Jurists" (main_menu/common/static_modifiers/
+ # z_aqd_independent_jurists.txt) - national modifier, granted for
+ # declining to referee a fiqh debate. ----
+ z_aqd_independent_jurists: "Independent Jurists"
+ STATIC_MODIFIER_NAME_z_aqd_independent_jurists: "Independent Jurists"
+ STATIC_MODIFIER_DESC_z_aqd_independent_jurists: "The throne let a dispute among its own jurists resolve on its own terms, without dictating an outcome. Scholars across the realm take note of the restraint."
+
+ # ---- Fiqh debate's own two dedicated "pending pick" markers
+ # (main_menu/common/static_modifiers/z_aqd_debate_pending_pick_a.txt,
+ # _b.txt) - always stamped and consumed within the same effect chain,
+ # so these names should never actually be visible; kept only as a
+ # safety net. ----
+ z_aqd_debate_pending_pick_a: "A Fatwa Is Being Weighed"
+ STATIC_MODIFIER_NAME_z_aqd_debate_pending_pick_a: "A Fatwa Is Being Weighed"
+ STATIC_MODIFIER_DESC_z_aqd_debate_pending_pick_a: "The jurists here are weighing a fatwa. This should resolve immediately."
+ z_aqd_debate_pending_pick_b: "A Fatwa Is Being Weighed"
+ STATIC_MODIFIER_NAME_z_aqd_debate_pending_pick_b: "A Fatwa Is Being Weighed"
+ STATIC_MODIFIER_DESC_z_aqd_debate_pending_pick_b: "The jurists here are weighing a fatwa. This should resolve immediately."

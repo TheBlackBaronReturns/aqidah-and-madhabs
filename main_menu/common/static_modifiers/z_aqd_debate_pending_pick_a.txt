@@ -1,0 +1,29 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - fiqh debate's own "pivot pending pick"
+# marker.
+#
+# Purely a same-tick re-derivation anchor for the PIVOT seat in
+# scripted_effects/z_aqd_debate_effects.txt's aqd_debate_attempt -
+# deliberately a THIRD dedicated pending-pick key, not a reuse of the
+# already-shared z_aqd_fatwa_pending_pick (which the white-peace fatwa
+# and jihad fatwa already both use for their own single-seat picks).
+# This feature always stamps TWO markers in the same tick (this one for
+# the pivot, z_aqd_debate_pending_pick_b for the partner); if the pivot
+# reused the shared key instead, any_owned_location = { has_location_
+# modifier = z_aqd_fatwa_pending_pick } could - in the rare case another
+# fatwa pulse also succeeds for the same country in the same month -
+# resolve to an entirely unrelated feature's own pending pick instead of
+# this one's. Two fully dedicated keys make that collision structurally
+# impossible instead of merely unlikely. Stamped on a successful pick,
+# then consumed (remove_location_modifier) in the very next line of the
+# event's own immediate that finds it - it should never be visible to
+# the player for more than an instant. months = 1 at the stamp site is a
+# safety-net duration only, not load-bearing.
+# =====================================================================
+
+z_aqd_debate_pending_pick_a = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

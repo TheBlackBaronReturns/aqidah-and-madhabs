@@ -1,0 +1,140 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - the Jurists' Fiqh Debate.
+#
+# Fired by on_action/00_aqd_game_start.txt's aqd_debate_pulse
+# (monthly_country_pulse) whenever the realm owns at least two jurist
+# seats - of any madhhab(s) the ruler's own aqeedah doesn't consider
+# heterodox, same madhhab allowed - sitting at the same location or
+# within the same area (scripted_triggers/z_aqd_debate_triggers.txt's
+# aqd_debate_seat_eligible_<X>, scripted_effects/z_aqd_debate_effects.
+# txt's aqd_debate_pick_pair/aqd_debate_attempt). Same silent-miss shape
+# as the other fatwa systems: the full pair-pick happens in the pulse's
+# own effect, BEFORE this event ever fires - a month with no valid pair
+# produces no popup at all.
+#
+# Both seats are named by LOCATION, not by madhhab school, throughout
+# this event - deliberately, not a simplification of convenience. A
+# previous attempt at dynamically naming a seat's madhhab from
+# customizable localization (z_aqd_seat_madhhab_name, since deleted) was
+# scrapped after it silently rendered blank from a scope bug; the
+# working fix used by z_aqd_jfatwa.1's own desc only ever resolves ONE
+# dynamic name via a 9-way triggered_desc, never two independently in
+# the same string - doing that for a genuine PAIR here would need an
+# 81-branch (9x9) matrix. Naming locations instead needs no branching at
+# all (plain [scope:debate_location_a.GetName]), matches the option
+# names below, and dynamic scope references in event option text are a
+# confirmed, ordinary base-game idiom (e.g. artist_events.1.b's own
+# [ROOT.GetCountry...] option name) - nothing new or risky here.
+#
+# Saved scopes do not survive trigger_event, so this event's own
+# immediate re-derives both locations via their own dedicated pending-
+# pick marker (z_aqd_debate_pending_pick_a for the pivot, z_aqd_debate_
+# pending_pick_b for the partner - two fully dedicated keys, not a reuse
+# of the older shared z_aqd_fatwa_pending_pick, specifically so the two
+# random_owned_location calls below can never collide with each other OR
+# with an unrelated fatwa pulse's own pick in the same tick) and
+# consumes each immediately - mirrors z_aqd_jfatwa.1's own re-derivation
+# idiom. var:aqd_debate_seat_a_madhhab/_b_madhhab are plain country
+# variables, which (unlike saved scopes) survive trigger_event on their
+# own - same confirmed idiom the jihad fatwa already relies on.
+# =====================================================================
+
+namespace = z_aqd_debate
+
+z_aqd_debate.1 = {
+	type = country_event
+	title = z_aqd_debate.1.title
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { exists = scope:debate_location_a  exists = scope:debate_location_b }
+				desc = z_aqd_debate.1.desc.main
+			}
+			triggered_desc = {
+				desc = z_aqd_debate.1.desc.fallback
+			}
+		}
+	}
+	outcome = neutral
+
+	trigger = {
+		religion.group = religion_group:muslim
+		any_owned_location = { has_location_modifier = z_aqd_debate_pending_pick_a }
+		any_owned_location = { has_location_modifier = z_aqd_debate_pending_pick_b }
+	}
+
+	illustration_tags = {
+		10 = calm
+		10 = interior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+
+		random_owned_location = {
+			limit = { has_location_modifier = z_aqd_debate_pending_pick_a }
+			save_scope_as = debate_location_a
+		}
+		if = {
+			limit = { exists = scope:debate_location_a }
+			scope:debate_location_a = { remove_location_modifier = z_aqd_debate_pending_pick_a }
+		}
+
+		random_owned_location = {
+			limit = { has_location_modifier = z_aqd_debate_pending_pick_b }
+			save_scope_as = debate_location_b
+		}
+		if = {
+			limit = { exists = scope:debate_location_b }
+			scope:debate_location_b = { remove_location_modifier = z_aqd_debate_pending_pick_b }
+		}
+	}
+
+	option = {
+		name = z_aqd_debate.1.leave_it
+		if = {
+			limit = { exists = scope:debate_location_a  exists = scope:debate_location_b }
+			aqd_debate_apply_displeased_for_seat = { MADHHAB = var:aqd_debate_seat_a_madhhab  LOCATION = scope:debate_location_a  YEARS = 6 }
+			aqd_debate_apply_displeased_for_seat = { MADHHAB = var:aqd_debate_seat_b_madhhab  LOCATION = scope:debate_location_b  YEARS = 6 }
+			add_country_modifier = { modifier = z_aqd_independent_jurists  years = 10  mode = add_and_extend }
+			# Refusing to rule on the dispute is itself a legalistic stance -
+			# the matter is left to be settled by process and precedent
+			# rather than by the ruler's own word, same direction (jurisprudence,
+			# the "right" pole per the sign convention documented in script_
+			# values/z_aqd_madhhab_approval.txt's header) and same magnitude
+			# tier as this mod's own existing societal-value nudges (scripted_
+			# effects/z_aqd_jurist_effects.txt's aqd_halqa_apply_orthodox/
+			# _heterodox), and the same confirmed base-game idiom muslim_
+			# school_events.2's own "pious mufti" option uses for this exact
+			# axis.
+			change_societal_value = { type = mysticism_vs_jurisprudence  value = societal_value_tiny_move_to_right }
+		}
+	}
+
+	option = {
+		name = z_aqd_debate.1.side_a
+		trigger = { exists = scope:debate_location_a }
+		if = {
+			limit = { exists = scope:debate_location_a  exists = scope:debate_location_b }
+			aqd_debate_apply_vindicated_for_seat = { MADHHAB = var:aqd_debate_seat_a_madhhab  LOCATION = scope:debate_location_a }
+			aqd_debate_apply_displeased_for_seat = { MADHHAB = var:aqd_debate_seat_b_madhhab  LOCATION = scope:debate_location_b  YEARS = 12 }
+		}
+	}
+
+	option = {
+		name = z_aqd_debate.1.side_b
+		trigger = { exists = scope:debate_location_b }
+		if = {
+			limit = { exists = scope:debate_location_a  exists = scope:debate_location_b }
+			aqd_debate_apply_vindicated_for_seat = { MADHHAB = var:aqd_debate_seat_b_madhhab  LOCATION = scope:debate_location_b }
+			aqd_debate_apply_displeased_for_seat = { MADHHAB = var:aqd_debate_seat_a_madhhab  LOCATION = scope:debate_location_a  YEARS = 12 }
+		}
+	}
+
+	after = {
+		root = {
+			remove_variable = aqd_debate_seat_a_madhhab
+			remove_variable = aqd_debate_seat_b_madhhab
+		}
+	}
+}

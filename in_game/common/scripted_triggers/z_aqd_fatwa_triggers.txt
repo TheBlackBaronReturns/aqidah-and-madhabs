@@ -415,20 +415,27 @@ aqd_seat_madhhab_not_heterodox_to_root = {
 # eligibility, layered on top of the pure doctrinal check above exactly
 # the way scripted_triggers/z_aqd_jihad_fatwa_triggers.txt's aqd_jihad_
 # seat_eligible_<X> layers on top of it for the jihad fatwa. Adds the
-# ONE thing that was previously missing here: excluding a location that
-# already carries an in-flight z_aqd_fatwa_pending_pick marker.
+# things that were previously missing here: excluding a location that
+# already carries an in-flight z_aqd_fatwa_pending_pick marker, and
+# excluding a location currently carrying z_aqd_jurist_evicted_<X> - a
+# crackdown-persecuted seat (main_menu/common/static_modifiers/z_aqd_
+# jurist_evicted.txt, now a flat 20 years, scripted_effects/z_aqd_jurist_
+# effects.txt's aqd_crackdown_effect) has no standing left to issue a
+# fresh fatwa demand either, same reasoning aqd_jihad_seat_eligible_<X>
+# and aqd_debate_seat_eligible_<X> (scripted_triggers/z_aqd_debate_
+# triggers.txt) already apply.
 #
-# Without this, the "no double-booking" protection between the jihad
-# fatwa and this one existed only as a side effect of on_action/
-# 00_aqd_game_start.txt's monthly_country_pulse listing aqd_fatwa_pulse
-# before aqd_jihad_fatwa_pulse (so a location the white-peace fatwa just
-# stamped this same tick is correctly excluded from that month's jihad
-# pick, purely because jihad runs second) - reorder that list, or have
-# another mod interpose a third consumer of the same shared marker
-# between them, and the two systems could race to stamp/consume the same
-# location in one tick. This makes the exclusion explicit and order-
-# independent here too, rather than relying on which pulse happens to
-# run first.
+# Without the pending-pick exclusion, the "no double-booking" protection
+# between the jihad fatwa and this one existed only as a side effect of
+# on_action/00_aqd_game_start.txt's monthly_country_pulse listing aqd_
+# fatwa_pulse before aqd_jihad_fatwa_pulse (so a location the white-peace
+# fatwa just stamped this same tick is correctly excluded from that
+# month's jihad pick, purely because jihad runs second) - reorder that
+# list, or have another mod interpose a third consumer of the same
+# shared marker between them, and the two systems could race to stamp/
+# consume the same location in one tick. This makes the exclusion
+# explicit and order-independent here too, rather than relying on which
+# pulse happens to run first.
 #
 # scripted_effects/z_aqd_fatwa_effects.txt's aqd_fatwa_pick_seat (both
 # the initial random_owned_location limit and its own per-madhhab
@@ -438,38 +445,47 @@ aqd_seat_madhhab_not_heterodox_to_root = {
 # ---------------------------------------------------------------------
 aqd_fatwa_seat_eligible_hanafi = {
 	aqd_seat_madhhab_not_heterodox_to_root_hanafi = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanafi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 aqd_fatwa_seat_eligible_hanbali = {
 	aqd_seat_madhhab_not_heterodox_to_root_hanbali = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanbali }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 aqd_fatwa_seat_eligible_maliki = {
 	aqd_seat_madhhab_not_heterodox_to_root_maliki = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_maliki }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 aqd_fatwa_seat_eligible_shafii = {
 	aqd_seat_madhhab_not_heterodox_to_root_shafii = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_shafii }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 aqd_fatwa_seat_eligible_zahiri = {
 	aqd_seat_madhhab_not_heterodox_to_root_zahiri = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_zahiri }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 aqd_fatwa_seat_eligible_ismaili = {
 	aqd_seat_madhhab_not_heterodox_to_root_ismaili = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_ismaili }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 aqd_fatwa_seat_eligible_jafari = {
 	aqd_seat_madhhab_not_heterodox_to_root_jafari = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_jafari }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 aqd_fatwa_seat_eligible_zaidi = {
 	aqd_seat_madhhab_not_heterodox_to_root_zaidi = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_zaidi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 aqd_fatwa_seat_eligible_ibadi = {
 	aqd_seat_madhhab_not_heterodox_to_root_ibadi = yes
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_ibadi }
 	NOT = { has_location_modifier = z_aqd_fatwa_pending_pick }
 }
 
