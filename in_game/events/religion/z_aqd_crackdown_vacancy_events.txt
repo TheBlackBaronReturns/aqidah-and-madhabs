@@ -1,0 +1,135 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Crackdown Vacancy.
+#
+# Fired by scripted_effects/z_aqd_crackdown_vacancy_effects.txt's aqd_
+# crackdown_offer_seat_vacancy, itself called twice from aqd_crackdown_
+# effect (scripted_effects/z_aqd_jurist_effects.txt) - once per seat
+# actually razed by a crackdown, on a 20% roll each. Unlike every other
+# event built for this mod this session, this one is a REAL two-way (now
+# three-way) choice, not a pre-decided notification - the roll only
+# gates whether the offer appears at all, never which option wins.
+#
+# desc names the razed madhhab via a 9-way triggered_desc (safe: only
+# ONE dynamic name to resolve, the same proven idiom z_aqd_jfatwa.1
+# already uses) - the OPTIONS deliberately do NOT try to name which
+# specific madhhab each one would install (the state madhhab is only
+# known at option-resolution time via has_policy, and the "let the
+# 'Ulema decide" outcome isn't known until its own live pick runs), so
+# the button text stays generic and safe rather than risking a second
+# dynamic-name resolution.
+# =====================================================================
+
+namespace = z_aqd_crackdown_vacancy
+
+z_aqd_crackdown_vacancy.1 = {
+	type = country_event
+	title = z_aqd_crackdown_vacancy.1.title
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 1 }
+				desc = z_aqd_crackdown_vacancy.1.desc.hanafi
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 2 }
+				desc = z_aqd_crackdown_vacancy.1.desc.hanbali
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 3 }
+				desc = z_aqd_crackdown_vacancy.1.desc.maliki
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 4 }
+				desc = z_aqd_crackdown_vacancy.1.desc.shafii
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 5 }
+				desc = z_aqd_crackdown_vacancy.1.desc.zahiri
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 6 }
+				desc = z_aqd_crackdown_vacancy.1.desc.ismaili
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 7 }
+				desc = z_aqd_crackdown_vacancy.1.desc.jafari
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 8 }
+				desc = z_aqd_crackdown_vacancy.1.desc.zaidi
+			}
+			triggered_desc = {
+				trigger = { exists = scope:target_location  var:aqd_crackdown_razed_seat_madhhab = 9 }
+				desc = z_aqd_crackdown_vacancy.1.desc.ibadi
+			}
+			triggered_desc = {
+				desc = z_aqd_crackdown_vacancy.1.desc.fallback
+			}
+		}
+	}
+	outcome = neutral
+
+	trigger = {
+		religion.group = religion_group:muslim
+		any_owned_location = { has_location_modifier = z_aqd_crackdown_vacancy_pending }
+	}
+
+	illustration_tags = {
+		10 = regular
+		10 = interior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+
+		random_owned_location = {
+			limit = { has_location_modifier = z_aqd_crackdown_vacancy_pending }
+			save_scope_as = target_location
+		}
+		if = {
+			limit = { exists = scope:target_location }
+			scope:target_location = { remove_location_modifier = z_aqd_crackdown_vacancy_pending }
+		}
+	}
+
+	option = {
+		name = z_aqd_crackdown_vacancy.1.state
+		if = {
+			limit = {
+				exists = scope:target_location
+				exists = var:aqd_crackdown_razed_seat_madhhab
+				scope:target_location = { NOT = { aqd_state_madhhab_seat_already_here = yes } }
+			}
+			aqd_crackdown_place_state_seat = { LOCATION = scope:target_location }
+			aqd_crackdown_sweep_province_state_madrasas = { MADHHAB = var:aqd_crackdown_razed_seat_madhhab  LOCATION = scope:target_location }
+		}
+	}
+
+	option = {
+		name = z_aqd_crackdown_vacancy.1.ulema
+		if = {
+			limit = {
+				exists = scope:target_location
+				exists = var:aqd_crackdown_razed_seat_madhhab
+			}
+			add_country_modifier = { modifier = z_aqd_independent_jurists  years = 10  mode = add_and_extend }
+			aqd_crackdown_pick_vacancy_candidate = yes
+			if = {
+				limit = { exists = var:aqd_vacancy_winner_madhhab }
+				aqd_crackdown_place_candidate_seat = { LOCATION = scope:target_location }
+				aqd_crackdown_sweep_province_candidate_madrasas = { MADHHAB = var:aqd_crackdown_razed_seat_madhhab  LOCATION = scope:target_location }
+			}
+		}
+	}
+
+	option = {
+		name = z_aqd_crackdown_vacancy.1.leave
+	}
+
+	after = {
+		root = {
+			remove_variable = aqd_crackdown_razed_seat_madhhab
+			remove_variable = aqd_vacancy_winner_madhhab
+		}
+	}
+}

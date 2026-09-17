@@ -1,0 +1,193 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Seat Collapse.
+#
+# Fired by on_action/00_aqd_game_start.txt's aqd_seat_collapse_pulse the
+# very month a jurist seat's own sect population at its location drops
+# below 5% (or its owner ceases to be Muslim) - the same condition that
+# used to silently force-destroy the building via building_types/
+# z_aqd_jurist_seats.txt's own (now-removed) remove_if, just now visible
+# to the player. Same silent-pre-roll shape as every other fatwa system
+# in this mod: scripted_effects/z_aqd_seat_collapse_effects.txt's
+# aqd_seat_collapse_attempt does the pick, the same-sect-candidate
+# search, and the roll BEFORE either event below ever fires - the
+# outcome is already decided by the time the popup renders.
+#
+# Both events are single-option "here's what just happened"
+# notifications, not real player choices (mirrors z_aqd_jfatwa.1) - the
+# actual building/modifier effects live in each event's own OPTION, not
+# its immediate, so the tooltip preview renders accurately (the
+# established convention throughout this mod).
+#
+# z_aqd_seat_collapse.1 (failure, the common outcome) names the
+# collapsing madhhab directly via a 9-way triggered_desc - safe here
+# since only ONE dynamic name needs resolving (the proven z_aqd_jfatwa.1
+# idiom). z_aqd_seat_collapse.2 (vacuum filled) instead names BOTH
+# LOCATIONS and no madhhab at all - deliberately: naming two
+# independent madhhabs in one sentence would need an 81-branch (9x9)
+# triggered_desc matrix (the same landmine events/religion/
+# z_aqd_debate_events.txt's own desc already routes around the same
+# way, see that file's header for the full reasoning), while both
+# locations are already live scopes needing no branching whatsoever.
+# =====================================================================
+
+namespace = z_aqd_seat_collapse
+
+z_aqd_seat_collapse.1 = {
+	type = country_event
+	title = z_aqd_seat_collapse.1.title
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 1 }
+				desc = z_aqd_seat_collapse.1.desc.hanafi
+			}
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 2 }
+				desc = z_aqd_seat_collapse.1.desc.hanbali
+			}
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 3 }
+				desc = z_aqd_seat_collapse.1.desc.maliki
+			}
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 4 }
+				desc = z_aqd_seat_collapse.1.desc.shafii
+			}
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 5 }
+				desc = z_aqd_seat_collapse.1.desc.zahiri
+			}
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 6 }
+				desc = z_aqd_seat_collapse.1.desc.ismaili
+			}
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 7 }
+				desc = z_aqd_seat_collapse.1.desc.jafari
+			}
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 8 }
+				desc = z_aqd_seat_collapse.1.desc.zaidi
+			}
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  var:aqd_collapse_madhhab = 9 }
+				desc = z_aqd_seat_collapse.1.desc.ibadi
+			}
+			triggered_desc = {
+				desc = z_aqd_seat_collapse.1.desc.fallback
+			}
+		}
+	}
+	outcome = neutral
+
+	trigger = {
+		religion.group = religion_group:muslim
+		any_owned_location = { has_location_modifier = z_aqd_seat_collapse_pending }
+	}
+
+	illustration_tags = {
+		10 = sad
+		10 = exterior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+
+		random_owned_location = {
+			limit = { has_location_modifier = z_aqd_seat_collapse_pending }
+			save_scope_as = collapse_location
+		}
+		if = {
+			limit = { exists = scope:collapse_location }
+			scope:collapse_location = { remove_location_modifier = z_aqd_seat_collapse_pending }
+		}
+	}
+
+	option = {
+		name = z_aqd_seat_collapse.1.ok
+		if = {
+			limit = { exists = scope:collapse_location  exists = var:aqd_collapse_madhhab }
+			aqd_seat_collapse_destroy_seat = { MADHHAB = var:aqd_collapse_madhhab  LOCATION = scope:collapse_location }
+			aqd_seat_collapse_destroy_province_madrasas = { MADHHAB = var:aqd_collapse_madhhab  LOCATION = scope:collapse_location }
+			aqd_seat_collapse_clear_madhhab_modifiers = { MADHHAB = var:aqd_collapse_madhhab  LOCATION = scope:collapse_location }
+		}
+	}
+
+	after = {
+		root = { remove_variable = aqd_collapse_madhhab }
+	}
+}
+
+z_aqd_seat_collapse.2 = {
+	type = country_event
+	title = z_aqd_seat_collapse.2.title
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = { exists = scope:collapse_location  exists = scope:vacuum_candidate_location }
+				desc = z_aqd_seat_collapse.2.desc.main
+			}
+			triggered_desc = {
+				desc = z_aqd_seat_collapse.2.desc.fallback
+			}
+		}
+	}
+	outcome = neutral
+
+	trigger = {
+		religion.group = religion_group:muslim
+		any_owned_location = { has_location_modifier = z_aqd_seat_collapse_pending }
+		any_owned_location = { has_location_modifier = z_aqd_vacuum_fill_pending }
+	}
+
+	illustration_tags = {
+		10 = calm
+		10 = exterior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+
+		random_owned_location = {
+			limit = { has_location_modifier = z_aqd_seat_collapse_pending }
+			save_scope_as = collapse_location
+		}
+		if = {
+			limit = { exists = scope:collapse_location }
+			scope:collapse_location = { remove_location_modifier = z_aqd_seat_collapse_pending }
+		}
+
+		random_owned_location = {
+			limit = { has_location_modifier = z_aqd_vacuum_fill_pending }
+			save_scope_as = vacuum_candidate_location
+		}
+		if = {
+			limit = { exists = scope:vacuum_candidate_location }
+			scope:vacuum_candidate_location = { remove_location_modifier = z_aqd_vacuum_fill_pending }
+		}
+	}
+
+	option = {
+		name = z_aqd_seat_collapse.2.ok
+		if = {
+			limit = {
+				exists = scope:collapse_location
+				exists = scope:vacuum_candidate_location
+				exists = var:aqd_collapse_madhhab
+				exists = var:aqd_vacuum_fill_madhhab
+			}
+			aqd_seat_collapse_destroy_seat = { MADHHAB = var:aqd_collapse_madhhab  LOCATION = scope:collapse_location }
+			aqd_seat_collapse_destroy_province_madrasas = { MADHHAB = var:aqd_collapse_madhhab  LOCATION = scope:collapse_location }
+			aqd_seat_collapse_place_new_seat = { MADHHAB = var:aqd_vacuum_fill_madhhab  LOCATION = scope:collapse_location }
+			aqd_seat_collapse_place_province_madrasas = { MADHHAB = var:aqd_vacuum_fill_madhhab  LOCATION = scope:collapse_location }
+			aqd_seat_collapse_clear_madhhab_modifiers = { MADHHAB = var:aqd_collapse_madhhab  LOCATION = scope:collapse_location }
+		}
+	}
+
+	after = {
+		root = {
+			remove_variable = aqd_collapse_madhhab
+			remove_variable = aqd_vacuum_fill_madhhab
+		}
+	}
+}

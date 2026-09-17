@@ -1,0 +1,25 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - seat collapse's own "vacuum-filling candidate
+# pending pick" marker.
+#
+# Purely a same-tick re-derivation anchor for the CANDIDATE location in
+# scripted_effects/z_aqd_seat_collapse_effects.txt's aqd_seat_collapse_
+# attempt - only stamped on a successful vacuum-fill roll, alongside
+# z_aqd_seat_collapse_pending on the collapsing seat's own location.
+# Two fully dedicated keys, not one shared twice, so events/religion/
+# z_aqd_seat_collapse_events.txt's z_aqd_seat_collapse.2 can re-find
+# each location via its own has_location_modifier check without any
+# risk of either random_owned_location call resolving to the wrong one
+# - same reasoning as the fiqh-debate event's own two dedicated markers
+# (main_menu/common/static_modifiers/z_aqd_debate_pending_pick_a.txt/
+# _b.txt). Consumed immediately in the event's own immediate; should
+# never be visible to the player for more than an instant. months = 1
+# is a safety-net duration only, not load-bearing.
+# =====================================================================
+
+z_aqd_vacuum_fill_pending = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

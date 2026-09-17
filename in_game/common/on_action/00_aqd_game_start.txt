@@ -92,7 +92,7 @@ aqd_seat_establishment_pulse = {
 # subscribers - same merge-not-override guarantee documented above for
 # on_game_start.
 monthly_country_pulse = {
-	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_fatwa_episode_cleanup_pulse  aqd_jihad_fatwa_pulse  aqd_jihad_episode_cleanup_pulse  aqd_debate_pulse }
+	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_fatwa_episode_cleanup_pulse  aqd_jihad_fatwa_pulse  aqd_jihad_episode_cleanup_pulse  aqd_debate_pulse  aqd_seat_collapse_pulse }
 }
 
 # The Jurists' Fatwa Against an Unjust War (events/religion/
@@ -208,17 +208,23 @@ aqd_jihad_fatwa_pulse = {
 # defensive_jihad_participant (scripted_triggers/z_aqd_jihad_fatwa_
 # triggers.txt) while still carrying the "episode active" flag from a
 # previous month, clears it, and sweep-clears the nine z_aqd_jihad_
-# declined_<X> "one shot per war" markers AND the nine z_aqd_jihad_
-# blessed_<X> "already asked and said yes this war" markers realm-wide so
+# declined_<X> "one shot per war" markers, the nine z_aqd_jihad_blessed_
+# <X> "already asked and said yes this war" markers, AND (confirmed by
+# playtesting - CORRECTING an earlier design assumption here) the nine
+# z_aqd_fatwa_of_jihad_<X> mobilization buffs themselves, realm-wide, so
 # the NEXT jihad (offensive or defensive) starts with every seat's slate
-# wiped clean. A realm that is simultaneously offensive-jihading in one
-# war and defending against a heathen in another keeps the episode open
-# until BOTH end, not just one - the OR mirrors the pulse's own gate
-# above exactly, so the episode boundary always matches whichever
-# condition actually kept the pulse firing. Deliberately does NOT touch
-# z_aqd_fatwa_of_jihad_<X> - its own real cross-war throttle keeps
-# running on its own duration regardless of this war ending, exactly as
-# before this whole feature.
+# wiped clean and no lingering buff from the last one. This mod used to
+# leave z_aqd_fatwa_of_jihad_<X> alone here on the theory that its own
+# 50-year safety-net duration would "almost always outlast any single
+# war" and so behave as war-duration-only in practice without ever being
+# explicitly cleared - confirmed in actual play that this doesn't hold:
+# the buff visibly persists long after the war it mobilized for has
+# ended, since nothing was ever built to end it early. A realm that is
+# simultaneously offensive-jihading in one war and defending against a
+# heathen in another keeps the episode open (and every one of these
+# modifiers active) until BOTH end, not just one - the OR mirrors the
+# pulse's own gate above exactly, so the episode boundary always matches
+# whichever condition actually kept the pulse firing.
 aqd_jihad_episode_cleanup_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
@@ -251,6 +257,15 @@ aqd_jihad_episode_cleanup_pulse = {
 			remove_location_modifier = z_aqd_jihad_blessed_jafari
 			remove_location_modifier = z_aqd_jihad_blessed_zaidi
 			remove_location_modifier = z_aqd_jihad_blessed_ibadi
+			remove_location_modifier = z_aqd_fatwa_of_jihad_hanafi
+			remove_location_modifier = z_aqd_fatwa_of_jihad_hanbali
+			remove_location_modifier = z_aqd_fatwa_of_jihad_maliki
+			remove_location_modifier = z_aqd_fatwa_of_jihad_shafii
+			remove_location_modifier = z_aqd_fatwa_of_jihad_zahiri
+			remove_location_modifier = z_aqd_fatwa_of_jihad_ismaili
+			remove_location_modifier = z_aqd_fatwa_of_jihad_jafari
+			remove_location_modifier = z_aqd_fatwa_of_jihad_zaidi
+			remove_location_modifier = z_aqd_fatwa_of_jihad_ibadi
 		}
 	}
 }
@@ -272,13 +287,57 @@ aqd_debate_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
 		has_policy = sharia_law_policy
-		aqd_debate_seat_eligible = yes
+		# any_owned_location wrapper is LOAD-BEARING, not decorative -
+		# aqd_debate_seat_eligible (scripted_triggers/z_aqd_debate_
+		# triggers.txt) is a bare OR of 9 LOCATION-scoped checks (has_
+		# location_modifier etc.), with no location-iteration baked into
+		# its own definition the way e.g. aqd_country_owns_any_jurist_
+		# seat's does. Calling it bare here (as an earlier version of
+		# this pulse did) evaluates those location-scoped checks against
+		# country scope instead of any actual location, which never
+		# correctly finds anything - confirmed by comparing against aqd_
+		# jihad_fatwa_pulse's own (correct) any_owned_location = { aqd_
+		# jihad_seat_eligible = yes } wrapping of the identically-shaped
+		# aqd_jihad_seat_eligible.
+		any_owned_location = { aqd_debate_seat_eligible = yes }
 	}
 	effect = {
 		random = {
 			chance = 10
 			aqd_debate_attempt = yes
 		}
+	}
+}
+
+# Seat Collapse (events/religion/z_aqd_seat_collapse_events.txt).
+# Replaces building_types/z_aqd_jurist_seats.txt's own (now-removed)
+# remove_if - the mod, not the engine, now owns "what happens when a
+# seat's sect population collapses below 5%". Deliberately NO random =
+# { chance = N ... } wrapper on whether resolution happens at all,
+# unlike every other pulse in this file - this must fire the very month
+# the condition is met, exactly like remove_if used to; the only roll
+# lives inside scripted_effects/z_aqd_seat_collapse_effects.txt's own
+# aqd_seat_collapse_attempt (whether a same-sect neighbour fills the
+# vacuum instead of the seat and its province's madrasas being lost
+# outright). Resolves only ONE collapsing seat per tick - see that
+# effect's own header for why more than one in the same tick is not
+# attempted.
+aqd_seat_collapse_pulse = {
+	trigger = {
+		religion.group = religion_group:muslim
+		# any_owned_location wrapper is LOAD-BEARING - same bug, same fix,
+		# as aqd_debate_pulse's own identical correction above: aqd_seat_
+		# collapsing (scripted_triggers/z_aqd_seat_collapse_triggers.txt)
+		# is a bare OR of 9 location-scoped checks with no location-
+		# iteration of its own, so calling it bare here (as this pulse
+		# originally did) never correctly evaluates against any actual
+		# owned location - confirmed by playtesting: a debug-added seat
+		# below the 5% floor never actually triggered Seat Collapse at
+		# all, matching this exact failure mode.
+		any_owned_location = { aqd_seat_collapsing = yes }
+	}
+	effect = {
+		aqd_seat_collapse_attempt = yes
 	}
 }
 

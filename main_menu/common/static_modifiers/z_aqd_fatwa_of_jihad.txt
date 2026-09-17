@@ -48,15 +48,20 @@
 # war-scoped marker is used instead of just relying on this modifier's
 # own duration or extending it repeatedly - the latter risks unbounded
 # stacking depending on add_and_extend's exact semantics, which could
-# not be confirmed with certainty). This modifier's own real 4-year-
-# equivalent throttling role is unchanged from before - it is NOT cleared
-# early when a war ends, so a seat that just blessed one war still can't
-# immediately bless a fresh one a few years later. In practice its
-# 50-year safety-net duration will almost always outlast any single war,
-# so its natural expiry rarely if ever actually fires; the still-active
-# 0.01/0.1 mobilization bonus simply persists for as long as the war
-# does, exactly as intended, with no monthly upkeep effect needed to
-# sustain it.
+# not be confirmed with certainty).
+#
+# CORRECTED by playtesting: this modifier IS now explicitly cleared when
+# the jihad episode ends (on_action/00_aqd_game_start.txt's aqd_jihad_
+# episode_cleanup_pulse, alongside the blessed/declined markers) - an
+# earlier version of this comment claimed the opposite (that it was
+# deliberately left uncleared, relying on its own 50-year safety net to
+# "almost always outlast any single war" and so behave as war-duration-
+# only without ever actually being cleared). Confirmed in actual play
+# that assumption doesn't hold - the mobilization bonus visibly
+# outlived the war it was granted for. years = 50 remains a pure safety
+# net now (covering the gap between a jihad ending and the cleanup pulse
+# next running, and the debug-force-fire path), not the real controlling
+# lifetime.
 # =====================================================================
 
 z_aqd_fatwa_of_jihad_hanafi = {

@@ -1,0 +1,22 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - crackdown vacancy's own "razed seat pending
+# pick" marker.
+#
+# Purely a same-tick re-derivation anchor for scripted_effects/z_aqd_
+# crackdown_vacancy_effects.txt's aqd_crackdown_offer_seat_vacancy -
+# stamped on a successful 20% roll, consumed immediately in the very
+# next line of events/religion/z_aqd_crackdown_vacancy_events.txt's own
+# immediate. Unlike var:aqd_crackdown_razed_seat_madhhab (the numeric
+# variable, which genuinely needs to survive however long the player
+# takes to answer the popup - see that variable's own documentation),
+# this marker only has to last until the event itself fires, which is
+# always the very next tick - months = 1 is a safety-net duration only,
+# not load-bearing.
+# =====================================================================
+
+z_aqd_crackdown_vacancy_pending = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

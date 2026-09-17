@@ -43,15 +43,29 @@
 # like these.
 #
 # location_potential below is now dead weight (every real placement path
-# bypasses it) but harmless. remove_if (0.05 sect floor + non-Muslim
-# owner) stays as the demographic-cleanup path.
+# bypasses it) but harmless.
+#
+# NO remove_if any more - the demographic-collapse cleanup (0.05 sect
+# floor, or non-Muslim owner) used to live here as an engine-automatic
+# field, silently destroying the building the instant it triggered. It
+# is now scripted_triggers/z_aqd_seat_collapse_triggers.txt's own
+# aqd_seat_collapsing_<X> (the identical condition, just expressed as a
+# trigger instead) plus scripted_effects/z_aqd_seat_collapse_effects.txt's
+# aqd_seat_collapse_attempt (on_action/00_aqd_game_start.txt's
+# aqd_seat_collapse_pulse), so the mod can notify the player and - a
+# small chance - let a sect-appropriate neighbour absorb the vacancy
+# instead of losing the institution outright (events/religion/
+# z_aqd_seat_collapse_events.txt). Removing remove_if here is load-
+# bearing for that: with it still in place the engine would still race
+# ahead and destroy the seat before the new pulse ever got a chance to
+# roll.
 #
 # A seat can never be manually demolished (can_destroy = always = no).
 # It is removed only by scripted_effects/z_aqd_jurist_effects.txt's
-# aqd_crackdown_effect - which razes it with destroy_building_forcefully
-# (plain destroy_building is refused by can_destroy = no) - or by
-# remove_if. Switching the realm's official madhhab does not remove an
-# existing seat.
+# aqd_crackdown_effect (destroy_building_forcefully - plain
+# destroy_building is refused by can_destroy = no) or by z_aqd_seat_
+# collapse_effects.txt's own destroy wrappers above. Switching the
+# realm's official madhhab does not remove an existing seat.
 #
 # Counted into script_values/z_aqd_madhhab_counts.txt's per-madhhab
 # institution score (weight 4, vs. 1 for a madrasa), which drives the
@@ -99,14 +113,6 @@ seat_of_hanafi_jurists = {
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_hanafi_jurists }
 	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:sunni)" < 0.05
-			}
-		}
-	}
 
 	possible_production_methods = { estate_building_input }
 	modifier = {
@@ -135,14 +141,6 @@ seat_of_hanbali_jurists = {
 
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_hanbali_jurists }
-	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:sunni)" < 0.05
-			}
-		}
 	}
 
 	possible_production_methods = { estate_building_input }
@@ -173,14 +171,6 @@ seat_of_maliki_jurists = {
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_maliki_jurists }
 	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:sunni)" < 0.05
-			}
-		}
-	}
 
 	possible_production_methods = { estate_building_input }
 	modifier = {
@@ -209,14 +199,6 @@ seat_of_shafii_jurists = {
 
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_shafii_jurists }
-	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:sunni)" < 0.05
-			}
-		}
 	}
 
 	possible_production_methods = { estate_building_input }
@@ -247,14 +229,6 @@ seat_of_zahiri_jurists = {
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_zahiri_jurists }
 	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:sunni)" < 0.05
-			}
-		}
-	}
 
 	possible_production_methods = { estate_building_input }
 	modifier = {
@@ -283,14 +257,6 @@ seat_of_ismaili_jurists = {
 
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_ismaili_jurists }
-	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:shia)" < 0.05
-			}
-		}
 	}
 
 	possible_production_methods = { estate_building_input }
@@ -321,14 +287,6 @@ seat_of_jafari_jurists = {
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_jafari_jurists }
 	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:shia)" < 0.05
-			}
-		}
-	}
 
 	possible_production_methods = { estate_building_input }
 	modifier = {
@@ -358,14 +316,6 @@ seat_of_zaidi_jurists = {
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_zaidi_jurists }
 	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:shia)" < 0.05
-			}
-		}
-	}
 
 	possible_production_methods = { estate_building_input }
 	modifier = {
@@ -394,14 +344,6 @@ seat_of_ibadi_jurists = {
 
 	location_potential = {
 		NOT = { has_building = building_type:seat_of_ibadi_jurists }
-	}
-	remove_if = {
-		location = {
-			OR = {
-				owner ?= { religion.group != religion_group:muslim }
-				"religion_percentage(religion:ibadi)" < 0.05
-			}
-		}
 	}
 
 	possible_production_methods = { estate_building_input }

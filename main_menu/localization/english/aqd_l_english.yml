@@ -564,3 +564,107 @@
  z_aqd_debate_pending_pick_b: "A Fatwa Is Being Weighed"
  STATIC_MODIFIER_NAME_z_aqd_debate_pending_pick_b: "A Fatwa Is Being Weighed"
  STATIC_MODIFIER_DESC_z_aqd_debate_pending_pick_b: "The jurists here are weighing a fatwa. This should resolve immediately."
+
+ # ---- Seat Collapse (events/religion/z_aqd_seat_collapse_events.txt) ----
+ # z_aqd_seat_collapse.1 (failure, the common outcome) names the
+ # collapsing madhhab directly - safe here since only ONE dynamic name
+ # needs resolving (mirrors z_aqd_jfatwa.1's own proven idiom).
+ z_aqd_seat_collapse.1.title: "A Seat Falls Silent"
+ z_aqd_seat_collapse.1.desc.hanafi: "The Ḥanafī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.hanbali: "The Ḥanbalī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.maliki: "The Mālikī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.shafii: "The Shāfi'ī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.zahiri: "The Ẓāhirī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.ismaili: "The Ismā'īlī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.jafari: "The Ja'farī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.zaidi: "The Zaydī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.ibadi: "The Ibāḍī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.fallback: "DEBUG/fallback: no matching collapsing seat was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
+ z_aqd_seat_collapse.1.ok: "So it ends"
+
+ # z_aqd_seat_collapse.2 (vacuum filled) names BOTH locations and no
+ # madhhab at all - see this file's own top-of-file header for why.
+ z_aqd_seat_collapse.2.title: "A Vacancy Filled"
+ z_aqd_seat_collapse.2.desc.main: "The seat of [scope:collapse_location.GetName] has fallen silent, its faithful dwindled past recall - but word travels fast among the jurists. Before the college halls stand empty for long, the jurists of [scope:vacuum_candidate_location.GetName] step into the vacancy, and every madrasa here that once taught the old rite now teaches theirs instead."
+ z_aqd_seat_collapse.2.desc.fallback: "DEBUG/fallback: no matching collapsing seat or vacuum-filling candidate was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
+ z_aqd_seat_collapse.2.ok: "The vacancy is filled"
+
+ # ---- Seat collapse's three dedicated same-tick markers (main_menu/
+ # common/static_modifiers/z_aqd_seat_collapse_pending.txt, z_aqd_vacuum_
+ # fill_pending.txt, z_aqd_vacuum_fill_madrasa_pending.txt) - always
+ # stamped and consumed within the same effect chain (or, for the
+ # madrasa marker on a failed roll, simply left to expire unused), so
+ # these names should never actually be visible; kept only as a safety
+ # net. ----
+ z_aqd_seat_collapse_pending: "A Seat's Fate Is Being Weighed"
+ STATIC_MODIFIER_NAME_z_aqd_seat_collapse_pending: "A Seat's Fate Is Being Weighed"
+ STATIC_MODIFIER_DESC_z_aqd_seat_collapse_pending: "This seat's fate is being weighed. This should resolve immediately."
+ z_aqd_vacuum_fill_pending: "A Vacancy Is Being Weighed"
+ STATIC_MODIFIER_NAME_z_aqd_vacuum_fill_pending: "A Vacancy Is Being Weighed"
+ STATIC_MODIFIER_DESC_z_aqd_vacuum_fill_pending: "A nearby vacancy is being weighed. This should resolve immediately."
+ z_aqd_vacuum_fill_madrasa_pending: "A Madrasa Is Being Repurposed"
+ STATIC_MODIFIER_NAME_z_aqd_vacuum_fill_madrasa_pending: "A Madrasa Is Being Repurposed"
+ STATIC_MODIFIER_DESC_z_aqd_vacuum_fill_madrasa_pending: "This madrasa is being repurposed. This should resolve immediately."
+
+ # ---- Crackdown Vacancy (events/religion/z_aqd_crackdown_vacancy_
+ # events.txt) - names the razed madhhab directly (9-way, safe: only one
+ # dynamic name to resolve), never which replacement wins - that isn't
+ # known until the chosen option itself resolves. ----
+ z_aqd_crackdown_vacancy.1.title: "A Seat Lies Vacant"
+ z_aqd_crackdown_vacancy.1.desc.hanafi: "The crackdown against the Ḥanafī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.hanbali: "The crackdown against the Ḥanbalī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.maliki: "The crackdown against the Mālikī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.shafii: "The crackdown against the Shāfi'ī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.zahiri: "The crackdown against the Ẓāhirī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.ismaili: "The crackdown against the Ismā'īlī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.jafari: "The crackdown against the Ja'farī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.zaidi: "The crackdown against the Zaydī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.ibadi: "The crackdown against the Ibāḍī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.fallback: "DEBUG/fallback: no matching razed seat was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
+ z_aqd_crackdown_vacancy.1.state: "Fill it with our own madhhab"
+ z_aqd_crackdown_vacancy.1.ulema: "Let the 'Ulema decide for themselves"
+ z_aqd_crackdown_vacancy.1.leave: "Leave it be"
+
+ # ---- Crackdown vacancy's own "razed seat pending pick" marker
+ # (main_menu/common/static_modifiers/z_aqd_crackdown_vacancy_pending.
+ # txt) - always stamped and consumed within the same effect chain, so
+ # this name should never actually be visible; kept only as a safety
+ # net. ----
+ z_aqd_crackdown_vacancy_pending: "A Vacancy Is Being Weighed"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_vacancy_pending: "A Vacancy Is Being Weighed"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_vacancy_pending: "This vacancy is being weighed. This should resolve immediately."
+
+ # ---- "Razed by this Crackdown" markers (main_menu/common/static_
+ # modifiers/z_aqd_crackdown_madrasa_razed.txt) - 9 concrete per-madhhab
+ # keys, normally invisible-in-practice bookkeeping (a 3-year safety net,
+ # not something the player is meant to notice), but unlike the pending-
+ # pick markers above these CAN genuinely sit visible on the map for a
+ # while if the player takes time to answer the vacancy popup, so they
+ # get real names rather than placeholder text. ----
+ z_aqd_crackdown_madrasa_razed_hanafi: "Razed by the Crackdown (Ḥanafī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_hanafi: "Razed by the Crackdown (Ḥanafī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_hanafi: "This location's Ḥanafī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."
+ z_aqd_crackdown_madrasa_razed_hanbali: "Razed by the Crackdown (Ḥanbalī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_hanbali: "Razed by the Crackdown (Ḥanbalī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_hanbali: "This location's Ḥanbalī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."
+ z_aqd_crackdown_madrasa_razed_maliki: "Razed by the Crackdown (Mālikī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_maliki: "Razed by the Crackdown (Mālikī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_maliki: "This location's Mālikī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."
+ z_aqd_crackdown_madrasa_razed_shafii: "Razed by the Crackdown (Shāfi'ī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_shafii: "Razed by the Crackdown (Shāfi'ī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_shafii: "This location's Shāfi'ī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."
+ z_aqd_crackdown_madrasa_razed_zahiri: "Razed by the Crackdown (Ẓāhirī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_zahiri: "Razed by the Crackdown (Ẓāhirī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_zahiri: "This location's Ẓāhirī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."
+ z_aqd_crackdown_madrasa_razed_ismaili: "Razed by the Crackdown (Ismā'īlī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_ismaili: "Razed by the Crackdown (Ismā'īlī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_ismaili: "This location's Ismā'īlī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."
+ z_aqd_crackdown_madrasa_razed_jafari: "Razed by the Crackdown (Ja'farī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_jafari: "Razed by the Crackdown (Ja'farī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_jafari: "This location's Ja'farī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."
+ z_aqd_crackdown_madrasa_razed_zaidi: "Razed by the Crackdown (Zaydī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_zaidi: "Razed by the Crackdown (Zaydī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_zaidi: "This location's Zaydī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."
+ z_aqd_crackdown_madrasa_razed_ibadi: "Razed by the Crackdown (Ibāḍī)"
+ STATIC_MODIFIER_NAME_z_aqd_crackdown_madrasa_razed_ibadi: "Razed by the Crackdown (Ibāḍī)"
+ STATIC_MODIFIER_DESC_z_aqd_crackdown_madrasa_razed_ibadi: "This location's Ibāḍī madrasa was razed by a crackdown against the school. Should a nearby seat's vacancy be filled by another school of law, this site may yet be rebuilt in their name."

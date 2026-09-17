@@ -1,0 +1,26 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - seat collapse's own "this location's madrasa
+# is mid-conversion" marker.
+#
+# Stamped by scripted_effects/z_aqd_seat_collapse_effects.txt's aqd_seat_
+# collapse_destroy_province_madrasas on EVERY location whose old-madhhab
+# madrasa it just destroyed - unconditionally, on both the failure and
+# the vacuum-fill outcome (that effect has no way to know in advance
+# which one it's being called for, and doesn't need to: it is only ever
+# actually consumed by aqd_seat_collapse_place_province_madrasas, which
+# runs solely on the vacuum-fill path). On failure it is simply never
+# read again and expires unused after its own safety-net duration - the
+# same "harmless if not consumed" tolerance this mod's other pending-
+# pick markers already rely on, rather than needing two near-duplicate
+# destroy effects (one that marks, one that doesn't). months = 1 is a
+# safety-net duration only; normal flow on the vacuum-fill path always
+# removes this explicitly, same tick, once the replacement madrasa is
+# placed.
+# =====================================================================
+
+z_aqd_vacuum_fill_madrasa_pending = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

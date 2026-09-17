@@ -1,0 +1,1119 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - Seat Collapse: effects.
+#
+# Replaces building_types/z_aqd_jurist_seats.txt's own (now-removed)
+# remove_if - the mod, not the engine, now owns "what happens when a
+# seat's sect population collapses below 5%". Reads the identical
+# condition (scripted_triggers/z_aqd_seat_collapse_triggers.txt's
+# aqd_seat_collapsing_<X>) every month via on_action/00_aqd_game_start.
+# txt's aqd_seat_collapse_pulse, with NO chance gate on whether
+# resolution happens at all - unlike every other pulse in this mod, this
+# must fire the very month the condition is met, exactly as remove_if
+# used to. The only roll here is whether an eligible neighbour - any
+# madhhab whose own sect clears 25% of the province, see aqd_seat_
+# collapse_find_vacuum_candidate below - fills the vacuum instead of
+# losing the institution outright.
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# aqd_seat_collapse_pick: picks ONE collapsing seat this month, uniformly
+# among owned locations via the umbrella aqd_seat_collapsing OR, then
+# reservoir-samples which of its (possibly several) collapsing madhhabs
+# is the one being resolved - identical Algorithm-R idiom to
+# aqd_jihad_fatwa_pick_seat (scripted_effects/z_aqd_jihad_fatwa_effects.
+# txt). Only ONE per tick, deliberately - see aqd_seat_collapse_pulse's
+# own header (on_action/00_aqd_game_start.txt) for why resolving more
+# than one collapse in the same tick is not attempted.
+#
+# Also captures the seat's own area (area = { save_scope_as = ... }, the
+# confirmed location -> area scope transition idiom already used by
+# events/religion/z_aqd_fatwa_events.txt's z_aqd_fatwa.2 and scripted_
+# effects/z_aqd_debate_effects.txt's own picker) so aqd_seat_collapse_
+# find_vacuum_candidate below has it ready without a second lookup.
+#
+# Sets scope:collapse_location, scope:collapse_area, var:aqd_collapse_
+# madhhab (1-9).
+# ---------------------------------------------------------------------
+aqd_seat_collapse_pick = {
+	random_owned_location = {
+		limit = { aqd_seat_collapsing = yes }
+		save_scope_as = collapse_location
+		area = { save_scope_as = collapse_area }
+	}
+	if = {
+		limit = { exists = scope:collapse_location }
+		set_variable = { name = aqd_collapse_seat_count  value = 0 }
+
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_hanafi = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			set_variable = { name = aqd_collapse_madhhab  value = 1 }
+		}
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_hanbali = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_collapse_seat_count = 1 }
+				set_variable = { name = aqd_collapse_madhhab  value = 2 }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 2 } }  1 = {} }
+			}
+		}
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_maliki = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_collapse_seat_count = 1 }
+				set_variable = { name = aqd_collapse_madhhab  value = 3 }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 3 } }  1 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 3 } }  2 = {} }
+			}
+		}
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_shafii = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_collapse_seat_count = 1 }
+				set_variable = { name = aqd_collapse_madhhab  value = 4 }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 4 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 4 } }  2 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 4 } }  3 = {} }
+			}
+		}
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_zahiri = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_collapse_seat_count = 1 }
+				set_variable = { name = aqd_collapse_madhhab  value = 5 }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 5 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 5 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 5 } }  3 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 5 } }  4 = {} }
+			}
+		}
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_ismaili = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_collapse_seat_count = 1 }
+				set_variable = { name = aqd_collapse_madhhab  value = 6 }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 6 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 6 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 6 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 6 } }  4 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 6 } }  5 = {} }
+			}
+		}
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_jafari = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_collapse_seat_count = 1 }
+				set_variable = { name = aqd_collapse_madhhab  value = 7 }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 7 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 7 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 7 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 7 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 7 } }  5 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 7 } }  6 = {} }
+			}
+		}
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_zaidi = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_collapse_seat_count = 1 }
+				set_variable = { name = aqd_collapse_madhhab  value = 8 }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 8 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 8 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 8 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 8 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 8 } }  5 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 7 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 8 } }  6 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 8 } }  7 = {} }
+			}
+		}
+		if = {
+			limit = { scope:collapse_location = { aqd_seat_collapsing_ibadi = yes } }
+			change_variable = { name = aqd_collapse_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_collapse_seat_count = 1 }
+				set_variable = { name = aqd_collapse_madhhab  value = 9 }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 9 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 9 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 9 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 9 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 9 } }  5 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 7 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 9 } }  6 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_collapse_seat_count = 8 }
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 9 } }  7 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_collapse_madhhab  value = 9 } }  8 = {} }
+			}
+		}
+
+		remove_variable = aqd_collapse_seat_count
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_seat_collapse_find_vacuum_candidate: given the collapsing seat's
+# own madhhab (var:aqd_collapse_madhhab, scope:collapse_location, scope:
+# collapse_area from aqd_seat_collapse_pick above), looks for a madhhab
+# to "inherit" the vacancy - REVISED from the original same-SECT-only
+# design (see the mod's own commit history) to the final agreed rule:
+# ANY of the other 8 madhhabs is eligible, sect-relationship to the
+# collapsing one irrelevant, provided (a) it isn't the exact same
+# madhhab that just collapsed and (b) its own sect's general population
+# exceeds 25% of the collapsing seat's own province ("religion_
+# percentage" confirmed valid at province scope: base game's own common/
+# attribute_columns/20_province.txt evaluates it directly on a province
+# row). No more sect-group outer dispatch, no more heterodoxy check -
+# scripted_triggers/z_aqd_vacancy_fill_triggers.txt's aqd_vacancy_
+# candidate_base_eligible_<X> (NOT aqd_debate_seat_eligible_<X> any
+# more - that one still carries a heterodoxy check this feature no
+# longer wants) plus the population line is the whole rule, applied
+# uniformly to all 8.
+#
+# The pick itself is now WEIGHTED by the same madhhab-approval engine
+# the jihad/unjust-war fatwas use (aqd_compute_seat_approval / aqd_roll_
+# approval_percentage, scripted_effects/z_aqd_madhhab_approval_effects.
+# txt) rather than a flat uniform draw - full reasoning, including why a
+# clean "pick proportional to score" draw isn't possible given random_
+# list's literal-weights-only constraint, and why this uses "every
+# eligible candidate gets its own independent roll, draw uniformly among
+# the survivors" instead of "first success wins," lives in scripted_
+# effects/z_aqd_crackdown_vacancy_effects.txt's aqd_crackdown_pick_
+# vacancy_candidate - the identical technique, just keyed to this
+# feature's own var:aqd_collapse_madhhab/scope:collapse_location/scope:
+# collapse_area instead of that one's crackdown-specific names.
+#
+# Sets var:aqd_vacuum_fill_madhhab (1-9) only if at least one candidate
+# survives its own roll. A second, purely cosmetic step then picks ONE
+# location actually holding that winning madhhab's own eligible seat in
+# the area (scope:vacuum_candidate_location) - guaranteed to succeed,
+# since the winning madhhab's own existence check already confirmed at
+# least one such location exists - used only so the eventual z_aqd_
+# seat_collapse.2 event can still name a specific city, not a mechanical
+# input to who actually wins.
+# ---------------------------------------------------------------------
+aqd_seat_collapse_find_vacuum_candidate = {
+	set_variable = { name = aqd_vacuum_survivor_count  value = 0 }
+
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 1 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_hanafi = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 1 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			set_variable = { name = aqd_vacuum_fill_madhhab  value = 1 }
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 2 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_hanbali = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 2 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			if = {
+				limit = { var:aqd_vacuum_survivor_count = 1 }
+				set_variable = { name = aqd_vacuum_fill_madhhab  value = 2 }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 2 } }  1 = {} }
+			}
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 3 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_maliki = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 3 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			if = {
+				limit = { var:aqd_vacuum_survivor_count = 1 }
+				set_variable = { name = aqd_vacuum_fill_madhhab  value = 3 }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 3 } }  1 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 3 } }  2 = {} }
+			}
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 4 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_shafii = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 4 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			if = {
+				limit = { var:aqd_vacuum_survivor_count = 1 }
+				set_variable = { name = aqd_vacuum_fill_madhhab  value = 4 }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 4 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 4 } }  2 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 4 } }  3 = {} }
+			}
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 5 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_zahiri = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 5 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			if = {
+				limit = { var:aqd_vacuum_survivor_count = 1 }
+				set_variable = { name = aqd_vacuum_fill_madhhab  value = 5 }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 5 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 5 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 5 } }  3 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 5 } }  4 = {} }
+			}
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 6 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_ismaili = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:shia)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 6 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			if = {
+				limit = { var:aqd_vacuum_survivor_count = 1 }
+				set_variable = { name = aqd_vacuum_fill_madhhab  value = 6 }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 6 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 6 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 6 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 6 } }  4 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 6 } }  5 = {} }
+			}
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 7 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_jafari = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:shia)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 7 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			if = {
+				limit = { var:aqd_vacuum_survivor_count = 1 }
+				set_variable = { name = aqd_vacuum_fill_madhhab  value = 7 }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 7 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 7 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 7 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 7 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 7 } }  5 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 7 } }  6 = {} }
+			}
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 8 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_zaidi = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:shia)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 8 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			if = {
+				limit = { var:aqd_vacuum_survivor_count = 1 }
+				set_variable = { name = aqd_vacuum_fill_madhhab  value = 8 }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 8 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 8 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 8 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 8 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 8 } }  5 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 7 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 8 } }  6 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 8 } }  7 = {} }
+			}
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+	if = {
+		limit = {
+			NOT = { var:aqd_collapse_madhhab = 9 }
+			scope:collapse_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_ibadi = yes } }
+			scope:collapse_location = { province_definition = { "religion_percentage(religion:ibadi)" > 0.25 } }
+		}
+		set_variable = { name = aqd_seat_madhhab  value = 9 }
+		aqd_compute_seat_approval = yes
+		aqd_roll_approval_percentage = yes
+		if = {
+			limit = { var:aqd_madhhab_approval_result = 1 }
+			change_variable = { name = aqd_vacuum_survivor_count  add = 1 }
+			if = {
+				limit = { var:aqd_vacuum_survivor_count = 1 }
+				set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 } }  5 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 7 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 } }  6 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_vacuum_survivor_count = 8 }
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 } }  7 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_vacuum_fill_madhhab  value = 9 } }  8 = {} }
+			}
+		}
+		remove_variable = aqd_seat_madhhab
+		remove_variable = aqd_seat_compat
+		remove_variable = aqd_approval_scratch
+		remove_variable = aqd_madhhab_approval_result
+	}
+
+	remove_variable = aqd_vacuum_survivor_count
+
+	# Cosmetic follow-up: only if a winner was actually determined above,
+	# pick ONE location in the area that actually holds that winning
+	# madhhab's own eligible seat, purely so z_aqd_seat_collapse.2's desc
+	# can still name a specific city - guaranteed to succeed, since the
+	# winning madhhab's own existence check already confirmed at least
+	# one such location exists earlier in this same effect.
+	if = {
+		limit = { exists = var:aqd_vacuum_fill_madhhab }
+		scope:collapse_area = {
+			random_location_in_area = {
+				limit = {
+					owner ?= root
+					OR = {
+						AND = { var:aqd_vacuum_fill_madhhab = 1  aqd_vacancy_candidate_base_eligible_hanafi = yes }
+						AND = { var:aqd_vacuum_fill_madhhab = 2  aqd_vacancy_candidate_base_eligible_hanbali = yes }
+						AND = { var:aqd_vacuum_fill_madhhab = 3  aqd_vacancy_candidate_base_eligible_maliki = yes }
+						AND = { var:aqd_vacuum_fill_madhhab = 4  aqd_vacancy_candidate_base_eligible_shafii = yes }
+						AND = { var:aqd_vacuum_fill_madhhab = 5  aqd_vacancy_candidate_base_eligible_zahiri = yes }
+						AND = { var:aqd_vacuum_fill_madhhab = 6  aqd_vacancy_candidate_base_eligible_ismaili = yes }
+						AND = { var:aqd_vacuum_fill_madhhab = 7  aqd_vacancy_candidate_base_eligible_jafari = yes }
+						AND = { var:aqd_vacuum_fill_madhhab = 8  aqd_vacancy_candidate_base_eligible_zaidi = yes }
+						AND = { var:aqd_vacuum_fill_madhhab = 9  aqd_vacancy_candidate_base_eligible_ibadi = yes }
+					}
+				}
+				save_scope_as = vacuum_candidate_location
+			}
+		}
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_seat_collapse_attempt: country-scoped, called from the pulse's
+# effect (on_action/00_aqd_game_start.txt's aqd_seat_collapse_pulse) -
+# NOT from an event. The pick, the candidate search, and the roll all
+# happen here, before any event exists - same silent-pre-roll idiom as
+# every other fatwa system in this mod, so the event that eventually
+# fires already has its outcome fully decided.
+#
+# No flat chance here any more - "does the institution survive at all"
+# is now entirely a question of whether aqd_seat_collapse_find_vacuum_
+# candidate finds a survivor (each eligible candidate weighted through
+# the real madhhab-approval engine, see that effect's own header). A
+# maximally-opposed candidate still keeps a real, non-zero shot (the
+# approval engine's own 5-95 clamp guarantees at least a 10% roll), so
+# "no eligible candidate exists at all" is the only path that's ever a
+# guaranteed loss.
+# ---------------------------------------------------------------------
+aqd_seat_collapse_attempt = {
+	aqd_seat_collapse_pick = yes
+	if = {
+		limit = {
+			exists = scope:collapse_location
+			exists = var:aqd_collapse_madhhab
+		}
+		aqd_seat_collapse_find_vacuum_candidate = yes
+		if = {
+			limit = {
+				exists = scope:vacuum_candidate_location
+				exists = var:aqd_vacuum_fill_madhhab
+			}
+			# No outer chance roll here any more - aqd_seat_collapse_find_
+			# vacuum_candidate's own weighted survival mechanism (each
+			# eligible candidate independently rolled through the real
+			# madhhab-approval engine) already IS the "small chance, more
+			# likely for a favoured madhhab" gate. Layering a further flat
+			# roll on top here would double-dilute it - a strongly favoured
+			# candidate could survive its own ~90% roll and still lose to an
+			# unrelated coin flip, which defeats the point of weighting by
+			# approval at all. Finding a survivor now means the fill happens.
+			scope:collapse_location = { add_location_modifier = { modifier = z_aqd_seat_collapse_pending  months = 1 } }
+			scope:vacuum_candidate_location = { add_location_modifier = { modifier = z_aqd_vacuum_fill_pending  months = 1 } }
+			trigger_event_non_silently = { id = z_aqd_seat_collapse.2  days = 1 }
+		}
+		else = {
+			scope:collapse_location = { add_location_modifier = { modifier = z_aqd_seat_collapse_pending  months = 1 } }
+			trigger_event_non_silently = { id = z_aqd_seat_collapse.1  days = 1 }
+		}
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_seat_collapse_destroy_seat = { MADHHAB  LOCATION }: 9-branch
+# dispatch, destroys the seat of MADHHAB at LOCATION. destroy_building_
+# forcefully's own "building(X|owner)" target-link string cannot take a
+# $MADHHAB$ substitution (the same confirmed constraint documented at
+# scripted_effects/z_aqd_jurist_effects.txt's aqd_crackdown_destroy_<X>_
+# madrasa/_seat), hence the 9 literal branches - inlined directly here
+# rather than as 9 separate named wrapper effects, since (unlike
+# crackdown's own copies) nothing else in this feature ever needs to
+# call them from a different context.
+# ---------------------------------------------------------------------
+aqd_seat_collapse_destroy_seat = {
+	if      = { limit = { $MADHHAB$ = 1 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_hanafi_jurists|owner)" } }
+	else_if = { limit = { $MADHHAB$ = 2 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_hanbali_jurists|owner)" } }
+	else_if = { limit = { $MADHHAB$ = 3 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_maliki_jurists|owner)" } }
+	else_if = { limit = { $MADHHAB$ = 4 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_shafii_jurists|owner)" } }
+	else_if = { limit = { $MADHHAB$ = 5 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_zahiri_jurists|owner)" } }
+	else_if = { limit = { $MADHHAB$ = 6 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_ismaili_jurists|owner)" } }
+	else_if = { limit = { $MADHHAB$ = 7 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_jafari_jurists|owner)" } }
+	else_if = { limit = { $MADHHAB$ = 8 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_zaidi_jurists|owner)" } }
+	else_if = { limit = { $MADHHAB$ = 9 }  $LOCATION$ = { destroy_building_forcefully = "building(building_type:seat_of_ibadi_jurists|owner)" } }
+}
+
+# ---------------------------------------------------------------------
+# aqd_seat_collapse_destroy_province_madrasas = { MADHHAB  LOCATION }:
+# 9-branch dispatch. Province-wide (LOCATION's own province, same
+# province_definition/every_location_in_province_definition idiom used
+# throughout this mod), destroys every madrasa of MADHHAB - this is
+# genuinely new behaviour, not something remove_if ever did (madrasas'
+# own remove_if, building_types/z_aqd_madrasas.txt, only ever fires on
+# non-Muslim conquest, never on sect-percentage collapse, so today's
+# seat removal already leaves madrasas standing orphaned).
+#
+# Each destroyed location is first stamped with z_aqd_vacuum_fill_
+# madrasa_pending (1-month safety-net marker) BEFORE being destroyed -
+# unconditionally, on BOTH the failure and the vacuum-fill path. Only
+# the vacuum-fill path ever actually consumes it (aqd_seat_collapse_
+# place_province_madrasas below); on the failure path it is simply never
+# read again and expires unused after its own safety-net duration - the
+# same "harmless if not consumed" tolerance this mod's other pending-
+# pick markers already rely on, rather than needing two near-duplicate
+# destroy effects (one that marks, one that doesn't).
+# ---------------------------------------------------------------------
+aqd_seat_collapse_destroy_province_madrasas = {
+	if = {
+		limit = { $MADHHAB$ = 1 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_hanafi_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_hanafi_fiqh|owner)"
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 2 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_hanbali_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_hanbali_fiqh|owner)"
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 3 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_maliki_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_maliki_fiqh|owner)"
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 4 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_shafii_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_shafii_fiqh|owner)"
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 5 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_zahiri_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_zahiri_fiqh|owner)"
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 6 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_ismaili_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_ismaili_fiqh|owner)"
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 7 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_jafari_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_jafari_fiqh|owner)"
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 8 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_zaidi_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_zaidi_fiqh|owner)"
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 9 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_building = building_type:madrasa_of_ibadi_fiqh }
+			add_location_modifier = { modifier = z_aqd_vacuum_fill_madrasa_pending  months = 1 }
+			destroy_building_forcefully = "building(building_type:madrasa_of_ibadi_fiqh|owner)"
+		} } }
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_seat_collapse_place_new_seat = { MADHHAB  LOCATION }: 9-branch
+# dispatch (keyed to the WINNING madhhab, var:aqd_vacuum_fill_madhhab),
+# vacuum-fill only. change_building_level_in_location's own building =
+# field DOES accept direct $MADHHAB$ text substitution (confirmed
+# idiom: scripted_effects/z_aqd_jurist_effects.txt's aqd_jurists_accept
+# already places a seat this exact way) - but $MADHHAB$ here is our own
+# NUMERIC 1-9 variable, not a literal token, so it still needs the same
+# 9-branch numeric-to-literal translation every other per-madhhab
+# dispatch in this mod already uses; the substitution shortcut only ever
+# applies to a caller that already knows the literal madhhab NAME at
+# each of ITS OWN call sites, which is exactly what each branch below
+# provides. Bypasses `allow`/`location_potential`/`country_potential`,
+# same confirmed idiom as every other seat-placement path.
+# ---------------------------------------------------------------------
+aqd_seat_collapse_place_new_seat = {
+	if      = { limit = { $MADHHAB$ = 1 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_hanafi_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 2 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_hanbali_jurists  value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 3 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_maliki_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 4 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_shafii_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 5 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_zahiri_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 6 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_ismaili_jurists  value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 7 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_jafari_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 8 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_zaidi_jurists    value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 9 }  $LOCATION$ = { change_building_level_in_location = { building = building_type:seat_of_ibadi_jurists    value = 1 } } }
+}
+
+# ---------------------------------------------------------------------
+# aqd_seat_collapse_place_province_madrasas = { MADHHAB  LOCATION }:
+# 9-branch dispatch (keyed to the WINNING madhhab), vacuum-fill only.
+# Province-wide, places a madrasa of MADHHAB at every location still
+# carrying z_aqd_vacuum_fill_madrasa_pending (stamped by aqd_seat_
+# collapse_destroy_province_madrasas above just before it destroyed the
+# OLD madhhab's madrasa there) - consuming the marker, completing the
+# destroy-then-place pair per location. This is what actually converts
+# "every madrasa in the province that belonged to the collapsed seat"
+# to the new madhhab, one location at a time.
+# ---------------------------------------------------------------------
+aqd_seat_collapse_place_province_madrasas = {
+	if = {
+		limit = { $MADHHAB$ = 1 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_hanafi_fiqh  value = 1 }
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 2 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_hanbali_fiqh  value = 1 }
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 3 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_maliki_fiqh  value = 1 }
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 4 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_shafii_fiqh  value = 1 }
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 5 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_zahiri_fiqh  value = 1 }
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 6 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_ismaili_fiqh  value = 1 }
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 7 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_jafari_fiqh  value = 1 }
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 8 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_zaidi_fiqh  value = 1 }
+		} } }
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 9 }
+		$LOCATION$ = { province_definition = { every_location_in_province_definition = {
+			limit = { owner ?= root  has_location_modifier = z_aqd_vacuum_fill_madrasa_pending }
+			remove_location_modifier = z_aqd_vacuum_fill_madrasa_pending
+			change_building_level_in_location = { building = building_type:madrasa_of_ibadi_fiqh  value = 1 }
+		} } }
+	}
+}
+
+# ---------------------------------------------------------------------
+# aqd_seat_collapse_clear_madhhab_modifiers = { MADHHAB  LOCATION }:
+# 9-branch dispatch, same $MADHHAB$/$LOCATION$ re-entry shape as
+# aqd_fatwa_apply_displeased_for_seat (scripted_effects/z_aqd_fatwa_
+# effects.txt) and aqd_debate_apply_displeased_for_seat (scripted_
+# effects/z_aqd_debate_effects.txt). Called from BOTH z_aqd_seat_
+# collapse.1 and .2's options, on the OLD (collapsing) madhhab only -
+# once its seat is gone (destroyed outright, or replaced by the winning
+# madhhab), nothing keyed to its old madhhab at that seat should linger:
+# every location-scoped per-madhhab modifier this mod has ever stamped
+# (z_aqd_fatwa_displeased_<X>, z_aqd_jurist_evicted_<X>, z_aqd_jurist_
+# vindicated_<X>, z_aqd_fatwa_of_jihad_<X>, z_aqd_jihad_blessed_<X>,
+# z_aqd_jihad_declined_<X>) at $LOCATION$ itself, plus the ḥalqa class
+# modifiers (z_aqd_halqa_state_<X>/_orthodox_<X>/_heterodox_<X>)
+# PROVINCE-WIDE - a ḥalqa's own footprint was always province-wide
+# (aqd_halqa_apply_state/_orthodox/_heterodox), so its clear must be
+# too, same reasoning as aqd_fatwa_apply_displeased_for_seat's own
+# province-wide ḥalqa sweep.
+# ---------------------------------------------------------------------
+aqd_seat_collapse_clear_madhhab_modifiers = {
+	if = {
+		limit = { $MADHHAB$ = 1 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_hanafi
+			remove_location_modifier = z_aqd_jurist_evicted_hanafi
+			remove_location_modifier = z_aqd_jurist_vindicated_hanafi
+			remove_location_modifier = z_aqd_fatwa_of_jihad_hanafi
+			remove_location_modifier = z_aqd_jihad_blessed_hanafi
+			remove_location_modifier = z_aqd_jihad_declined_hanafi
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_hanafi
+				remove_location_modifier = z_aqd_halqa_orthodox_hanafi
+				remove_location_modifier = z_aqd_halqa_heterodox_hanafi
+			} }
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 2 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_hanbali
+			remove_location_modifier = z_aqd_jurist_evicted_hanbali
+			remove_location_modifier = z_aqd_jurist_vindicated_hanbali
+			remove_location_modifier = z_aqd_fatwa_of_jihad_hanbali
+			remove_location_modifier = z_aqd_jihad_blessed_hanbali
+			remove_location_modifier = z_aqd_jihad_declined_hanbali
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_hanbali
+				remove_location_modifier = z_aqd_halqa_orthodox_hanbali
+				remove_location_modifier = z_aqd_halqa_heterodox_hanbali
+			} }
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 3 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_maliki
+			remove_location_modifier = z_aqd_jurist_evicted_maliki
+			remove_location_modifier = z_aqd_jurist_vindicated_maliki
+			remove_location_modifier = z_aqd_fatwa_of_jihad_maliki
+			remove_location_modifier = z_aqd_jihad_blessed_maliki
+			remove_location_modifier = z_aqd_jihad_declined_maliki
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_maliki
+				remove_location_modifier = z_aqd_halqa_orthodox_maliki
+				remove_location_modifier = z_aqd_halqa_heterodox_maliki
+			} }
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 4 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_shafii
+			remove_location_modifier = z_aqd_jurist_evicted_shafii
+			remove_location_modifier = z_aqd_jurist_vindicated_shafii
+			remove_location_modifier = z_aqd_fatwa_of_jihad_shafii
+			remove_location_modifier = z_aqd_jihad_blessed_shafii
+			remove_location_modifier = z_aqd_jihad_declined_shafii
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_shafii
+				remove_location_modifier = z_aqd_halqa_orthodox_shafii
+				remove_location_modifier = z_aqd_halqa_heterodox_shafii
+			} }
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 5 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_zahiri
+			remove_location_modifier = z_aqd_jurist_evicted_zahiri
+			remove_location_modifier = z_aqd_jurist_vindicated_zahiri
+			remove_location_modifier = z_aqd_fatwa_of_jihad_zahiri
+			remove_location_modifier = z_aqd_jihad_blessed_zahiri
+			remove_location_modifier = z_aqd_jihad_declined_zahiri
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_zahiri
+				remove_location_modifier = z_aqd_halqa_orthodox_zahiri
+				remove_location_modifier = z_aqd_halqa_heterodox_zahiri
+			} }
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 6 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_ismaili
+			remove_location_modifier = z_aqd_jurist_evicted_ismaili
+			remove_location_modifier = z_aqd_jurist_vindicated_ismaili
+			remove_location_modifier = z_aqd_fatwa_of_jihad_ismaili
+			remove_location_modifier = z_aqd_jihad_blessed_ismaili
+			remove_location_modifier = z_aqd_jihad_declined_ismaili
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_ismaili
+				remove_location_modifier = z_aqd_halqa_orthodox_ismaili
+				remove_location_modifier = z_aqd_halqa_heterodox_ismaili
+			} }
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 7 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_jafari
+			remove_location_modifier = z_aqd_jurist_evicted_jafari
+			remove_location_modifier = z_aqd_jurist_vindicated_jafari
+			remove_location_modifier = z_aqd_fatwa_of_jihad_jafari
+			remove_location_modifier = z_aqd_jihad_blessed_jafari
+			remove_location_modifier = z_aqd_jihad_declined_jafari
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_jafari
+				remove_location_modifier = z_aqd_halqa_orthodox_jafari
+				remove_location_modifier = z_aqd_halqa_heterodox_jafari
+			} }
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 8 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_zaidi
+			remove_location_modifier = z_aqd_jurist_evicted_zaidi
+			remove_location_modifier = z_aqd_jurist_vindicated_zaidi
+			remove_location_modifier = z_aqd_fatwa_of_jihad_zaidi
+			remove_location_modifier = z_aqd_jihad_blessed_zaidi
+			remove_location_modifier = z_aqd_jihad_declined_zaidi
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_zaidi
+				remove_location_modifier = z_aqd_halqa_orthodox_zaidi
+				remove_location_modifier = z_aqd_halqa_heterodox_zaidi
+			} }
+		}
+	}
+	else_if = {
+		limit = { $MADHHAB$ = 9 }
+		$LOCATION$ = {
+			remove_location_modifier = z_aqd_fatwa_displeased_ibadi
+			remove_location_modifier = z_aqd_jurist_evicted_ibadi
+			remove_location_modifier = z_aqd_jurist_vindicated_ibadi
+			remove_location_modifier = z_aqd_fatwa_of_jihad_ibadi
+			remove_location_modifier = z_aqd_jihad_blessed_ibadi
+			remove_location_modifier = z_aqd_jihad_declined_ibadi
+			province_definition = { every_location_in_province_definition = {
+				limit = { owner ?= root }
+				remove_location_modifier = z_aqd_halqa_state_ibadi
+				remove_location_modifier = z_aqd_halqa_orthodox_ibadi
+				remove_location_modifier = z_aqd_halqa_heterodox_ibadi
+			} }
+		}
+	}
+}

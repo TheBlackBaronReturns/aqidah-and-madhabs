@@ -1,0 +1,25 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - seat collapse's own "collapsing seat pending
+# pick" marker.
+#
+# Purely a same-tick re-derivation anchor for scripted_effects/z_aqd_
+# seat_collapse_effects.txt's aqd_seat_collapse_attempt - a dedicated
+# key, not a reuse of the older shared z_aqd_fatwa_pending_pick (the
+# white-peace/jihad fatwas already share that one for their own single
+# picks; this feature stamps it alongside a SECOND marker in the same
+# tick on a successful vacuum-fill roll, so sharing either key with an
+# unrelated pulse's own pick would risk a collision - see z_aqd_vacuum_
+# fill_pending.txt's own header for the full reasoning). Stamped on
+# every attempt (both the failure and the vacuum-fill outcome use it),
+# consumed immediately in the very next line of whichever event's own
+# immediate finds it (events/religion/z_aqd_seat_collapse_events.txt) -
+# it should never be visible to the player for more than an instant.
+# months = 1 is a safety-net duration only, not load-bearing.
+# =====================================================================
+
+z_aqd_seat_collapse_pending = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

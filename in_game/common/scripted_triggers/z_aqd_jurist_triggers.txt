@@ -588,3 +588,26 @@ aqd_country_has_any_halqa_ready = {
 		}
 	}
 }
+
+# Location-scoped: does a seat of the REALM'S OWN current sharia_law
+# policy already stand here? Used by scripted_effects/z_aqd_crackdown_
+# vacancy_effects.txt's aqd_crackdown_offer_seat_vacancy to skip the
+# whole vacancy-offer roll when placing the state madhhab's seat at a
+# just-razed location would be redundant - a location can hold more than
+# one madhhab's seat at once (building_types/z_aqd_jurist_seats.txt's
+# location_potential only ever excludes a duplicate of the SAME madhhab),
+# so a razed rival seat's location could easily already carry the state
+# madhhab's own seat separately.
+aqd_state_madhhab_seat_already_here = {
+	OR = {
+		AND = { root = { has_policy = hanafi_policy }    has_building = building_type:seat_of_hanafi_jurists }
+		AND = { root = { has_policy = hanbali_policy }   has_building = building_type:seat_of_hanbali_jurists }
+		AND = { root = { has_policy = maliki_policy }    has_building = building_type:seat_of_maliki_jurists }
+		AND = { root = { has_policy = shafii_policy }    has_building = building_type:seat_of_shafii_jurists }
+		AND = { root = { has_policy = zahiri_policy }    has_building = building_type:seat_of_zahiri_jurists }
+		AND = { root = { has_policy = ismaili_policy }   has_building = building_type:seat_of_ismaili_jurists }
+		AND = { root = { has_policy = jafari_policy }    has_building = building_type:seat_of_jafari_jurists }
+		AND = { root = { has_policy = zaidi_policy }     has_building = building_type:seat_of_zaidi_jurists }
+		AND = { root = { has_policy = ibadi_policy }     has_building = building_type:seat_of_ibadi_jurists }
+	}
+}

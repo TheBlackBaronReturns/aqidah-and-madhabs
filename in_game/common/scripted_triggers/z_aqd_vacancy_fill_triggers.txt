@@ -1,0 +1,91 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - shared "who can fill a vacancy" eligibility.
+#
+# NINE concrete location-scoped triggers, one per madhhab, shared by BOTH
+# features that pick a substitute madhhab to inherit a vacated
+# institution: scripted_effects/z_aqd_seat_collapse_effects.txt's
+# aqd_seat_collapse_find_vacuum_candidate (a seat lost to demographic
+# collapse) and scripted_effects/z_aqd_crackdown_vacancy_effects.txt's
+# aqd_crackdown_pick_vacancy_candidate (a seat lost to a crackdown,
+# "let the 'Ulema decide" option). Deliberately a NEW, separate trigger
+# from aqd_debate_seat_eligible_<X> (scripted_triggers/z_aqd_debate_
+# triggers.txt), not a reuse of it - that one still needs its own
+# aqd_seat_madhhab_not_heterodox_to_root_<X> line for the fiqh-debate
+# feature, which vacancy-filling deliberately drops: per the user's own
+# final rule, a candidate's standing with the ruler's own aqeedah has NO
+# bearing on eligibility to fill a vacancy - the only two gates are "not
+# the exact madhhab that was just removed" (checked by each caller
+# itself, via its own numeric variable, not here) and "this candidate's
+# own sect clears 25% of the affected province's population" (also
+# checked by each caller, since it needs the vacancy's own province in
+# scope, not available to a bare location-scoped trigger). This trigger
+# is only the "in good standing" half: not currently under an active
+# fatwa ban, crackdown eviction, or a rival's vindication in this same
+# episode, and not itself a location mid-resolution in another Seat
+# Collapse attempt (z_aqd_seat_collapse_pending / z_aqd_vacuum_fill_
+# pending, main_menu/common/static_modifiers/).
+# =====================================================================
+
+aqd_vacancy_candidate_base_eligible_hanafi = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanafi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanafi }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_hanafi }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}
+aqd_vacancy_candidate_base_eligible_hanbali = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanbali }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanbali }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_hanbali }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}
+aqd_vacancy_candidate_base_eligible_maliki = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_maliki }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_maliki }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_maliki }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}
+aqd_vacancy_candidate_base_eligible_shafii = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_shafii }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_shafii }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_shafii }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}
+aqd_vacancy_candidate_base_eligible_zahiri = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zahiri }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_zahiri }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_zahiri }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}
+aqd_vacancy_candidate_base_eligible_ismaili = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ismaili }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_ismaili }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_ismaili }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}
+aqd_vacancy_candidate_base_eligible_jafari = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_jafari }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_jafari }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_jafari }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}
+aqd_vacancy_candidate_base_eligible_zaidi = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zaidi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_zaidi }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_zaidi }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}
+aqd_vacancy_candidate_base_eligible_ibadi = {
+	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ibadi }
+	NOT = { has_location_modifier = z_aqd_jurist_evicted_ibadi }
+	NOT = { has_location_modifier = z_aqd_jurist_vindicated_ibadi }
+	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
+	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
+}

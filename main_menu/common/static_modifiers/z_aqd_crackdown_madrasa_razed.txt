@@ -1,0 +1,88 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "razed by this crackdown" markers.
+#
+# NINE concrete per-madhhab keys, stamped by scripted_effects/z_aqd_
+# jurist_effects.txt's 9 literal aqd_crackdown_destroy_<X>_madrasa
+# wrappers on every location whose madrasa they just destroyed -
+# unconditionally, every crackdown, not just ones that go on to offer a
+# seat vacancy. Confirmed structurally: in both of aqd_crackdown_
+# effect's branches (small-school wipeout and established-school tier-
+# drop), every madrasa of the cracked-down madhhab is always destroyed
+# before any seat is (the tier-drop loop's own if/else_if checks "does
+# any madrasa still exist" first, every pass; the wipeout branch is two
+# fully separate loops in that same order) - so by the time a seat is
+# razed and rolls its own 20% vacancy-offer chance (scripted_effects/
+# z_aqd_crackdown_vacancy_effects.txt's aqd_crackdown_offer_seat_
+# vacancy), any of this SAME crackdown's own madrasas that stood in that
+# seat's own province are already marked here, ready to convert too if
+# the player approves either fill option (events/religion/z_aqd_
+# crackdown_vacancy_events.txt's z_aqd_crackdown_vacancy.1).
+#
+# years = 36 (3 years) - deliberately NOT the usual 1-month same-tick
+# safety net every other pending-pick marker in this mod uses. This one
+# has to survive not just until an event fires, but until the PLAYER
+# actually answers a real yes/no popup, which could be much longer than
+# one tick - see z_aqd_crackdown_vacancy_pending.txt's own header for the
+# contrast. 36 months is a generous cushion for that while staying
+# comfortably under the school's own 60-month (5-year) crackdown
+# cooldown, so two episodes of the same madhhab's own crackdown can
+# never overlap and cross-contaminate each other's markers. A marker
+# left unconsumed (no seat in that same province ever won its own 20%
+# roll) simply expires unused - harmless, same "fine if never consumed"
+# tolerance this mod's other pending-pick markers already rely on.
+# =====================================================================
+
+z_aqd_crackdown_madrasa_razed_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_crackdown_madrasa_razed_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_crackdown_madrasa_razed_maliki = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_crackdown_madrasa_razed_shafii = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_crackdown_madrasa_razed_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_crackdown_madrasa_razed_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_crackdown_madrasa_razed_jafari = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_crackdown_madrasa_razed_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_crackdown_madrasa_razed_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
