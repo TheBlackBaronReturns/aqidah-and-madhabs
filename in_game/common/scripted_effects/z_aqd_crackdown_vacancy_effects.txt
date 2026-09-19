@@ -10,7 +10,19 @@
 # fill, that same crackdown's own razed province madrasas (tracked via
 # the 9 z_aqd_crackdown_madrasa_razed_<X> markers stamped by aqd_
 # crackdown_effect's own destroy-madrasa wrappers) convert along with
-# the seat rather than staying lost.
+# the seat rather than staying lost - and since a converted madrasa was
+# never actually looted, aqd_crackdown_place_state_madrasa_here / aqd_
+# crackdown_place_candidate_madrasa_here below each pay back the same 25%
+# income estimate aqd_crackdown_effect originally credited for razing it.
+#
+# *** TEMP DEBUG TUNING ACTIVE ***: the per-seat vacancy offer below is
+# bumped from 20% to 100%, aqd_crackdown_pick_vacancy_candidate's 25%
+# population floor is temporarily lowered to 1%, and its approval roll is
+# force-succeeded - all so the vacancy-fill path is easy to trigger and
+# observe while testing. Search this file for "TEMP DEBUG" and revert
+# every hit before release - the real balance is a 20% offer roll, a 25%
+# population floor, and a genuine, possibly-failing approval roll (min
+# 10% per script_values/z_aqd_madhhab_approval.txt's clamp).
 # =====================================================================
 
 # ---------------------------------------------------------------------
@@ -26,6 +38,9 @@
 # exact location (aqd_state_madhhab_seat_already_here, scripted_
 # triggers/z_aqd_jurist_triggers.txt) - offering to plant a duplicate
 # would be pointless. 20% is a starting guess, easy to retune.
+#
+# TEMP DEBUG: bumped to 100/0 so every razed seat offers the vacancy
+# choice - revert to 20/80 before release.
 # ---------------------------------------------------------------------
 aqd_crackdown_offer_seat_vacancy = {
 	if = {
@@ -35,11 +50,11 @@ aqd_crackdown_offer_seat_vacancy = {
 			scope:aqd_crackdown_razed_seat_location = { NOT = { aqd_state_madhhab_seat_already_here = yes } }
 		}
 		random_list = {
-			20 = {
+			100 = {
 				scope:aqd_crackdown_razed_seat_location = { add_location_modifier = { modifier = z_aqd_crackdown_vacancy_pending  months = 1 } }
 				trigger_event_non_silently = { id = z_aqd_crackdown_vacancy.1  days = 1 }
 			}
-			80 = {}
+			0 = {}
 		}
 	}
 }
@@ -73,6 +88,17 @@ aqd_crackdown_place_state_seat = {
 # iterated LOCATION, not root - has_policy is explicitly re-scoped to
 # root here for that reason. No $LOCATION$ param: acts on "this" (the
 # current loop location) directly.
+#
+# Every call here converts one location that aqd_crackdown_effect's own
+# destroy-madrasa wrapper (scripted_effects/z_aqd_jurist_effects.txt)
+# already paid out 25% of monthly trade+tax income for at razing time -
+# that payout represented looting the endowment on the assumption the
+# site stayed razed. Converting it to a live madrasa instead means it was
+# never actually looted, so root pays back that same estimate here,
+# mirroring (with the opposite sign) the exact add_gold call in
+# aqd_crackdown_effect's own while-loops. Unconditional: every reach of
+# this function corresponds 1:1 to a real conversion (the caller only
+# ever visits a location that still carries the razed marker).
 aqd_crackdown_place_state_madrasa_here = {
 	if      = { limit = { root = { has_policy = hanafi_policy } }    change_building_level_in_location = { building = building_type:madrasa_of_hanafi_fiqh   value = 1 } }
 	else_if = { limit = { root = { has_policy = hanbali_policy } }   change_building_level_in_location = { building = building_type:madrasa_of_hanbali_fiqh  value = 1 } }
@@ -83,6 +109,7 @@ aqd_crackdown_place_state_madrasa_here = {
 	else_if = { limit = { root = { has_policy = jafari_policy } }    change_building_level_in_location = { building = building_type:madrasa_of_jafari_fiqh   value = 1 } }
 	else_if = { limit = { root = { has_policy = zaidi_policy } }     change_building_level_in_location = { building = building_type:madrasa_of_zaidi_fiqh    value = 1 } }
 	else_if = { limit = { root = { has_policy = ibadi_policy } }     change_building_level_in_location = { building = building_type:madrasa_of_ibadi_fiqh    value = 1 } }
+	root = { add_gold = { value = monthly_income_trade_and_tax  multiply = -0.25 } }
 }
 
 # aqd_crackdown_sweep_province_state_madrasas = { MADHHAB  LOCATION }:
@@ -119,12 +146,31 @@ aqd_crackdown_sweep_province_state_madrasas = {
 # what guarantees this, mirrors the identical guard already used in
 # scripted_effects/z_aqd_seat_collapse_effects.txt's own picker):
 #   1. Cheap eligibility first - scripted_triggers/z_aqd_vacancy_fill_
-#      triggers.txt's aqd_vacancy_candidate_base_eligible_<X> somewhere
-#      in the razed seat's own area, AND that candidate's own sect
-#      clears 25% of the razed seat's own PROVINCE population
-#      ("religion_percentage" confirmed valid at province scope - base
-#      game's own common/attribute_columns/20_province.txt evaluates it
-#      directly on a province row).
+#      triggers.txt's aqd_vacancy_candidate_base_eligible_<X> AND an
+#      actual has_building = seat_of_<X>_jurists at that SAME location
+#      somewhere in the razed seat's own area (the base-eligible trigger
+#      only ever checks the ABSENCE of an active ban/eviction, never the
+#      PRESENCE of any real footprint - without the has_building half, a
+#      madhhab with zero institutions anywhere in the realm could still
+#      win the vacancy purely because its broader sect cleared the
+#      population floor below; confirmed in actual play, a crackdown on
+#      Hanbali handed the vacancy to Zahiri with no Zahiri seat or
+#      madrasa anywhere in the realm - both checks are combined into the
+#      SAME any_location_in_area call, not two independent ones, so the
+#      seat and the "not banned" status must both hold at the same
+#      candidate location), AND that candidate's own sect clears 25% of
+#      the razed seat's own PROVINCE population ("religion_percentage"
+#      confirmed valid at province scope - base game's own common/
+#      attribute_columns/20_province.txt evaluates it directly on a
+#      province row), AND that candidate madhhab doesn't already hold a
+#      seat anywhere else in scope:target_location's own province -
+#      change_building_level_in_location (aqd_crackdown_place_candidate_
+#      seat below) bypasses the seat building's own location_potential,
+#      which only ever blocks a duplicate at the SAME location, never
+#      elsewhere in the same province, so without this extra check a
+#      winning madhhab that already has a seat two locations over in the
+#      same province could end up with a second one (identical fix to
+#      scripted_effects/z_aqd_seat_collapse_effects.txt's own picker).
 #   2. Only if eligible: run that candidate through the SAME approval
 #      engine the jihad/unjust-war fatwas already use (aqd_compute_seat_
 #      approval + aqd_roll_approval_percentage, scripted_effects/z_aqd_
@@ -161,12 +207,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 1 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_hanafi = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_hanafi = yes  has_building = building_type:seat_of_hanafi_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_hanafi_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 1 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -180,12 +228,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 2 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_hanbali = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_hanbali = yes  has_building = building_type:seat_of_hanbali_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_hanbali_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 2 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -205,12 +255,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 3 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_maliki = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_maliki = yes  has_building = building_type:seat_of_maliki_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_maliki_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 3 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -234,12 +286,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 4 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_shafii = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_shafii = yes  has_building = building_type:seat_of_shafii_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_shafii_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 4 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -267,12 +321,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 5 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_zahiri = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_zahiri = yes  has_building = building_type:seat_of_zahiri_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:sunni)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_zahiri_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 5 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -304,12 +360,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 6 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_ismaili = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:shia)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_ismaili = yes  has_building = building_type:seat_of_ismaili_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:shia)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_ismaili_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 6 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -345,12 +403,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 7 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_jafari = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:shia)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_jafari = yes  has_building = building_type:seat_of_jafari_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:shia)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_jafari_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 7 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -390,12 +450,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 8 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_zaidi = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:shia)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_zaidi = yes  has_building = building_type:seat_of_zaidi_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:shia)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_zaidi_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 8 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -439,12 +501,14 @@ aqd_crackdown_pick_vacancy_candidate = {
 	if = {
 		limit = {
 			NOT = { var:aqd_crackdown_razed_seat_madhhab = 9 }
-			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_ibadi = yes } }
-			scope:target_location = { province_definition = { "religion_percentage(religion:ibadi)" > 0.25 } }
+			scope:aqd_vacancy_area = { any_location_in_area = { owner ?= root  aqd_vacancy_candidate_base_eligible_ibadi = yes  has_building = building_type:seat_of_ibadi_jurists } }
+			scope:target_location = { province_definition = { "religion_percentage(religion:ibadi)" > 0.01 } } # TEMP DEBUG: lowered from 0.25, revert before release
+			NOT = { scope:target_location = { province_definition = { any_location_in_province_definition = { owner ?= root  has_building = building_type:seat_of_ibadi_jurists } } } }
 		}
 		set_variable = { name = aqd_seat_madhhab  value = 9 }
 		aqd_compute_seat_approval = yes
 		aqd_roll_approval_percentage = yes
+		set_variable = { name = aqd_madhhab_approval_result  value = 1 } # TEMP DEBUG: force-succeed, revert before release
 		if = {
 			limit = { var:aqd_madhhab_approval_result = 1 }
 			change_variable = { name = aqd_vacancy_survivor_count  add = 1 }
@@ -513,6 +577,13 @@ aqd_crackdown_place_candidate_seat = {
 # WITHIN a location-scoped province sweep - reads var:aqd_vacancy_
 # winner_madhhab directly (a plain variable, readable from any scope),
 # no root re-scoping needed unlike the has_policy-based state version.
+#
+# Same gold clawback as aqd_crackdown_place_state_madrasa_here above, same
+# reasoning: this location's madrasa was already paid out for at razing
+# time (aqd_crackdown_effect's own add_gold, scripted_effects/z_aqd_
+# jurist_effects.txt) on the assumption it stayed razed - converting it to
+# the winning candidate's madrasa instead means it wasn't actually looted,
+# so root pays that same estimate back here.
 aqd_crackdown_place_candidate_madrasa_here = {
 	if      = { limit = { var:aqd_vacancy_winner_madhhab = 1 }  change_building_level_in_location = { building = building_type:madrasa_of_hanafi_fiqh   value = 1 } }
 	else_if = { limit = { var:aqd_vacancy_winner_madhhab = 2 }  change_building_level_in_location = { building = building_type:madrasa_of_hanbali_fiqh  value = 1 } }
@@ -523,6 +594,7 @@ aqd_crackdown_place_candidate_madrasa_here = {
 	else_if = { limit = { var:aqd_vacancy_winner_madhhab = 7 }  change_building_level_in_location = { building = building_type:madrasa_of_jafari_fiqh   value = 1 } }
 	else_if = { limit = { var:aqd_vacancy_winner_madhhab = 8 }  change_building_level_in_location = { building = building_type:madrasa_of_zaidi_fiqh    value = 1 } }
 	else_if = { limit = { var:aqd_vacancy_winner_madhhab = 9 }  change_building_level_in_location = { building = building_type:madrasa_of_ibadi_fiqh    value = 1 } }
+	root = { add_gold = { value = monthly_income_trade_and_tax  multiply = -0.25 } }
 }
 
 # aqd_crackdown_sweep_province_candidate_madrasas = { MADHHAB LOCATION }:

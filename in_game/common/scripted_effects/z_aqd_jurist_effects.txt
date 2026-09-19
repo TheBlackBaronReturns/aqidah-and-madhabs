@@ -876,7 +876,12 @@ aqd_crackdown_effect = {
 	# apply_state/_orthodox/_heterodox below); owner ?= scope:aqd_crackdown_
 	# country, NOT owner ?= root - root is unreliable in a generic_action
 	# (see the iteration-backstop comment below), scope:aqd_crackdown_
-	# country is this effect's own confirmed-safe stand-in.
+	# country is this effect's own confirmed-safe stand-in. Each of the 3
+	# class-variant removals below is gated behind its own has_location_
+	# modifier check - only ONE class is ever active for a given madhhab/
+	# location pair, so an unconditional trio would tooltip-preview all 3
+	# as "removed" in the crackdown option even though at most 1 ever is
+	# (same fix as aqd_fatwa_apply_displeased_for_seat's own gating).
 	set_variable = { name = aqd_crackdown_footprint  value = 0 }
 	# Jurist Seats (not madrasas) razed below - drives the exiled-jurists
 	# follow-up chance at the end of this effect.
@@ -902,9 +907,9 @@ aqd_crackdown_effect = {
 		province_definition = {
 			every_location_in_province_definition = {
 				limit = { owner ?= scope:aqd_crackdown_country }
-				remove_location_modifier = z_aqd_halqa_state_$MADHHAB$
-				remove_location_modifier = z_aqd_halqa_orthodox_$MADHHAB$
-				remove_location_modifier = z_aqd_halqa_heterodox_$MADHHAB$
+				if = { limit = { has_location_modifier = z_aqd_halqa_state_$MADHHAB$ }  remove_location_modifier = z_aqd_halqa_state_$MADHHAB$ }
+				if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_$MADHHAB$ }  remove_location_modifier = z_aqd_halqa_orthodox_$MADHHAB$ }
+				if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_$MADHHAB$ }  remove_location_modifier = z_aqd_halqa_heterodox_$MADHHAB$ }
 			}
 		}
 		scope:aqd_crackdown_country = { change_variable = { name = aqd_crackdown_footprint  add = 1 } }

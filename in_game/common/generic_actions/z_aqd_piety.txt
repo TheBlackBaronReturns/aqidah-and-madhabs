@@ -200,7 +200,14 @@ aqd_crackdown_madhhab = {
 
 		# Projected confiscation gold, shown in the action tooltip
 		# (script_values/z_aqd_madhhab_counts.txt - wipeout ceiling, so
-		# the text says "up to").
+		# the text says "up to"). aqd_crackdown_gold_tt's loc string reads
+		# this back via the bare custom scope name [aqd_crackdown_actor.
+		# GetVariable(...)] - NOT [SCOPE.sCountry('actor')...] as it
+		# previously did, which always rendered 0: that read the variable
+		# via the same bare "actor" reference the comment above already
+		# warns is unreliable in a generic_action, instead of the
+		# aqd_crackdown_actor named scope the variable was actually
+		# written to.
 		scope:aqd_crackdown_actor = {
 			set_variable = { name = aqd_crackdown_gold_est  value = aqd_crackdown_gold_estimate_target }
 		}

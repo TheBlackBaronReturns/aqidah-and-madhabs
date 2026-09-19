@@ -13,79 +13,79 @@
 # aqd_seat_madhhab_not_heterodox_to_root_<X> line for the fiqh-debate
 # feature, which vacancy-filling deliberately drops: per the user's own
 # final rule, a candidate's standing with the ruler's own aqeedah has NO
-# bearing on eligibility to fill a vacancy - the only two gates are "not
-# the exact madhhab that was just removed" (checked by each caller
-# itself, via its own numeric variable, not here) and "this candidate's
-# own sect clears 25% of the affected province's population" (also
-# checked by each caller, since it needs the vacancy's own province in
-# scope, not available to a bare location-scoped trigger). This trigger
-# is only the "in good standing" half: not currently under an active
-# fatwa ban, crackdown eviction, or a rival's vindication in this same
-# episode, and not itself a location mid-resolution in another Seat
-# Collapse attempt (z_aqd_seat_collapse_pending / z_aqd_vacuum_fill_
-# pending, main_menu/common/static_modifiers/).
+# bearing on eligibility to fill a vacancy - the gates are "not the exact
+# madhhab that was just removed" (checked by each caller itself, via its
+# own numeric variable, not here), "this candidate's own sect clears 25%
+# of the affected province's population" (also checked by each caller,
+# since it needs the vacancy's own province in scope, not available to a
+# bare location-scoped trigger), and "this candidate already holds a real
+# seat somewhere in the affected area" (ALSO checked by each caller,
+# ANDed into the same any_location_in_area call as this trigger, not a
+# second independent one - see either caller's own header). This trigger
+# below is only the "in good standing" half of that last gate: not
+# currently under an active crackdown eviction, and not itself a location
+# mid-resolution in another Seat Collapse attempt (z_aqd_seat_collapse_
+# pending / z_aqd_vacuum_fill_pending, main_menu/common/static_modifiers/).
+# Deliberately NOT gated on z_aqd_fatwa_displeased_<X> or z_aqd_jurist_
+# vindicated_<X> - a fatwa-displeased ban is about refusing to end an
+# unjust war, unrelated to whether that same school is fit to inherit an
+# unrelated vacancy elsewhere, and vindicated is a POSITIVE status (that
+# seat just WON a fiqh debate) that makes no sense to penalize here -
+# only an actual crackdown eviction (this madhhab was just forcibly
+# suppressed) is a real reason to say "not right now". This trigger by
+# itself was ORIGINALLY treated as the whole "does a madhhab
+# qualify" story, before the has_building half was added at each call
+# site - it only ever checks the ABSENCE of a ban, never the PRESENCE of
+# any actual footprint, so used alone it would let a madhhab with zero
+# institutions anywhere in the realm win a vacancy purely off the
+# province's sect population (confirmed in actual play: a crackdown on
+# Hanbali handed the vacancy to Zahiri with no Zahiri institution
+# anywhere in the realm). Do not use this trigger alone for a future
+# vacancy-fill feature without also ANDing in the has_building check.
 # =====================================================================
 
 aqd_vacancy_candidate_base_eligible_hanafi = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanafi }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanafi }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_hanafi }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }
 aqd_vacancy_candidate_base_eligible_hanbali = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_hanbali }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_hanbali }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_hanbali }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }
 aqd_vacancy_candidate_base_eligible_maliki = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_maliki }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_maliki }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_maliki }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }
 aqd_vacancy_candidate_base_eligible_shafii = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_shafii }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_shafii }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_shafii }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }
 aqd_vacancy_candidate_base_eligible_zahiri = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zahiri }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_zahiri }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_zahiri }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }
 aqd_vacancy_candidate_base_eligible_ismaili = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ismaili }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_ismaili }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_ismaili }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }
 aqd_vacancy_candidate_base_eligible_jafari = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_jafari }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_jafari }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_jafari }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }
 aqd_vacancy_candidate_base_eligible_zaidi = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_zaidi }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_zaidi }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_zaidi }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }
 aqd_vacancy_candidate_base_eligible_ibadi = {
-	NOT = { has_location_modifier = z_aqd_fatwa_displeased_ibadi }
 	NOT = { has_location_modifier = z_aqd_jurist_evicted_ibadi }
-	NOT = { has_location_modifier = z_aqd_jurist_vindicated_ibadi }
 	NOT = { has_location_modifier = z_aqd_seat_collapse_pending }
 	NOT = { has_location_modifier = z_aqd_vacuum_fill_pending }
 }

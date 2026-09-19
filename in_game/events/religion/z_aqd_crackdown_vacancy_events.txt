@@ -92,15 +92,33 @@ z_aqd_crackdown_vacancy.1 = {
 		}
 	}
 
+	# Placing a NEW seat and converting this crackdown's own razed madrasas
+	# are two independent actions - a madhhab already holding a seat
+	# elsewhere in the province blocks ONLY the seat (aqd_state_madhhab_
+	# seat_already_in_province), never the madrasa conversion (nothing
+	# stops a madhhab from holding madrasas in a province without a seat
+	# there). trigger (not just an inner if) so this option is actually
+	# greyed out/unselectable when NEITHER action would do anything -
+	# confirmed idiom already used in this mod: events/religion/z_aqd_
+	# debate_events.txt's own z_aqd_debate.1.side_a/side_b options.
 	option = {
 		name = z_aqd_crackdown_vacancy.1.state
+		trigger = {
+			exists = scope:target_location
+			OR = {
+				scope:target_location = { NOT = { aqd_state_madhhab_seat_already_in_province = yes } }
+				scope:target_location = { aqd_crackdown_state_madrasas_convertible = yes }
+			}
+		}
 		if = {
 			limit = {
 				exists = scope:target_location
 				exists = var:aqd_crackdown_razed_seat_madhhab
-				scope:target_location = { NOT = { aqd_state_madhhab_seat_already_here = yes } }
 			}
-			aqd_crackdown_place_state_seat = { LOCATION = scope:target_location }
+			if = {
+				limit = { scope:target_location = { NOT = { aqd_state_madhhab_seat_already_in_province = yes } } }
+				aqd_crackdown_place_state_seat = { LOCATION = scope:target_location }
+			}
 			aqd_crackdown_sweep_province_state_madrasas = { MADHHAB = var:aqd_crackdown_razed_seat_madhhab  LOCATION = scope:target_location }
 		}
 	}

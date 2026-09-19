@@ -429,6 +429,11 @@ aqd_fatwa_attempt_stage1 = {
 # zz_aqd_debug_effects.txt's aqd_debug_clear_halqa, which is fine for a
 # debug reset but would be wrong here: wiping every madhhab's circle
 # would undo the whole point of tracking these bans per-madhhab).
+#
+# Each of the 3 class-variant removals is gated behind its own
+# has_location_modifier check - only ONE class is ever active for a given
+# madhhab/location pair, so an unconditional trio would tooltip-preview
+# all 3 as "removed" in the refuse option even though at most 1 ever is.
 # ---------------------------------------------------------------------
 aqd_fatwa_apply_displeased_for_seat = {
 	if = {
@@ -438,9 +443,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_hanafi
-					remove_location_modifier = z_aqd_halqa_orthodox_hanafi
-					remove_location_modifier = z_aqd_halqa_heterodox_hanafi
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_hanafi }  remove_location_modifier = z_aqd_halqa_state_hanafi }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_hanafi }  remove_location_modifier = z_aqd_halqa_orthodox_hanafi }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_hanafi }  remove_location_modifier = z_aqd_halqa_heterodox_hanafi }
 				}
 			}
 		}
@@ -452,9 +457,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_hanbali
-					remove_location_modifier = z_aqd_halqa_orthodox_hanbali
-					remove_location_modifier = z_aqd_halqa_heterodox_hanbali
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_hanbali }  remove_location_modifier = z_aqd_halqa_state_hanbali }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_hanbali }  remove_location_modifier = z_aqd_halqa_orthodox_hanbali }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_hanbali }  remove_location_modifier = z_aqd_halqa_heterodox_hanbali }
 				}
 			}
 		}
@@ -466,9 +471,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_maliki
-					remove_location_modifier = z_aqd_halqa_orthodox_maliki
-					remove_location_modifier = z_aqd_halqa_heterodox_maliki
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_maliki }  remove_location_modifier = z_aqd_halqa_state_maliki }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_maliki }  remove_location_modifier = z_aqd_halqa_orthodox_maliki }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_maliki }  remove_location_modifier = z_aqd_halqa_heterodox_maliki }
 				}
 			}
 		}
@@ -480,9 +485,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_shafii
-					remove_location_modifier = z_aqd_halqa_orthodox_shafii
-					remove_location_modifier = z_aqd_halqa_heterodox_shafii
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_shafii }  remove_location_modifier = z_aqd_halqa_state_shafii }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_shafii }  remove_location_modifier = z_aqd_halqa_orthodox_shafii }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_shafii }  remove_location_modifier = z_aqd_halqa_heterodox_shafii }
 				}
 			}
 		}
@@ -494,9 +499,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_zahiri
-					remove_location_modifier = z_aqd_halqa_orthodox_zahiri
-					remove_location_modifier = z_aqd_halqa_heterodox_zahiri
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_zahiri }  remove_location_modifier = z_aqd_halqa_state_zahiri }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_zahiri }  remove_location_modifier = z_aqd_halqa_orthodox_zahiri }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_zahiri }  remove_location_modifier = z_aqd_halqa_heterodox_zahiri }
 				}
 			}
 		}
@@ -508,9 +513,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_ismaili
-					remove_location_modifier = z_aqd_halqa_orthodox_ismaili
-					remove_location_modifier = z_aqd_halqa_heterodox_ismaili
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_ismaili }  remove_location_modifier = z_aqd_halqa_state_ismaili }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_ismaili }  remove_location_modifier = z_aqd_halqa_orthodox_ismaili }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_ismaili }  remove_location_modifier = z_aqd_halqa_heterodox_ismaili }
 				}
 			}
 		}
@@ -522,9 +527,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_jafari
-					remove_location_modifier = z_aqd_halqa_orthodox_jafari
-					remove_location_modifier = z_aqd_halqa_heterodox_jafari
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_jafari }  remove_location_modifier = z_aqd_halqa_state_jafari }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_jafari }  remove_location_modifier = z_aqd_halqa_orthodox_jafari }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_jafari }  remove_location_modifier = z_aqd_halqa_heterodox_jafari }
 				}
 			}
 		}
@@ -536,9 +541,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_zaidi
-					remove_location_modifier = z_aqd_halqa_orthodox_zaidi
-					remove_location_modifier = z_aqd_halqa_heterodox_zaidi
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_zaidi }  remove_location_modifier = z_aqd_halqa_state_zaidi }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_zaidi }  remove_location_modifier = z_aqd_halqa_orthodox_zaidi }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_zaidi }  remove_location_modifier = z_aqd_halqa_heterodox_zaidi }
 				}
 			}
 		}
@@ -550,9 +555,9 @@ aqd_fatwa_apply_displeased_for_seat = {
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
-					remove_location_modifier = z_aqd_halqa_state_ibadi
-					remove_location_modifier = z_aqd_halqa_orthodox_ibadi
-					remove_location_modifier = z_aqd_halqa_heterodox_ibadi
+					if = { limit = { has_location_modifier = z_aqd_halqa_state_ibadi }  remove_location_modifier = z_aqd_halqa_state_ibadi }
+					if = { limit = { has_location_modifier = z_aqd_halqa_orthodox_ibadi }  remove_location_modifier = z_aqd_halqa_orthodox_ibadi }
+					if = { limit = { has_location_modifier = z_aqd_halqa_heterodox_ibadi }  remove_location_modifier = z_aqd_halqa_heterodox_ibadi }
 				}
 			}
 		}

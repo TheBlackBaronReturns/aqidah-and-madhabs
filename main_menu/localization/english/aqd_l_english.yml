@@ -19,7 +19,7 @@
 
  aqd_crackdown_madhhab: "Crack Down on Jurists"
  aqd_crackdown_madhhab_desc: "Move against a rival madhhab's institutions in your realm - closing courts, and if need be a seat itself, until its standing is broken back by one degree. The Ulema will not forget it quickly."
- aqd_crackdown_gold_tt: "Seize up to #Y [SCOPE.sCountry('actor').MakeScope.GetVariable('aqd_crackdown_gold_est').GetValue|V0]@gold!#! in confiscated endowments"
+ aqd_crackdown_gold_tt: "Seize up to #Y [aqd_crackdown_actor.GetVariable('aqd_crackdown_gold_est').GetValue|V0]@gold!#! in confiscated endowments"
  aqd_crackdown_select: "Crack down on which madhhab?"
  aqd_crackdown_none: "@trigger_no! No rival madhhab has enough of a foothold in your realm to crack down on."
 
@@ -509,11 +509,11 @@
  # the other fatwa systems, so there is no "declined" desc variant here
  # either.
  z_aqd_debate.1.title: "A Dispute of Doctors"
- z_aqd_debate.1.desc.main: "The jurists of [scope:debate_location_a.GetName] and the jurists of [scope:debate_location_b.GetName] have come to blows over a fine point of fiqh, each convinced the other has strayed from sound doctrine. Students take sides in the streets, and the dispute threatens to spill beyond the walls of the madrasa unless the throne intervenes - or wisely does not."
+ z_aqd_debate.1.desc.main: "The jurists of [debate_location_a.GetName] and the jurists of [debate_location_b.GetName] have come to blows over a fine point of fiqh, each convinced the other has strayed from sound doctrine. Students take sides in the streets, and the dispute threatens to spill beyond the walls of the madrasa unless the throne intervenes - or wisely does not."
  z_aqd_debate.1.desc.fallback: "DEBUG/fallback: no matching jurist-seat pair was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
  z_aqd_debate.1.leave_it: "Leave the fiqh debate to the specialists"
- z_aqd_debate.1.side_a: "Side with the Jurists of [scope:debate_location_a.GetName]"
- z_aqd_debate.1.side_b: "Side with the Jurists of [scope:debate_location_b.GetName]"
+ z_aqd_debate.1.side_a: "Side with the Jurists of [debate_location_a.GetName]"
+ z_aqd_debate.1.side_b: "Side with the Jurists of [debate_location_b.GetName]"
 
  # ---- "Local <Madhhab> Jurists Vindicated" (main_menu/common/static_
  # modifiers/z_aqd_jurist_vindicated.txt) - 9 concrete per-madhhab keys,
@@ -570,22 +570,22 @@
  # collapsing madhhab directly - safe here since only ONE dynamic name
  # needs resolving (mirrors z_aqd_jfatwa.1's own proven idiom).
  z_aqd_seat_collapse.1.title: "A Seat Falls Silent"
- z_aqd_seat_collapse.1.desc.hanafi: "The Ḥanafī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
- z_aqd_seat_collapse.1.desc.hanbali: "The Ḥanbalī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
- z_aqd_seat_collapse.1.desc.maliki: "The Mālikī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
- z_aqd_seat_collapse.1.desc.shafii: "The Shāfi'ī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
- z_aqd_seat_collapse.1.desc.zahiri: "The Ẓāhirī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
- z_aqd_seat_collapse.1.desc.ismaili: "The Ismā'īlī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
- z_aqd_seat_collapse.1.desc.jafari: "The Ja'farī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
- z_aqd_seat_collapse.1.desc.zaidi: "The Zaydī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
- z_aqd_seat_collapse.1.desc.ibadi: "The Ibāḍī seat of [scope:collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.hanafi: "The Ḥanafī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.hanbali: "The Ḥanbalī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.maliki: "The Mālikī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.shafii: "The Shāfi'ī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.zahiri: "The Ẓāhirī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.ismaili: "The Ismā'īlī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.jafari: "The Ja'farī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.zaidi: "The Zaydī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
+ z_aqd_seat_collapse.1.desc.ibadi: "The Ibāḍī seat of [collapse_location.GetName] has fallen silent. The faithful of its rite have all but vanished here, and with no students left to teach, its madrasas close along with it."
  z_aqd_seat_collapse.1.desc.fallback: "DEBUG/fallback: no matching collapsing seat was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
  z_aqd_seat_collapse.1.ok: "So it ends"
 
  # z_aqd_seat_collapse.2 (vacuum filled) names BOTH locations and no
  # madhhab at all - see this file's own top-of-file header for why.
  z_aqd_seat_collapse.2.title: "A Vacancy Filled"
- z_aqd_seat_collapse.2.desc.main: "The seat of [scope:collapse_location.GetName] has fallen silent, its faithful dwindled past recall - but word travels fast among the jurists. Before the college halls stand empty for long, the jurists of [scope:vacuum_candidate_location.GetName] step into the vacancy, and every madrasa here that once taught the old rite now teaches theirs instead."
+ z_aqd_seat_collapse.2.desc.main: "The seat of [collapse_location.GetName] has fallen silent, its faithful dwindled past recall - but word travels fast among the jurists. Before the college halls stand empty for long, the jurists of [vacuum_candidate_location.GetName] step into the vacancy, and every madrasa here that once taught the old rite now teaches theirs instead."
  z_aqd_seat_collapse.2.desc.fallback: "DEBUG/fallback: no matching collapsing seat or vacuum-filling candidate was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
  z_aqd_seat_collapse.2.ok: "The vacancy is filled"
 
@@ -611,15 +611,15 @@
  # dynamic name to resolve), never which replacement wins - that isn't
  # known until the chosen option itself resolves. ----
  z_aqd_crackdown_vacancy.1.title: "A Seat Lies Vacant"
- z_aqd_crackdown_vacancy.1.desc.hanafi: "The crackdown against the Ḥanafī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
- z_aqd_crackdown_vacancy.1.desc.hanbali: "The crackdown against the Ḥanbalī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
- z_aqd_crackdown_vacancy.1.desc.maliki: "The crackdown against the Mālikī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
- z_aqd_crackdown_vacancy.1.desc.shafii: "The crackdown against the Shāfi'ī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
- z_aqd_crackdown_vacancy.1.desc.zahiri: "The crackdown against the Ẓāhirī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
- z_aqd_crackdown_vacancy.1.desc.ismaili: "The crackdown against the Ismā'īlī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
- z_aqd_crackdown_vacancy.1.desc.jafari: "The crackdown against the Ja'farī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
- z_aqd_crackdown_vacancy.1.desc.zaidi: "The crackdown against the Zaydī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
- z_aqd_crackdown_vacancy.1.desc.ibadi: "The crackdown against the Ibāḍī school of law has left [scope:target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.hanafi: "The crackdown against the Ḥanafī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.hanbali: "The crackdown against the Ḥanbalī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.maliki: "The crackdown against the Mālikī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.shafii: "The crackdown against the Shāfi'ī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.zahiri: "The crackdown against the Ẓāhirī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.ismaili: "The crackdown against the Ismā'īlī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.jafari: "The crackdown against the Ja'farī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.zaidi: "The crackdown against the Zaydī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
+ z_aqd_crackdown_vacancy.1.desc.ibadi: "The crackdown against the Ibāḍī school of law has left [target_location.GetName]'s own jurist seat vacant. Might another school of law step into the void here - or is it best left to close along with the school that once held it?"
  z_aqd_crackdown_vacancy.1.desc.fallback: "DEBUG/fallback: no matching razed seat was found to name here - this text renders when the event is force-fired with no real target, so nothing crashes. Under a real fire this should never be seen."
  z_aqd_crackdown_vacancy.1.state: "Fill it with our own madhhab"
  z_aqd_crackdown_vacancy.1.ulema: "Let the 'Ulema decide for themselves"
