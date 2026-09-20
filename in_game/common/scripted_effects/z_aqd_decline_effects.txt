@@ -1,0 +1,474 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - A Seat in Decline: shared effects.
+#
+# Canonical madhhab index (same as z_aqd_jurist_effects.txt's
+# var:aqd_compat_madhhab / var:aqd_establish_madhhab):
+#   1 hanafi  2 hanbali  3 maliki  4 shafii  5 zahiri
+#   6 ismaili 7 jafari   8 zaidi   9 ibadi
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# aqd_decline_attempt: called from on_action/00_aqd_game_start.txt's
+# aqd_decline_pulse, country scope, only after the cheap aqd_country_has_
+# any_declining_seat prefilter (scripted_triggers/z_aqd_decline_triggers.
+# txt) already passed and the pulse's own random = { chance = N } already
+# rolled a hit.
+#
+# PASS 1 - cache all 9 aqidah-compatibility verdicts once, at country
+# scope, before ever touching a location. var:aqd_jurist_compat
+# (scripted_effects/z_aqd_jurist_effects.txt's aqd_classify_madhhab_
+# compatibility) depends only on root's own religious_school and the
+# madhhab index - never on which location is being examined - so
+# recomputing it inside a per-location scan would silently redo the same
+# 9 verdicts once per candidate location for nothing. Cached into 9
+# dedicated country variables so the per-location scan below can read
+# them as plain triggers.
+#
+# PASS 2 - pick ONE owned location uniformly among those holding at
+# least one currently-eligible declining seat, via random_owned_location
+# (same idiom as z_aqd_seat_collapse_effects.txt's aqd_seat_collapse_
+# pick) - deliberately compatibility-AGNOSTIC at this stage (aqd_
+# declining_seat_present has no compatibility check baked in - see that
+# trigger family's own header for why).
+#
+# PASS 3 - Algorithm-R reservoir tie-break across however many madhhabs
+# at THIS location independently qualify (mirrors aqd_seat_collapse_
+# pick's own per-location madhhab tie-break exactly), now filtering by
+# the pass-1 cached compatibility verdict per candidate: only orthodox/
+# neutral (never -1, opposed/heterodox) madhhabs enter the reservoir. If
+# the location pass 2 picked turns out to hold ONLY a heterodox
+# candidate (the umbrella OR let it through, but the real per-branch
+# filter here excludes it), the reservoir simply ends up empty and this
+# tick quietly does nothing - same "no candidate found" no-op behavior
+# as aqd_seat_collapse_find_vacuum_candidate elsewhere in this mod; the
+# monthly pulse just tries again next month.
+#
+# HANDOFF - saved scopes do not survive trigger_event (confirmed
+# repeatedly elsewhere in this mod - aqd_can_host_exile_seat's header,
+# aqd_crackdown_exile_pick's "scope:aqd_exile_target is transient"
+# comment, and Seat Collapse's own z_aqd_seat_collapse_pending marker).
+# So the winning location gets a disposable z_aqd_decline_pending marker
+# (1 month, main_menu/common/static_modifiers/z_aqd_decline_pending.txt)
+# instead of relying on the scope itself; var:aqd_decline_madhhab (a
+# plain country variable) DOES survive trigger_event and is the actual
+# handoff z_aqd_decline.1 reads (trigger = { has_variable = aqd_decline_
+# madhhab }). on_action/00_aqd_game_start.txt's aqd_decline_pulse also
+# guards NOT = { has_variable = aqd_decline_madhhab } so this effect is
+# never re-entered while a previous pick is still in flight (the 1-day
+# gap between the pick and z_aqd_decline.1 actually firing).
+# ---------------------------------------------------------------------
+aqd_decline_attempt = {
+	set_variable = { name = aqd_compat_madhhab  value = 1 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_hanafi  value = var:aqd_jurist_compat }
+	set_variable = { name = aqd_compat_madhhab  value = 2 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_hanbali  value = var:aqd_jurist_compat }
+	set_variable = { name = aqd_compat_madhhab  value = 3 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_maliki  value = var:aqd_jurist_compat }
+	set_variable = { name = aqd_compat_madhhab  value = 4 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_shafii  value = var:aqd_jurist_compat }
+	set_variable = { name = aqd_compat_madhhab  value = 5 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_zahiri  value = var:aqd_jurist_compat }
+	set_variable = { name = aqd_compat_madhhab  value = 6 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_ismaili  value = var:aqd_jurist_compat }
+	set_variable = { name = aqd_compat_madhhab  value = 7 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_jafari  value = var:aqd_jurist_compat }
+	set_variable = { name = aqd_compat_madhhab  value = 8 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_zaidi  value = var:aqd_jurist_compat }
+	set_variable = { name = aqd_compat_madhhab  value = 9 }
+	aqd_classify_madhhab_compatibility = { COUNTRY = root }
+	set_variable = { name = aqd_decline_compat_ibadi  value = var:aqd_jurist_compat }
+	remove_variable = aqd_compat_madhhab
+	remove_variable = aqd_jurist_compat
+
+	random_owned_location = {
+		limit = { aqd_declining_seat_present = yes }
+		save_scope_as = aqd_decline_loc_pick
+	}
+	if = {
+		limit = { exists = scope:aqd_decline_loc_pick }
+		set_variable = { name = aqd_decline_seat_count  value = 0 }
+
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_hanafi = yes }
+				NOT = { var:aqd_decline_compat_hanafi = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			set_variable = { name = aqd_decline_madhhab  value = 1 }
+		}
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_hanbali = yes }
+				NOT = { var:aqd_decline_compat_hanbali = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_decline_seat_count = 1 }
+				set_variable = { name = aqd_decline_madhhab  value = 2 }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 2 } }  1 = {} }
+			}
+		}
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_maliki = yes }
+				NOT = { var:aqd_decline_compat_maliki = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_decline_seat_count = 1 }
+				set_variable = { name = aqd_decline_madhhab  value = 3 }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 3 } }  1 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 3 } }  2 = {} }
+			}
+		}
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_shafii = yes }
+				NOT = { var:aqd_decline_compat_shafii = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_decline_seat_count = 1 }
+				set_variable = { name = aqd_decline_madhhab  value = 4 }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 4 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 4 } }  2 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 4 } }  3 = {} }
+			}
+		}
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_zahiri = yes }
+				NOT = { var:aqd_decline_compat_zahiri = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_decline_seat_count = 1 }
+				set_variable = { name = aqd_decline_madhhab  value = 5 }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 5 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 5 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 5 } }  3 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 5 } }  4 = {} }
+			}
+		}
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_ismaili = yes }
+				NOT = { var:aqd_decline_compat_ismaili = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_decline_seat_count = 1 }
+				set_variable = { name = aqd_decline_madhhab  value = 6 }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 6 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 6 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 6 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 6 } }  4 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 6 } }  5 = {} }
+			}
+		}
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_jafari = yes }
+				NOT = { var:aqd_decline_compat_jafari = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_decline_seat_count = 1 }
+				set_variable = { name = aqd_decline_madhhab  value = 7 }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 7 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 7 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 7 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 7 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 7 } }  5 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 7 } }  6 = {} }
+			}
+		}
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_zaidi = yes }
+				NOT = { var:aqd_decline_compat_zaidi = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_decline_seat_count = 1 }
+				set_variable = { name = aqd_decline_madhhab  value = 8 }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 8 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 8 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 8 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 8 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 8 } }  5 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 7 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 8 } }  6 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 8 } }  7 = {} }
+			}
+		}
+		if = {
+			limit = {
+				scope:aqd_decline_loc_pick = { aqd_declining_seat_ibadi = yes }
+				NOT = { var:aqd_decline_compat_ibadi = -1 }
+			}
+			change_variable = { name = aqd_decline_seat_count  add = 1 }
+			if = {
+				limit = { var:aqd_decline_seat_count = 1 }
+				set_variable = { name = aqd_decline_madhhab  value = 9 }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 2 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 9 } }  1 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 3 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 9 } }  2 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 4 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 9 } }  3 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 5 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 9 } }  4 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 6 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 9 } }  5 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 7 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 9 } }  6 = {} }
+			}
+			else_if = {
+				limit = { var:aqd_decline_seat_count = 8 }
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 9 } }  7 = {} }
+			}
+			else = {
+				random_list = { 1 = { set_variable = { name = aqd_decline_madhhab  value = 9 } }  8 = {} }
+			}
+		}
+
+		remove_variable = aqd_decline_seat_count
+
+		if = {
+			limit = { exists = var:aqd_decline_madhhab }
+			scope:aqd_decline_loc_pick = { add_location_modifier = { modifier = z_aqd_decline_pending  months = 1 } }
+			trigger_event_non_silently = { id = z_aqd_decline.1  days = 1 }
+		}
+	}
+
+	remove_variable = aqd_decline_compat_hanafi
+	remove_variable = aqd_decline_compat_hanbali
+	remove_variable = aqd_decline_compat_maliki
+	remove_variable = aqd_decline_compat_shafii
+	remove_variable = aqd_decline_compat_zahiri
+	remove_variable = aqd_decline_compat_ismaili
+	remove_variable = aqd_decline_compat_jafari
+	remove_variable = aqd_decline_compat_zaidi
+	remove_variable = aqd_decline_compat_ibadi
+}
+
+# ---------------------------------------------------------------------
+# aqd_decline_apply_reprieve = { MADHHAB  LOCATION }: 9-branch dispatch -
+# event option bodies cannot themselves take $MADHHAB$ substitution, only
+# scripted_effects can (same constraint documented throughout this mod,
+# e.g. z_aqd_jurist_effects.txt's aqd_crackdown_destroy_$MADHHAB$_madrasa/
+# _seat). Stamps the "we paid to keep them" marker (main_menu/common/
+# static_modifiers/z_aqd_decline_reprieved.txt) at $LOCATION$ for 10
+# years. A fresh application of that same madhhab's z_aqd_fatwa_
+# displeased_<X> later (a new grievance - see aqd_fatwa_apply_displeased_
+# for_seat / aqd_debate_apply_displeased_for_seat, both edited to clear
+# this marker on a fresh stamp) ends the reprieve early, so it stays
+# scoped to the grievance it was actually bought against rather than
+# blanket-blocking Decline for a fixed decade regardless of what happens
+# next.
+# ---------------------------------------------------------------------
+aqd_decline_apply_reprieve = {
+	if      = { limit = { $MADHHAB$ = 1 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_hanafi   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 2 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_hanbali  years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 3 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_maliki   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 4 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_shafii   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 5 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_zahiri   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 6 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_ismaili  years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 7 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_jafari   years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 8 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_zaidi    years = 10  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 9 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_decline_reprieved_ibadi    years = 10  mode = add_and_extend } } }
+}
+
+# aqd_decline_mark_departed = { MADHHAB  LOCATION }: same $MADHHAB$-
+# substitution constraint as above. Stamps the 30-year per-madhhab
+# establishment block (main_menu/common/static_modifiers/z_aqd_seat_
+# departed.txt) at $LOCATION$ - read by scripted_triggers/z_aqd_jurist_
+# triggers.txt's aqd_province_has_madhhab_density, so only the natural
+# three-madrasas establishment path is blocked; exile/foreign-jurist
+# placement of the same madhhab in this same province is untouched.
+aqd_decline_mark_departed = {
+	if      = { limit = { $MADHHAB$ = 1 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_hanafi   years = 30  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 2 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_hanbali  years = 30  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 3 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_maliki   years = 30  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 4 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_shafii   years = 30  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 5 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_zahiri   years = 30  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 6 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_ismaili  years = 30  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 7 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_jafari   years = 30  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 8 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_zaidi    years = 30  mode = add_and_extend } } }
+	else_if = { limit = { $MADHHAB$ = 9 }  $LOCATION$ = { add_location_modifier = { modifier = z_aqd_seat_departed_ibadi    years = 30  mode = add_and_extend } } }
+}
+
+# ---------------------------------------------------------------------
+# MIGRATION PICK - the departed jurists' next home. Entry point is
+# z_aqd_decline.1's own "let them go" option, dispatching on var:aqd_
+# decline_madhhab into one of the 9 wrappers below (same idiom as
+# z_aqd_jurist_effects.txt's aqd_crackdown_exile_offer_$MADHHAB$).
+# ---------------------------------------------------------------------
+aqd_decline_migration_pick_hanafi  = { aqd_decline_migration_pick = { MADHHAB = hanafi   SECT = sunni  IDX = 1 } }
+aqd_decline_migration_pick_hanbali = { aqd_decline_migration_pick = { MADHHAB = hanbali  SECT = sunni  IDX = 2 } }
+aqd_decline_migration_pick_maliki  = { aqd_decline_migration_pick = { MADHHAB = maliki   SECT = sunni  IDX = 3 } }
+aqd_decline_migration_pick_shafii  = { aqd_decline_migration_pick = { MADHHAB = shafii   SECT = sunni  IDX = 4 } }
+aqd_decline_migration_pick_zahiri  = { aqd_decline_migration_pick = { MADHHAB = zahiri   SECT = sunni  IDX = 5 } }
+aqd_decline_migration_pick_ismaili = { aqd_decline_migration_pick = { MADHHAB = ismaili  SECT = shia   IDX = 6 } }
+aqd_decline_migration_pick_jafari  = { aqd_decline_migration_pick = { MADHHAB = jafari   SECT = shia   IDX = 7 } }
+aqd_decline_migration_pick_zaidi   = { aqd_decline_migration_pick = { MADHHAB = zaidi    SECT = shia   IDX = 8 } }
+aqd_decline_migration_pick_ibadi   = { aqd_decline_migration_pick = { MADHHAB = ibadi    SECT = ibadi  IDX = 9 } }
+
+# Two-pass weighted neighbour selection, run at the departing country's
+# own scope (root - safe here, unlike aqd_crackdown_exile_pick's own
+# scope:aqd_crackdown_country stand-in, since this is only ever called
+# from z_aqd_decline.1's own option, a plain country_event where root is
+# reliable, never from inside a generic_action). Mirrors aqd_crackdown_
+# exile_pick (z_aqd_jurist_effects.txt) exactly: pass 1 (70%) prefers a
+# bordering realm whose own official madhhab already matches the
+# departing school; pass 2 falls back to any eligible bordering realm.
+# "Bordering" = a land border OR across a single sea zone (is_neighbor_
+# of_country_or_across_one_seazone, an engine trigger). EXPLICITLY-
+# ACCEPTED behavior change from reusing aqd_can_host_exile_seat as the
+# host-eligibility check: the old aqd_is_eligible_jurist_source (removed)
+# also required root.<X>_institution_tier < 3 and NOT root has_policy =
+# <X>_policy ("never offer your own madhhab as foreign"). Neither is
+# reproduced here, deliberately - z_aqd_exile.1's own target-pick doesn't
+# have them either, and the whole point of this rework is to give
+# "Foreign Jurists at the Gate" the same target-selection semantics as
+# its already-shipped sibling, including pass 1's explicit preference for
+# a candidate whose own state madhhab ALREADY MATCHES the departing
+# school - exactly the "weighted towards state madhhab" behavior this
+# feature asks for. aqd_can_host_exile_seat additionally requires
+# religion = religion:$SECT$ (the candidate's own STATE religion, not
+# just religion group), so a Sunni realm can no longer receive migrating
+# Shia jurists this way - also intentional, matching exile's existing
+# behavior exactly.
+aqd_decline_migration_pick = {
+	random = {
+		chance = 70
+		random_country = {
+			limit = {
+				NOT = { this = root }
+				religion = religion:$SECT$
+				has_policy = sharia_law_policy
+				has_policy = $MADHHAB$_policy
+				is_neighbor_of_country_or_across_one_seazone = root
+				aqd_can_host_exile_seat = { MADHHAB = $MADHHAB$  SECT = $SECT$ }
+			}
+			save_scope_as = aqd_jurists_target
+		}
+	}
+	if = {
+		limit = { NOT = { exists = scope:aqd_jurists_target } }
+		random_country = {
+			limit = {
+				NOT = { this = root }
+				religion = religion:$SECT$
+				has_policy = sharia_law_policy
+				is_neighbor_of_country_or_across_one_seazone = root
+				aqd_can_host_exile_seat = { MADHHAB = $MADHHAB$  SECT = $SECT$ }
+			}
+			save_scope_as = aqd_jurists_target
+		}
+	}
+	if = {
+		limit = { exists = scope:aqd_jurists_target }
+		scope:aqd_jurists_target = {
+			set_variable = { name = aqd_jurists_madhhab  value = $IDX$ }
+			trigger_event_non_silently = { id = z_aqd_jurists.1  days = 3 }
+		}
+	}
+}

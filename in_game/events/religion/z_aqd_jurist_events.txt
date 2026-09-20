@@ -1,38 +1,43 @@
 # =====================================================================
 # AQIDAH SCHOOLS OF CREED - Ulema Institutions: foreign jurists arrive.
 #
-# Fired rarely by on_action/00_aqd_game_start.txt's
-# aqd_jurist_migration_pulse (hooked to monthly_country_pulse). Sources
-# a neighboring Muslim country holding a madhhab that is neither the
-# receiver's own current madhhab nor already Plurality-or-above in the
-# receiver, AND that the receiver could raise a Seat of right now
-# (scripted_triggers/z_aqd_jurist_triggers.txt's
-# aqd_is_eligible_jurist_source). The event grants a Seat directly, so if
-# no city can host one it does not fire at all.
+# No longer a blind monthly neighbor scan. Triggered DIRECTLY by events/
+# religion/z_aqd_decline_events.txt's "let them go" option, via
+# scripted_effects/z_aqd_decline_effects.txt's aqd_decline_migration_pick
+# - a seat somewhere else has just declined (A Seat in Decline) and its
+# jurists have relocated to THIS realm specifically, weighted-picked as
+# a bordering Muslim neighbor (land border or across a single sea zone,
+# preferring one whose own state madhhab already matches). var:aqd_
+# jurists_madhhab (set on this country by the picker) is the sole
+# trigger condition and the sole source of which madhhab is arriving -
+# mirrors z_aqd_exile.1's own has_variable trigger pattern exactly.
 #
-# The target city is picked ONCE, in immediate
-# (aqd_jurists_derive_seat_target -> scope:aqd_jurists_seat_loc /
-# _seat_prov), not re-rolled inside the chosen option - so the desc can
-# name it before the player decides, and console-forcing the event with
-# no real source degrades gracefully instead of erroring (var:aqd_compat_madhhab
-# is always set, to 0 as a safe sentinel if no source was found, so every
-# var:aqd_compat_madhhab = N comparison downstream is well-defined).
+# The target city for the non-capital option is still picked ONCE, in
+# immediate (aqd_jurists_derive_seat_target -> scope:aqd_jurists_seat_loc
+# / _seat_prov), not re-rolled inside the chosen option - so every
+# option acts on the SAME city (scripted_effects/z_aqd_jurist_effects.
+# txt). NOT naming the target city dynamically in the desc:
+# [scope:X.GetName] does not resolve for a custom save_scope_as name in
+# loc text - confirmed via debug.log ("Failed to find type
+# 'scope:halqa_loc'..."), see z_aqd_halqa events/loc for the full note.
 #
 # The receiver chooses how far to go:
-#   grant_seat - raise a standing Seat of the visitors' madhhab in the
-#                named city at once (skips the grassroots
-#                madrasas-then-establishment chain entirely).
-#   endow      - Seat + one endowed college of the madhhab beside it:
-#                gold spent (aqd_endow_gold_estimate), and goodwill
-#                (z_aqd_endowed_our_school) with every realm of that
-#                school in diplomatic range. Shown only when the seat's
-#                province also has a free madrasa slot
-#                (aqd_source_madhhab_endow_hostable).
-#   refuse     - turn them away.
+#   settle_capital - raise the Seat directly in the realm's own capital.
+#                     Shown only when the capital doesn't already hold a
+#                     seat of the arriving madhhab (aqd_capital_lacks_
+#                     seat_of_compat_madhhab, scripted_triggers/z_aqd_
+#                     jurist_triggers.txt) - listed FIRST when available.
+#   grant_seat     - raise a standing Seat of the visitors' madhhab in
+#                     the randomly-derived city instead (skips the
+#                     grassroots madrasas-then-establishment chain
+#                     entirely). Always available.
+#   refuse         - turn them away.
 #
 # All three apply the aqidah-judged clergy/legitimacy reaction
-# (scripted_effects/z_aqd_jurist_effects.txt's aqd_apply_jurist_reaction);
-# accept = welcoming, refuse = moving against.
+# (scripted_effects/z_aqd_jurist_effects.txt's aqd_apply_jurist_reaction)
+# and then aqd_jurists_cleanup, so the has_variable = aqd_jurists_madhhab
+# trigger above doesn't stay permanently satisfied once this resolves -
+# mirrors z_aqd_exile.1's own aqd_exile_cleanup role.
 # =====================================================================
 
 namespace = z_aqd_jurists
@@ -40,21 +45,11 @@ namespace = z_aqd_jurists
 z_aqd_jurists.1 = {
 	type = country_event
 	title = z_aqd_jurists.1.title
-	# NOT naming the target city dynamically: [scope:X.GetName] does not
-	# resolve for a custom save_scope_as name in loc text - confirmed via
-	# debug.log ("Failed to find type 'scope:halqa_loc'..."), see
-	# z_aqd_halqa events/loc for the full note. Same limitation would hit
-	# scope:aqd_jurists_seat_loc here.
 	desc = z_aqd_jurists.1.desc
 	outcome = neutral
 
 	trigger = {
-		religion.group = religion_group:muslim
-		has_policy = sharia_law_policy
-		any_neighbor_country = {
-			religion.group = religion_group:muslim
-			aqd_is_eligible_jurist_source = yes
-		}
+		has_variable = aqd_jurists_madhhab
 	}
 
 	illustration_tags = {
@@ -63,70 +58,53 @@ z_aqd_jurists.1 = {
 
 	immediate = {
 		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
-		random_neighbor_country = {
-			limit = {
-				religion.group = religion_group:muslim
-				aqd_is_eligible_jurist_source = yes
-			}
-			save_scope_as = z_aqd_jurist_source
-		}
-		# Canonical 1-9 madhhab index on root - drives the seat-target pick
-		# and the option ai_chance weights. Always ends up SET (0 = "no
-		# real source", the console-force safety case) so var:aqd_compat_madhhab
-		# is never compared while unset.
-		if = {
-			limit = { exists = scope:z_aqd_jurist_source }
-			aqd_set_compat_madhhab_from_country = { SOURCE = scope:z_aqd_jurist_source  COUNTRY = root }
-		}
-		else = {
-			root = { set_variable = { name = aqd_compat_madhhab  value = 0 } }
-		}
+		set_variable = { name = aqd_compat_madhhab  value = var:aqd_jurists_madhhab }
 		aqd_classify_madhhab_compatibility = { COUNTRY = root }
-		# Pick the seat's target city now, once, so the desc can name it
-		# and every option acts on the SAME city (scripted_effects/
+		# Pick the (non-capital) seat's target city now, once, so every
+		# option that uses it acts on the SAME city (scripted_effects/
 		# z_aqd_jurist_effects.txt).
 		aqd_jurists_derive_seat_target = yes
-		# Projected endowment spend for z_aqd_jurists.1.endow's tooltip
-		# (script_values/z_aqd_madhhab_counts.txt).
-		set_variable = { name = aqd_endow_gold_est  value = aqd_endow_gold_estimate }
 	}
 
-	# Raise a standing Seat of the visitors' madhhab in the named city.
-	# No trigger: aqd_is_eligible_jurist_source already guaranteed a host
-	# exists, so this option is always available (the always-present
-	# non-refuse choice). aqd_jurists_accept still guards internally
-	# (console-forced with no real source: silently does nothing).
+	# Raise the Seat directly in the realm's own capital - listed first,
+	# shown only when the capital doesn't already hold a seat of the
+	# arriving madhhab.
 	option = {
-		name = z_aqd_jurists.1.grant_seat
-		aqd_jurists_accept_dispatch = { ENDOW = no }
+		name = z_aqd_jurists.1.settle_capital
+		trigger = { aqd_capital_lacks_seat_of_compat_madhhab = yes }
+		aqd_jurists_accept_capital = { MADHHAB = var:aqd_jurists_madhhab }
 		aqd_apply_jurist_reaction = { OUTCOME = accept  COUNTRY = root }
+		aqd_jurists_cleanup = yes
 		ai_chance = {
-			base = 55
+			base = 60
 			modifier = { factor = 3    var:aqd_jurist_compat = 1 }
 			modifier = { factor = 0.2  var:aqd_jurist_compat = -1 }
 		}
 	}
 
-	# Seat + an endowed college beside it: gold spent, goodwill with
-	# every realm of that school. Hidden when the seat's province has no
-	# free madrasa slot, so the spend always buys a real college.
+	# Raise a standing Seat of the visitors' madhhab in the randomly-
+	# derived city. No trigger: aqd_jurists_derive_seat_target's own
+	# eligibility already guaranteed a host exists (the picker in
+	# scripted_effects/z_aqd_decline_effects.txt only ever fires this
+	# event once a valid target realm was found), so this option is
+	# always available. aqd_jurists_accept still guards internally
+	# (console-forced with no real source: silently does nothing).
 	option = {
-		name = z_aqd_jurists.1.endow
-		trigger = { aqd_source_madhhab_endow_hostable = yes }
-		custom_tooltip = aqd_endow_gold_tt
-		aqd_jurists_accept_dispatch = { ENDOW = yes }
+		name = z_aqd_jurists.1.grant_seat
+		aqd_jurists_accept_dispatch = { ENDOW = no }
 		aqd_apply_jurist_reaction = { OUTCOME = accept  COUNTRY = root }
+		aqd_jurists_cleanup = yes
 		ai_chance = {
-			base = 25
+			base = 40
 			modifier = { factor = 3    var:aqd_jurist_compat = 1 }
-			modifier = { factor = 0    var:aqd_jurist_compat = -1 }
-			modifier = { factor = 0.1  gold < aqd_endow_gold_estimate }
+			modifier = { factor = 0.2  var:aqd_jurist_compat = -1 }
 		}
 	}
 
 	option = {
 		name = z_aqd_jurists.1.refuse
 		aqd_apply_jurist_reaction = { OUTCOME = refuse  COUNTRY = root }
+		aqd_jurists_cleanup = yes
 		ai_chance = {
 			base = 30
 			modifier = { factor = 5  var:aqd_jurist_compat = -1 }

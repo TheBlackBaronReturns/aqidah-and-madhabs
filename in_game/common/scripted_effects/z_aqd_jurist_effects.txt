@@ -39,10 +39,10 @@ aqd_recount_all_jurist_totals = {
 # Foreign-jurist madrasa seeding. CURRENTLY UNREFERENCED - retained for
 # reuse. It was the accept branch of "Foreign Jurists at the Gate" back
 # when that event only seeded madrasas; the event now grants a Seat
-# directly (aqd_jurists_accept below) and does not fire at all unless a
-# city can host one (scripted_triggers/z_aqd_jurist_triggers.txt's
-# aqd_is_eligible_jurist_source folds in aqd_can_host_jurist_seat), so
-# there is no longer a "no host" path for this to serve. Kept because it
+# directly (aqd_jurists_accept / aqd_jurists_accept_capital below) and is
+# only ever fired once a host is already confirmed (scripted_effects/
+# z_aqd_decline_effects.txt's aqd_decline_migration_pick), so there is no
+# longer a "no host" path for this to serve. Kept because it
 # is a clean, self-contained "seed N madrasas of a foreign madhhab in
 # one province, bypassing location_potential" primitive that a future
 # event may want.
@@ -366,38 +366,29 @@ aqd_build_madrasas_of_madhhab_from = {
 # "Foreign Jurists at the Gate" (events/religion/z_aqd_jurist_events.txt).
 # The visitors' madhhab is given a standing Seat in one of the realm's
 # own cities immediately - the grassroots madrasas-then-establishment
-# chain is bypassed. The event never fires unless a city can host that
-# Seat (aqd_is_eligible_jurist_source), so there is no "no host" fallback
-# path.
+# chain is bypassed. Triggered directly by scripted_effects/z_aqd_
+# decline_effects.txt's aqd_decline_migration_pick (A Seat in Decline's
+# "let them go" option), which already guaranteed a host exists before
+# ever firing the event - there is no "no host" fallback path.
 #
 # TARGET PICK (aqd_jurists_derive_seat_target, called ONCE from the
 # event's immediate): branches on var:aqd_compat_madhhab (canonical 1-9,
-# set on root in the immediate; 0 is the "no real source" sentinel and
-# matches no branch below, so this - and everything downstream - is a
-# clean no-op rather than an unset-variable error when the event is
-# console-forced with no eligible neighbour) into
+# set on root in the immediate from var:aqd_jurists_madhhab) into
 # aqd_jurists_find_seat_loc { MADHHAB SECT }, which picks the city once
-# and saves scope:aqd_jurists_seat_loc / _seat_prov - so the event desc
-# can name the city BEFORE the player chooses, and every option acts on
-# that same, already-resolved city (no per-option re-roll).
+# and saves scope:aqd_jurists_seat_loc / _seat_prov - every option that
+# uses it (grant_seat) acts on that same, already-resolved city (no
+# per-option re-roll). The "settle in the capital" option instead places
+# the Seat directly at the realm's own capital (aqd_jurists_accept_
+# capital below), bypassing this pick entirely.
 #
 # ACCEPT (aqd_jurists_accept_dispatch / aqd_jurists_accept, called from
-# the option effects): re-derives nothing, just guards
-# scope:aqd_jurists_seat_loc still exists and hands off to a dynamic
-# effect NAME (aqd_jurists_finish_$ENDOW$) - ENDOW (yes/no) is never
-# compared in a trigger, per this file's header note on text
-# substitution. Both finish_ variants place the Seat (so $MADHHAB$ is a
-# real reference in each - no unused-parameter branch).
-#
-# aqd_jurists_finish_yes additionally: plants one madrasa of the madhhab
-# in the seat's province BEFORE the Seat (so raising the Seat cannot take
-# the province's last free slot); spends aqd_endow_gold_estimate
-# (script_values/z_aqd_madhhab_counts.txt) in gold; and grants
-# z_aqd_endowed_our_school (common/biases/z_aqd_opinion.txt) with every
-# Muslim realm of that madhhab in diplomatic range. The "endow" option's
-# own trigger (aqd_source_madhhab_endow_hostable) guarantees a free
-# madrasa slot exists, so no player is ever charged for a college that
-# cannot be built.
+# the grant_seat option): re-derives nothing, just guards scope:aqd_
+# jurists_seat_loc still exists and hands off to aqd_jurists_finish_no,
+# which places the bare Seat via a raw level-delta (bypasses allow /
+# location_potential / country_potential, exactly as aqd_exile_plant_
+# seat / aqd_seed_seat). ENDOW / aqd_jurists_finish_yes (the old "endow a
+# college as well" option) has been removed along with the option itself
+# - see z_aqd_jurist_events.txt's own header for why.
 # ---------------------------------------------------------------------
 aqd_jurists_derive_seat_target = {
 	if      = { limit = { var:aqd_compat_madhhab = 1 } aqd_jurists_find_seat_loc = { MADHHAB = hanafi   SECT = sunni } }
@@ -450,9 +441,8 @@ aqd_jurists_accept_dispatch = {
 
 aqd_jurists_accept = {
 	# Belt-and-braces: the immediate already derived the target (and the
-	# option's own eligibility already proved a host exists), but guard
-	# anyway so a vanished city - or the var:aqd_compat_madhhab = 0
-	# no-real-source case - cannot half-apply the outcome.
+	# picker that fired this event already proved a host exists), but
+	# guard anyway so a vanished city cannot half-apply the outcome.
 	if = {
 		limit = { exists = scope:aqd_jurists_seat_loc }
 		aqd_jurists_finish_$ENDOW$ = { MADHHAB = $MADHHAB$ }
@@ -470,56 +460,32 @@ aqd_jurists_finish_no = {
 	}
 }
 
-# Endowment college first (placed in a location OTHER than the seat city
-# where possible, fallback the seat city itself), then the Seat, then the
-# gold spend + diplomatic goodwill. scope:aqd_jurists_seat_prov / _seat_loc
-# are still live - saved scopes persist across scripted_effect calls in
-# one tree.
-aqd_jurists_finish_yes = {
-	scope:aqd_jurists_seat_prov = {
-		random_location_in_province_definition = {
-			limit = {
-				owner ?= root
-				always = yes # TESTING: rural_settlement allowed
-				NOT = { aqd_location_has_fiqh_madrasa = yes }
-				NOT = { this = scope:aqd_jurists_seat_loc }
-			}
-			save_scope_as = aqd_jurists_madrasa_loc
-		}
-	}
-	if = {
-		limit = { NOT = { exists = scope:aqd_jurists_madrasa_loc } }
-		scope:aqd_jurists_seat_prov = {
-			random_location_in_province_definition = {
-				limit = {
-					owner ?= root
-					always = yes # TESTING: rural_settlement allowed
-					NOT = { aqd_location_has_fiqh_madrasa = yes }
-				}
-				save_scope_as = aqd_jurists_madrasa_loc
-			}
-		}
-	}
-	if = {
-		limit = { exists = scope:aqd_jurists_madrasa_loc }
-		scope:aqd_jurists_madrasa_loc = {
-			change_building_level_in_location = { building = building_type:madrasa_of_$MADHHAB$_fiqh  value = 1 }
-		}
-	}
+# "Settle them in the capital" option's own placement - bare Seat, same
+# raw level-delta idiom as aqd_jurists_finish_no above, just scoped to
+# `capital` instead of the randomly-derived scope:aqd_jurists_seat_loc.
+# No guard needed beyond the option's own trigger (aqd_capital_lacks_
+# seat_of_compat_madhhab, scripted_triggers/z_aqd_jurist_triggers.txt),
+# which already confirmed the capital has no seat of this madhhab yet.
+aqd_jurists_accept_capital = {
+	if      = { limit = { $MADHHAB$ = 1 }  capital = { change_building_level_in_location = { building = building_type:seat_of_hanafi_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 2 }  capital = { change_building_level_in_location = { building = building_type:seat_of_hanbali_jurists  value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 3 }  capital = { change_building_level_in_location = { building = building_type:seat_of_maliki_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 4 }  capital = { change_building_level_in_location = { building = building_type:seat_of_shafii_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 5 }  capital = { change_building_level_in_location = { building = building_type:seat_of_zahiri_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 6 }  capital = { change_building_level_in_location = { building = building_type:seat_of_ismaili_jurists  value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 7 }  capital = { change_building_level_in_location = { building = building_type:seat_of_jafari_jurists   value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 8 }  capital = { change_building_level_in_location = { building = building_type:seat_of_zaidi_jurists    value = 1 } } }
+	else_if = { limit = { $MADHHAB$ = 9 }  capital = { change_building_level_in_location = { building = building_type:seat_of_ibadi_jurists    value = 1 } } }
+	root = { aqd_recount_jurist_total = yes }
+}
 
-	scope:aqd_jurists_seat_loc = {
-		change_building_level_in_location = { building = building_type:seat_of_$MADHHAB$_jurists  value = 1 }
-	}
-
-	add_gold = { value = aqd_endow_gold_estimate  multiply = -1 }
-	every_country_in_diplomatic_range = {
-		limit = {
-			NOT = { this = root }
-			religion.group = religion_group:muslim
-			has_policy = $MADHHAB$_policy
-		}
-		add_opinion = { target = root  modifier = z_aqd_endowed_our_school }
-	}
+# Called from all three of z_aqd_jurists.1's options - mirrors aqd_exile_
+# cleanup's role for z_aqd_exile.1. Without this, trigger = { has_variable
+# = aqd_jurists_madhhab } would stay permanently satisfied on this
+# country after the event resolves.
+aqd_jurists_cleanup = {
+	remove_variable = aqd_jurists_madhhab
+	remove_variable = aqd_compat_madhhab
 }
 
 # ---------------------------------------------------------------------

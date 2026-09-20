@@ -147,18 +147,23 @@
  STATIC_MODIFIER_NAME_z_aqd_heretics_suppressed: "Heretical School Suppressed"
  STATIC_MODIFIER_DESC_z_aqd_heretics_suppressed: "The state has broken up the colleges of a heretical school of law. The ulema applaud the piety of it, and the realm's heretics are watched more closely."
  z_aqd_crackdown_on_our_school: "Persecuted our school of law"
- z_aqd_endowed_our_school: "Endowed our school of law"
+
+ # ---- A Seat in Decline ----
+ z_aqd_decline.1.title: "A Seat in Decline"
+ z_aqd_decline.1.desc: "One of our own Seats of jurisprudence stands in disgrace - its clergy repudiated, its standing among the faithful withered. Its jurists speak openly of leaving to seek a warmer welcome elsewhere. Something must be done, or they will go."
+ z_aqd_decline.1.pay: "Pay to keep them"
+ z_aqd_decline.1.let_go: "Let them go"
+ aqd_decline_reprieve_gold_tt: "Spend #Y[ROOT.GetVariable('aqd_decline_reprieve_gold_est').GetValue|V0]@gold!#! to keep the Seat's jurists here a while longer"
 
  # ---- Ulema Institutions: foreign jurists event ----
  z_aqd_jurists.1.title: "Foreign Jurists at the Gate"
  # [scope:aqd_jurists_seat_loc.GetName] does NOT resolve (see the Halqa
  # section below for the confirmed debug.log evidence) - reverted to the
  # single generic desc rather than a dead "named" variant.
- z_aqd_jurists.1.desc: "A party of jurists from a neighboring land has arrived, asking leave to establish their school of law in your realm - to raise a Seat in one of your cities, a standing authority to train and appoint the qadis of their method. Your own ulema watch closely to see what you will do."
+ z_aqd_jurists.1.desc: "A party of jurists driven from their former Seat by a neighboring realm's decline has crossed into our lands, asking leave to establish their school of law here - to raise a Seat in one of our cities, a standing authority to train and appoint the qadis of their method. Your own ulema watch closely to see what you will do."
+ z_aqd_jurists.1.settle_capital: "Settle them in our capital"
  z_aqd_jurists.1.grant_seat: "Let them raise a Seat"
- z_aqd_jurists.1.endow: "Raise their Seat, and endow a college beside it"
  z_aqd_jurists.1.refuse: "Turn them away"
- aqd_endow_gold_tt: "Spend #Y[ROOT.GetVariable('aqd_endow_gold_est').GetValue|V0]@gold!#! to endow their college"
 
  # ---- Ulema Institutions: seat establishment ----
  z_aqd_establishment.1.title: "A School Puts Down Roots"

@@ -1,0 +1,72 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - A Seat in Decline: "the jurists left, don't
+# come back too soon" marker. NINE concrete per-madhhab keys, modeled on
+# z_aqd_establishment_pending's single-field shape (main_menu/common/
+# static_modifiers/z_aqd_establishment_pending.txt) but PER-MADHHAB and
+# 30 YEARS instead of that shared 15-year key - a departure is a much
+# harder setback for that one school than an ordinary establishment
+# cooldown.
+#
+# Applied by scripted_effects/z_aqd_decline_effects.txt's aqd_decline_
+# mark_departed. Read by scripted_triggers/z_aqd_jurist_triggers.txt's
+# aqd_province_has_madhhab_density - blocks ONLY the natural three-
+# madrasas establishment path for this one madhhab in this province;
+# exile/foreign-jurist placement of the same madhhab here is untouched
+# (aqd_can_host_exile_seat / aqd_jurists_find_seat_loc deliberately do
+# not check this key).
+# =====================================================================
+
+z_aqd_seat_departed_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}
+z_aqd_seat_departed_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}
+z_aqd_seat_departed_maliki = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}
+z_aqd_seat_departed_shafii = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}
+z_aqd_seat_departed_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}
+z_aqd_seat_departed_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}
+z_aqd_seat_departed_jafari = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}
+z_aqd_seat_departed_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}
+z_aqd_seat_departed_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0.05
+}

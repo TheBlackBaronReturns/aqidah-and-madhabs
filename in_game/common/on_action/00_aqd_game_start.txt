@@ -86,13 +86,15 @@ aqd_seat_establishment_pulse = {
 	}
 }
 
-# Ulema Institutions - rare foreign-jurist-arrival event (events/
-# religion/z_aqd_jurist_events.txt). Hooks monthly_country_pulse, which
-# this mod doesn't otherwise touch, additively alongside base/other-mod
+# A Seat in Decline (events/religion/z_aqd_decline_events.txt) - drives
+# "Foreign Jurists at the Gate" (z_aqd_jurists.1) as its own follow-up;
+# see that pulse's own header and scripted_effects/z_aqd_decline_
+# effects.txt for the full chain. Hooks monthly_country_pulse, which this
+# mod doesn't otherwise touch, additively alongside base/other-mod
 # subscribers - same merge-not-override guarantee documented above for
 # on_game_start.
 monthly_country_pulse = {
-	on_actions = { aqd_jurist_migration_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_fatwa_episode_cleanup_pulse  aqd_jihad_fatwa_pulse  aqd_jihad_episode_cleanup_pulse  aqd_debate_pulse  aqd_seat_collapse_pulse }
+	on_actions = { aqd_decline_pulse  aqd_recount_jurist_total_pulse  aqd_halqa_pulse  aqd_fatwa_pulse  aqd_fatwa_escalation_pulse  aqd_fatwa_episode_cleanup_pulse  aqd_jihad_fatwa_pulse  aqd_jihad_episode_cleanup_pulse  aqd_debate_pulse  aqd_seat_collapse_pulse }
 }
 
 # The Jurists' Fatwa Against an Unjust War (events/religion/
@@ -372,19 +374,25 @@ aqd_recount_jurist_total_pulse = {
 		aqd_recount_jurist_total = yes
 	}
 }
-aqd_jurist_migration_pulse = {
+# A Seat in Decline. No sharia_law_policy requirement - matches aqd_
+# halqa_pulse's own reasoning (a conquered seat can still carry z_aqd_
+# fatwa_displeased_<X> from its previous owner's history and still
+# decay). NOT = { has_variable = aqd_decline_madhhab } guards against
+# re-entering aqd_decline_attempt while a previous pick is still in
+# flight (the 1-day gap between the pick and z_aqd_decline.1 actually
+# firing) - the variable is only ever set by the picker itself and
+# cleared in that event's own `after` block.
+aqd_decline_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
-		has_policy = sharia_law_policy
-		any_neighbor_country = {
-			religion.group = religion_group:muslim
-			aqd_is_eligible_jurist_source = yes
-		}
+		NOT = { has_variable = aqd_decline_madhhab }
+		aqd_country_has_any_declining_seat = yes
 	}
-	random_events = {
-		100 = z_aqd_jurists.1
-
-		chance_to_happen = 1
+	effect = {
+		random = {
+			chance = 10
+			aqd_decline_attempt = yes
+		}
 	}
 }
 

@@ -1,0 +1,130 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - A Seat in Decline: triggers.
+#
+# NINE concrete location-scoped triggers, one per madhhab, deliberately
+# WITHOUT any aqidah-compatibility check baked in - see scripted_effects/
+# z_aqd_decline_effects.txt's aqd_decline_attempt header for why: these
+# are read both by the cheap country-level pulse prefilter below (which
+# runs inside on_action/00_aqd_game_start.txt's trigger block, BEFORE
+# aqd_classify_madhhab_compatibility has ever run for this tick - reading
+# an unset var: there would be exactly the "unset-variable comparison is
+# a hard error, not a silent false" gotcha documented in scripted_
+# triggers/z_aqd_jurist_triggers.txt's own header) and by the picker's
+# own random_owned_location limit (same reason - the location-level pick
+# must stay compatibility-agnostic; the compatibility filter is applied
+# afterward, per-candidate, only once the picker's own effect body has
+# already cached it in pass 1).
+#
+# A seat "in decline" = it stands, carries its own madhhab's z_aqd_fatwa_
+# displeased_<X> (a punishment stamp from a refused unjust-war fatwa or a
+# lost fiqh debate - see z_aqd_fatwa_effects.txt / z_aqd_debate_effects.
+# txt), is not already under a bought reprieve (z_aqd_decline_reprieved_
+# <X>), and is not ALSO currently collapsing from population loss
+# (aqd_seat_collapsing_<X>, scripted_triggers/z_aqd_seat_collapse_
+# triggers.txt, reused as-is) - that is Seat Collapse's problem, not this
+# system's; paying gold to "keep them longer" would make no narrative
+# sense for a seat whose sect population has already left.
+# =====================================================================
+
+aqd_declining_seat_hanafi = {
+	has_building = building_type:seat_of_hanafi_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_hanafi
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_hanafi }
+	NOT = { aqd_seat_collapsing_hanafi = yes }
+}
+aqd_declining_seat_hanbali = {
+	has_building = building_type:seat_of_hanbali_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_hanbali
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_hanbali }
+	NOT = { aqd_seat_collapsing_hanbali = yes }
+}
+aqd_declining_seat_maliki = {
+	has_building = building_type:seat_of_maliki_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_maliki
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_maliki }
+	NOT = { aqd_seat_collapsing_maliki = yes }
+}
+aqd_declining_seat_shafii = {
+	has_building = building_type:seat_of_shafii_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_shafii
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_shafii }
+	NOT = { aqd_seat_collapsing_shafii = yes }
+}
+aqd_declining_seat_zahiri = {
+	has_building = building_type:seat_of_zahiri_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_zahiri
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_zahiri }
+	NOT = { aqd_seat_collapsing_zahiri = yes }
+}
+aqd_declining_seat_ismaili = {
+	has_building = building_type:seat_of_ismaili_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_ismaili
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_ismaili }
+	NOT = { aqd_seat_collapsing_ismaili = yes }
+}
+aqd_declining_seat_jafari = {
+	has_building = building_type:seat_of_jafari_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_jafari
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_jafari }
+	NOT = { aqd_seat_collapsing_jafari = yes }
+}
+aqd_declining_seat_zaidi = {
+	has_building = building_type:seat_of_zaidi_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_zaidi
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_zaidi }
+	NOT = { aqd_seat_collapsing_zaidi = yes }
+}
+aqd_declining_seat_ibadi = {
+	has_building = building_type:seat_of_ibadi_jurists
+	has_location_modifier = z_aqd_fatwa_displeased_ibadi
+	NOT = { has_location_modifier = z_aqd_decline_reprieved_ibadi }
+	NOT = { aqd_seat_collapsing_ibadi = yes }
+}
+
+# Location-scoped umbrella OR - used as the picker's own random_owned_
+# location limit (scripted_effects/z_aqd_decline_effects.txt).
+aqd_declining_seat_present = {
+	OR = {
+		aqd_declining_seat_hanafi = yes
+		aqd_declining_seat_hanbali = yes
+		aqd_declining_seat_maliki = yes
+		aqd_declining_seat_shafii = yes
+		aqd_declining_seat_zahiri = yes
+		aqd_declining_seat_ismaili = yes
+		aqd_declining_seat_jafari = yes
+		aqd_declining_seat_zaidi = yes
+		aqd_declining_seat_ibadi = yes
+	}
+}
+
+# Country-scoped. Cheap prefilter for on_action/00_aqd_game_start.txt's
+# aqd_decline_pulse trigger - mirrors aqd_country_owns_any_jurist_seat's
+# own any_owned_location wrapper shape (scripted_triggers/z_aqd_jurist_
+# triggers.txt).
+aqd_country_has_any_declining_seat = {
+	any_owned_location = { aqd_declining_seat_present = yes }
+}
+
+# Location-scoped. Does THIS location currently hold a seat matching
+# root's var:aqd_decline_madhhab (the numeric 1-9 index the picker
+# resolved)? Same OR/AND idiom as z_aqd_jurist_triggers.txt's own
+# aqd_state_madhhab_seat_already_here, just keyed to a numeric variable
+# instead of root's current policy. Used as events/religion/z_aqd_
+# decline_events.txt's own
+# belt-and-braces re-check before destroying anything - the 1-day gap
+# between the pick and that event actually firing leaves a small window
+# where conquest or an unrelated crackdown could already have removed
+# the seat.
+aqd_decline_seat_still_present = {
+	OR = {
+		AND = { root = { var:aqd_decline_madhhab = 1 }  has_building = building_type:seat_of_hanafi_jurists }
+		AND = { root = { var:aqd_decline_madhhab = 2 }  has_building = building_type:seat_of_hanbali_jurists }
+		AND = { root = { var:aqd_decline_madhhab = 3 }  has_building = building_type:seat_of_maliki_jurists }
+		AND = { root = { var:aqd_decline_madhhab = 4 }  has_building = building_type:seat_of_shafii_jurists }
+		AND = { root = { var:aqd_decline_madhhab = 5 }  has_building = building_type:seat_of_zahiri_jurists }
+		AND = { root = { var:aqd_decline_madhhab = 6 }  has_building = building_type:seat_of_ismaili_jurists }
+		AND = { root = { var:aqd_decline_madhhab = 7 }  has_building = building_type:seat_of_jafari_jurists }
+		AND = { root = { var:aqd_decline_madhhab = 8 }  has_building = building_type:seat_of_zaidi_jurists }
+		AND = { root = { var:aqd_decline_madhhab = 9 }  has_building = building_type:seat_of_ibadi_jurists }
+	}
+}

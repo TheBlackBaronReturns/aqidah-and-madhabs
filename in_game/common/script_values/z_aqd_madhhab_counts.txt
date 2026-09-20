@@ -281,17 +281,21 @@ aqd_crackdown_gold_estimate_target = {
 }
 
 # ---------------------------------------------------------------------
-# Gold cost of the "endow a college as well" option on "Foreign Jurists
-# at the Gate" (events/religion/z_aqd_jurist_events.txt via
-# scripted_effects/z_aqd_jurist_effects.txt's aqd_jurists_finish_yes).
-# ~4 months of trade + tax income, so the spend scales with realm size
-# the same way the crackdown's confiscation math does. Shown to the
-# player via var:aqd_endow_gold_est + custom_tooltip aqd_endow_gold_tt,
-# set in the event's immediate. TUNABLE: the multiply factor.
+# Gold cost of "Pay to keep them" on A Seat in Decline (events/religion/
+# z_aqd_decline_events.txt via scripted_effects/z_aqd_decline_effects.txt).
+# Same base-game idiom as the crackdown estimates above and vanilla's own
+# "N months of trade + tax income" event-option pattern (e.g. common/
+# events/religion/muslim_flavor.txt / events/culture/culture_italian.txt) -
+# ~3 months of trade + tax income, cheaper than raising a whole new
+# college (aqd_crackdown_gold_estimate_* above uses the same 0.25x/4x
+# family of multipliers) since this only buys the seat more time, not a
+# new institution. Shown to the player via var:aqd_decline_reprieve_
+# gold_est + custom_tooltip aqd_decline_reprieve_gold_tt, set in the
+# event's immediate. TUNABLE: the multiply factor.
 # ---------------------------------------------------------------------
-aqd_endow_gold_estimate = {
+aqd_decline_reprieve_gold_estimate = {
 	value = monthly_income_trade_and_tax
-	multiply = 4
+	multiply = 3
 }
 
 # ---------------------------------------------------------------------

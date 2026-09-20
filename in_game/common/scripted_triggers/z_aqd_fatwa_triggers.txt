@@ -22,7 +22,8 @@
 # NINE concrete branches, NOT one parameterised trigger: EU5 does not
 # substitute $PARAM$ when a scripted_trigger is invoked from inside
 # another scripted_trigger (see z_aqd_jurist_triggers.txt's header note)
-# - mirrors aqd_is_eligible_jurist_source's own style exactly.
+# - mirrors z_aqd_jurist_triggers.txt's own aqd_state_madhhab_seat_
+# already_here style exactly.
 # =====================================================================
 
 aqd_madhhab_acceptable_to_root = {

@@ -4,12 +4,16 @@
 #   event z_aqd_debug.1   - seed a seat + madrasas in your capital province
 #   event z_aqd_debug.2   - set your realm's aqidah (for orthodox / heterodox / tolerated)
 #   event z_aqd_debug.3   - clear any active ḥalqa from your capital province
-#   event z_aqd_debug.4   - diagnose WHY AHI is (not) an eligible foreign-jurist
-#                           source for you - the event text itself names the
-#                           first failing condition, no log-reading needed.
 #   event z_aqd_debug.5   - force-fire z_aqd_fatwa.1 / .2 directly (bypassing
 #                           their own trigger), or clear their cooldown/stage
 #                           variables for a repeat test.
+#
+# z_aqd_debug.4 (diagnosed aqd_is_eligible_jurist_source eligibility) has
+# been REMOVED - that trigger no longer exists now that "Foreign Jurists
+# at the Gate" fires from A Seat in Decline's own migration pick, not a
+# monthly neighbor scan. See events/religion/z_aqd_decline_events.txt to
+# test the new chain instead (force-apply z_aqd_fatwa_displeased_<X> to
+# an owned seat, then advance time).
 #
 # Then:  event z_aqd_halqa.1  /  event z_aqd_jurists.1
 # =====================================================================
@@ -86,54 +90,6 @@ z_aqd_debug.3 = {
 	}
 	option = {
 		name = z_aqd_debug.3.cancel
-	}
-}
-
-# Walks aqd_is_eligible_jurist_source's jafari branch condition-by-condition
-# against c:AHI and reports, IN THE EVENT TEXT, the first one that fails -
-# settles "is Ahi even eligible, and if not, why" without touching a log.
-z_aqd_debug.4 = {
-	type = country_event
-	title = z_aqd_debug.4.t
-	desc = {
-		first_valid = {
-			triggered_desc = {
-				trigger = { NOT = { exists = c:AHI } }
-				desc = z_aqd_debug.4.desc.no_ahi
-			}
-			triggered_desc = {
-				trigger = { c:AHI = { aqd_is_eligible_jurist_source = yes } }
-				desc = z_aqd_debug.4.desc.eligible
-			}
-			triggered_desc = {
-				trigger = { NOT = { any_neighbor_country = { this = c:AHI } } }
-				desc = z_aqd_debug.4.desc.not_neighbor
-			}
-			triggered_desc = {
-				trigger = { NOT = { c:AHI = { religion.group = religion_group:muslim } } }
-				desc = z_aqd_debug.4.desc.not_muslim
-			}
-			triggered_desc = {
-				trigger = { NOT = { c:AHI = { has_policy = jafari_policy } } }
-				desc = z_aqd_debug.4.desc.no_jafari
-			}
-			triggered_desc = {
-				trigger = { has_policy = jafari_policy }
-				desc = z_aqd_debug.4.desc.we_have_jafari
-			}
-			triggered_desc = {
-				trigger = { jafari_institution_tier >= 3 }
-				desc = z_aqd_debug.4.desc.tier_high
-			}
-			triggered_desc = {
-				desc = z_aqd_debug.4.desc.unknown
-			}
-		}
-	}
-	outcome = neutral
-
-	option = {
-		name = z_aqd_debug.4.ok
 	}
 }
 

@@ -440,6 +440,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 1 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_hanafi  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_hanafi }  remove_location_modifier = z_aqd_decline_reprieved_hanafi }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
@@ -454,6 +455,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 2 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_hanbali  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_hanbali }  remove_location_modifier = z_aqd_decline_reprieved_hanbali }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
@@ -468,6 +470,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 3 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_maliki  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_maliki }  remove_location_modifier = z_aqd_decline_reprieved_maliki }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
@@ -482,6 +485,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 4 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_shafii  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_shafii }  remove_location_modifier = z_aqd_decline_reprieved_shafii }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
@@ -496,6 +500,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 5 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_zahiri  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_zahiri }  remove_location_modifier = z_aqd_decline_reprieved_zahiri }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
@@ -510,6 +515,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 6 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_ismaili  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_ismaili }  remove_location_modifier = z_aqd_decline_reprieved_ismaili }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
@@ -524,6 +530,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 7 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_jafari  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_jafari }  remove_location_modifier = z_aqd_decline_reprieved_jafari }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
@@ -538,6 +545,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 8 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_zaidi  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_zaidi }  remove_location_modifier = z_aqd_decline_reprieved_zaidi }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }
@@ -552,6 +560,7 @@ aqd_fatwa_apply_displeased_for_seat = {
 		limit = { $MADHHAB$ = 9 }
 		$LOCATION$ = {
 			add_location_modifier = { modifier = z_aqd_fatwa_displeased_ibadi  years = 12  mode = add_and_extend }
+			if = { limit = { has_location_modifier = z_aqd_decline_reprieved_ibadi }  remove_location_modifier = z_aqd_decline_reprieved_ibadi }
 			province_definition = {
 				every_location_in_province_definition = {
 					limit = { owner ?= root }

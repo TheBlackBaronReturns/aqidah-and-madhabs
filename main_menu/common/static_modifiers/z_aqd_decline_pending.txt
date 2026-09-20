@@ -1,0 +1,13 @@
+# Disposable same-tick "which location did the pulse just pick" marker,
+# same role as z_aqd_seat_collapse_pending (main_menu/common/static_
+# modifiers/z_aqd_seat_collapse_pending.txt) - exists solely so z_aqd_
+# decline.1's own immediate can re-find the location the picker chose
+# (saved scopes do not survive trigger_event). 1 month is a pure safety
+# net; the event itself removes it the same tick it re-derives the scope.
+
+z_aqd_decline_pending = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

@@ -1,0 +1,74 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - A Seat in Decline: "we paid to keep them"
+# marker. NINE concrete per-madhhab keys (a location can hold seats of
+# more than one madhhab at once, so a single shared key would let paying
+# for ONE seat's reprieve also silently shield a co-located, uninvolved
+# madhhab's own declining seat - same reasoning as z_aqd_fatwa_displeased/
+# z_aqd_jurist_evicted's own per-madhhab split).
+#
+# Pure re-roll suppressor - no gameplay stat, like z_aqd_fatwa_declined_
+# <X>. Applied by scripted_effects/z_aqd_decline_effects.txt's aqd_
+# decline_apply_reprieve (10 years, mode = add_and_extend), and cleared
+# early by a fresh application of that same madhhab's z_aqd_fatwa_
+# displeased_<X> (scripted_effects/z_aqd_fatwa_effects.txt's aqd_fatwa_
+# apply_displeased_for_seat / z_aqd_debate_effects.txt's aqd_debate_
+# apply_displeased_for_seat), so a reprieve bought against one grievance
+# never blocks Decline from reconsidering a seat that earns a brand-new
+# one. Read by scripted_triggers/z_aqd_decline_triggers.txt's aqd_
+# declining_seat_<X>.
+# =====================================================================
+
+z_aqd_decline_reprieved_hanafi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_decline_reprieved_hanbali = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_decline_reprieved_maliki = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_decline_reprieved_shafii = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_decline_reprieved_zahiri = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_decline_reprieved_ismaili = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_decline_reprieved_jafari = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_decline_reprieved_zaidi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}
+z_aqd_decline_reprieved_ibadi = {
+	game_data = {
+		category = location
+	}
+	local_unrest = 0
+}

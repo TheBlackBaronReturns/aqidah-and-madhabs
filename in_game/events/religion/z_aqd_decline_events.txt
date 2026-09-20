@@ -1,0 +1,113 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - A Seat in Decline.
+#
+# Fired by on_action/00_aqd_game_start.txt's aqd_decline_pulse (monthly,
+# chance-gated) via scripted_effects/z_aqd_decline_effects.txt's aqd_
+# decline_attempt, which does the whole pick (which seat, which madhhab)
+# BEFORE this event ever exists - same silent-pre-roll shape as every
+# other pulse-driven system in this mod. Only fires for a seat that is
+# both currently carrying its own madhhab's z_aqd_fatwa_displeased_<X>
+# penalty (a refused unjust-war fatwa or a lost fiqh debate) AND whose
+# madhhab is orthodox or neutral to the realm's own aqidah - a heterodox
+# seat that earns the same penalty already has its own forced-removal
+# path (crackdown -> exile, z_aqd_exile_events.txt); this event is
+# reserved for a school the realm's own creed doesn't actively reject.
+#
+# The immediate re-derives scope:aqd_decline_loc from the disposable
+# z_aqd_decline_pending marker the picker stamped (saved scopes do not
+# survive trigger_event - see aqd_decline_attempt's own header for the
+# full reasoning), exactly as z_aqd_seat_collapse.1/.2 already do for
+# z_aqd_seat_collapse_pending.
+#
+# "Let them go" is the structural trigger for "Foreign Jurists at the
+# Gate" (z_aqd_jurists.1) - dispatches to one of the 9 aqd_decline_
+# migration_pick_$MADHHAB$ wrappers (scripted_effects/z_aqd_decline_
+# effects.txt), which picks ONE weighted-random bordering Muslim realm
+# (land border or across a single sea zone, weighted toward a realm whose
+# own state madhhab already matches) and fires that event there directly.
+# =====================================================================
+
+namespace = z_aqd_decline
+
+z_aqd_decline.1 = {
+	type = country_event
+	title = z_aqd_decline.1.title
+	desc = z_aqd_decline.1.desc
+	outcome = neutral
+
+	trigger = {
+		has_variable = aqd_decline_madhhab
+	}
+
+	illustration_tags = {
+		10 = sad
+		10 = interior
+	}
+
+	immediate = {
+		event_illustration_estate_effect = { foreground = estate_type:clergy_estate  background = estate_type:clergy_estate }
+
+		random_owned_location = {
+			limit = { has_location_modifier = z_aqd_decline_pending }
+			save_scope_as = aqd_decline_loc
+		}
+		if = {
+			limit = { exists = scope:aqd_decline_loc }
+			scope:aqd_decline_loc = { remove_location_modifier = z_aqd_decline_pending }
+		}
+
+		set_variable = { name = aqd_decline_reprieve_gold_est  value = aqd_decline_reprieve_gold_estimate }
+	}
+
+	option = {
+		name = z_aqd_decline.1.pay
+		custom_tooltip = aqd_decline_reprieve_gold_tt
+		if = {
+			limit = {
+				exists = scope:aqd_decline_loc
+				exists = var:aqd_decline_madhhab
+				scope:aqd_decline_loc = { aqd_decline_seat_still_present = yes }
+			}
+			add_gold = { value = aqd_decline_reprieve_gold_estimate  multiply = -1 }
+			aqd_decline_apply_reprieve = { MADHHAB = var:aqd_decline_madhhab  LOCATION = scope:aqd_decline_loc }
+		}
+		ai_chance = {
+			base = 40
+			modifier = { factor = 2    gold >= aqd_decline_reprieve_gold_estimate }
+			modifier = { factor = 0.1  gold < aqd_decline_reprieve_gold_estimate }
+		}
+	}
+
+	option = {
+		name = z_aqd_decline.1.let_go
+		if = {
+			limit = {
+				exists = scope:aqd_decline_loc
+				exists = var:aqd_decline_madhhab
+				scope:aqd_decline_loc = { aqd_decline_seat_still_present = yes }
+			}
+			aqd_seat_collapse_destroy_seat = { MADHHAB = var:aqd_decline_madhhab  LOCATION = scope:aqd_decline_loc }
+			aqd_seat_collapse_clear_madhhab_modifiers = { MADHHAB = var:aqd_decline_madhhab  LOCATION = scope:aqd_decline_loc }
+			aqd_decline_mark_departed = { MADHHAB = var:aqd_decline_madhhab  LOCATION = scope:aqd_decline_loc }
+			root = { aqd_recount_jurist_total = yes }
+
+			if      = { limit = { var:aqd_decline_madhhab = 1 }  aqd_decline_migration_pick_hanafi = yes }
+			else_if = { limit = { var:aqd_decline_madhhab = 2 }  aqd_decline_migration_pick_hanbali = yes }
+			else_if = { limit = { var:aqd_decline_madhhab = 3 }  aqd_decline_migration_pick_maliki = yes }
+			else_if = { limit = { var:aqd_decline_madhhab = 4 }  aqd_decline_migration_pick_shafii = yes }
+			else_if = { limit = { var:aqd_decline_madhhab = 5 }  aqd_decline_migration_pick_zahiri = yes }
+			else_if = { limit = { var:aqd_decline_madhhab = 6 }  aqd_decline_migration_pick_ismaili = yes }
+			else_if = { limit = { var:aqd_decline_madhhab = 7 }  aqd_decline_migration_pick_jafari = yes }
+			else_if = { limit = { var:aqd_decline_madhhab = 8 }  aqd_decline_migration_pick_zaidi = yes }
+			else_if = { limit = { var:aqd_decline_madhhab = 9 }  aqd_decline_migration_pick_ibadi = yes }
+		}
+		ai_chance = {
+			base = 60
+			modifier = { factor = 2  gold < aqd_decline_reprieve_gold_estimate }
+		}
+	}
+
+	after = {
+		root = { remove_variable = aqd_decline_madhhab }
+	}
+}
