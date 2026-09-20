@@ -247,33 +247,102 @@ aqd_fatwa_pick_seat = {
 }
 
 # ---------------------------------------------------------------------
-# aqd_fatwa_evaluate_seat_demand = { MADHHAB }: called at a candidate
-# seat's own LOCATION scope, given the canonical 1-9 index of exactly
-# which seat there to evaluate - $MADHHAB$ is always either a literal
-# (stage 2's per-madhhab loop below) or a variable reference like
-# var:aqd_fatwa_seat_madhhab (stage 1, via aqd_fatwa_attempt_stage1) -
-# both are confirmed-safe as a substituted parameter value (mirrors
-# aqd_classify_seat_compatibility's own SEAT_MADHHAB = var:aqd_seat_
-# madhhab call convention, scripted_effects/z_aqd_madhhab_approval_
-# effects.txt). Pre-seeds root's var:aqd_seat_madhhab from it before
-# calling aqd_compute_seat_approval, whose own guard (scripted_effects/
-# z_aqd_madhhab_approval_effects.txt) then skips its has_building auto-
-# detection - required because a location can hold more than one seat,
-# so guessing "whichever building matches first" could evaluate (and,
-# via aqd_fatwa_apply_displeased_for_seat below, punish) an entirely
-# different co-located madhhab than the one actually being asked.
-# Computes that seat's centralized approval, then INVERTS it before
-# rolling - this fatwa asks "does this seat turn AGAINST the ruler", the
-# opposite question from the jihad fatwa's direct read of the same
-# engine. Leaves var:aqd_madhhab_approval_result readable at root (1 =
-# this seat steps up to demand peace, 0 = it stays quiet).
+# aqd_fatwa_evaluate_seat_demand = { MADHHAB }: given the canonical 1-9
+# index of exactly which seat is being asked, answers "does the WAR'S
+# DEFENDANT resonate with this seat's own madhhab enough that it demands
+# the ruler stop fighting them?" - deliberately NOT the same question the
+# jihad fatwa asks of the SAME shared engine (root's own approval,
+# read straight). Requires scope:enemy (the war's defendant, found by
+# aqd_fatwa_attempt_stage1 below for stage 1, or already live from z_aqd_
+# fatwa.2's own immediate for stage 2 - see that event's header) to
+# already be a valid saved scope; if it is not, this seat simply stays
+# quiet (var:aqd_madhhab_approval_result = 0) rather than erroring - a
+# real, already-hit failure mode per z_aqd_fatwa_events.txt's own header
+# (a debug force-fire, or any other path that reaches this call with no
+# resolvable war/defendant).
+#
+# Deliberately does NOT call aqd_compute_seat_approval (scripted_effects/
+# z_aqd_madhhab_approval_effects.txt) - that helper, and the aqd_madhhab_
+# approval_<X> script_values it evaluates (script_values/z_aqd_madhhab_
+# approval.txt), are shared with three OTHER root-anchored features
+# (jihad fatwa, crackdown-vacancy, seat-collapse) that must stay
+# untouched, root-only, exactly as they are today. Everything here is
+# self-contained instead: aqd_classify_seat_compatibility is called with
+# COUNTRY = scope:enemy (not root) - so var:aqd_seat_compat now answers
+# "does the DEFENDANT's own aqidah consider this seat's madhhab favored/
+# neutral/opposed" - and the matching aqd_madhhab_approval_<X> script_
+# value is evaluated with scope:enemy as the CURRENT scope, so its bare
+# societal_value:/has_policy=/modifier:tolerance_own references all
+# naturally resolve against the defendant too. The whole judgment is
+# thereby one consistent question about one country, never a mix of
+# root and the defendant.
+#
+# $MADHHAB$ is either a literal (stage 2's per-madhhab loop in z_aqd_
+# fatwa_events.txt) or var:aqd_fatwa_seat_madhhab, which lives on ROOT
+# (stage 1, via aqd_fatwa_attempt_stage1). $PARAM$ substitution is purely
+# textual, so using that raw token directly inside scope:enemy = {...}
+# would - for the variable-reference form - incorrectly look for it on
+# the defendant instead of root. The first line below resolves it into a
+# real, always-root-anchored variable first (mirroring the original
+# code's own root = {...} wrapping for the identical reason), then
+# relays its value onto scope:enemy's own copy via the confirmed value =
+# root.var:X cross-scope idiom (common/scripted_effects/religious_
+# effects.txt:288-295, among others) - safe regardless of whether the
+# original $MADHHAB$ argument was a literal or a variable reference.
+#
+# scope:enemy is guaranteed to be "a fellow-sect Muslim state" by aqd_
+# fatwa_core_conditions (scripted_triggers/z_aqd_fatwa_triggers.txt), so
+# it can legitimately be mid-running its OWN crackdown-vacancy or seat-
+# collapse computation using these exact same variable names at the same
+# moment. Every variable borrowed on its scope is therefore saved (only
+# if it already existed) before use and restored (or removed, if it
+# didn't) afterward - the same save/restore idiom aqd_classify_seat_
+# compatibility itself already uses for aqd_compat_madhhab/aqd_jurist_
+# compat, applied here to avoid clobbering state that isn't this
+# feature's to touch.
+#
+# No inversion (contrast the old aqd_invert_approval_scratch, now
+# deleted as dead code): high resonance between the defendant and this
+# seat's own character IS the bless-probability input directly, not
+# something to invert. Leaves var:aqd_madhhab_approval_result readable
+# at root (1 = this seat steps up to demand peace, 0 = it stays quiet).
 # ---------------------------------------------------------------------
 aqd_fatwa_evaluate_seat_demand = {
-	root = { set_variable = { name = aqd_seat_madhhab  value = $MADHHAB$ } }
-	aqd_compute_seat_approval = yes
-	root = {
-		aqd_invert_approval_scratch = yes
-		aqd_roll_approval_percentage = yes
+	if = {
+		limit = { NOT = { exists = scope:enemy } }
+		root = { set_variable = { name = aqd_madhhab_approval_result  value = 0 } }
+	}
+	else = {
+		root = { set_variable = { name = aqd_seat_madhhab  value = $MADHHAB$ } }
+		scope:enemy = {
+			if = { limit = { exists = var:aqd_seat_madhhab }     set_variable = { name = aqd_seat_madhhab_save     value = var:aqd_seat_madhhab } }
+			if = { limit = { exists = var:aqd_seat_compat }      set_variable = { name = aqd_seat_compat_save      value = var:aqd_seat_compat } }
+			if = { limit = { exists = var:aqd_approval_scratch } set_variable = { name = aqd_approval_scratch_save value = var:aqd_approval_scratch } }
+			set_variable = { name = aqd_seat_madhhab  value = root.var:aqd_seat_madhhab }
+		}
+		aqd_classify_seat_compatibility = { COUNTRY = scope:enemy  SEAT_MADHHAB = var:aqd_seat_madhhab }
+		if      = { limit = { scope:enemy = { var:aqd_seat_madhhab = 1 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_hanafi } } }
+		else_if = { limit = { scope:enemy = { var:aqd_seat_madhhab = 2 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_hanbali } } }
+		else_if = { limit = { scope:enemy = { var:aqd_seat_madhhab = 3 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_maliki } } }
+		else_if = { limit = { scope:enemy = { var:aqd_seat_madhhab = 4 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_shafii } } }
+		else_if = { limit = { scope:enemy = { var:aqd_seat_madhhab = 5 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_zahiri } } }
+		else_if = { limit = { scope:enemy = { var:aqd_seat_madhhab = 6 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_ismaili } } }
+		else_if = { limit = { scope:enemy = { var:aqd_seat_madhhab = 7 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_jafari } } }
+		else_if = { limit = { scope:enemy = { var:aqd_seat_madhhab = 8 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_zaidi } } }
+		else_if = { limit = { scope:enemy = { var:aqd_seat_madhhab = 9 } }  scope:enemy = { set_variable = { name = aqd_approval_scratch  value = aqd_madhhab_approval_ibadi } } }
+		root = {
+			set_variable = { name = aqd_approval_scratch  value = scope:enemy.var:aqd_approval_scratch }
+			aqd_roll_approval_percentage = yes
+			remove_variable = aqd_seat_madhhab
+		}
+		scope:enemy = {
+			if   = { limit = { exists = var:aqd_seat_madhhab_save }     set_variable = { name = aqd_seat_madhhab  value = var:aqd_seat_madhhab_save }     remove_variable = aqd_seat_madhhab_save }
+			else = { remove_variable = aqd_seat_madhhab }
+			if   = { limit = { exists = var:aqd_seat_compat_save }      set_variable = { name = aqd_seat_compat  value = var:aqd_seat_compat_save }      remove_variable = aqd_seat_compat_save }
+			else = { remove_variable = aqd_seat_compat }
+			if   = { limit = { exists = var:aqd_approval_scratch_save } set_variable = { name = aqd_approval_scratch  value = var:aqd_approval_scratch_save } remove_variable = aqd_approval_scratch_save }
+			else = { remove_variable = aqd_approval_scratch }
+		}
 	}
 }
 
@@ -344,6 +413,26 @@ aqd_fatwa_episode_start_check = {
 # z_aqd_fatwa.1's own trigger still re-checks it a second time at fire
 # time as a defensive re-validation, same as before this change.
 #
+# Finds and saves scope:enemy (the war's defendant) BEFORE picking a seat
+# or rolling - aqd_fatwa_evaluate_seat_demand's own approval computation
+# now depends entirely on the defendant, unlike before this change, when
+# only the LATER event's flavor text needed it. Byte-for-byte the same
+# any_current_war/defender_leader condition set as aqd_fatwa_core_
+# conditions's own check just above (this file's own header notes it is
+# deliberately re-checked, not reused, since a saved scope from a trigger
+# context does not carry over) and as both z_aqd_fatwa.1's and z_aqd_
+# fatwa.2's own immediate in events/religion/z_aqd_fatwa_events.txt - all
+# three MUST be kept in sync if this condition set ever changes, there is
+# no compiler link enforcing it. A missing enemy here nests the rest of
+# this block behind exists = scope:enemy and does nothing further this
+# month (aqd_fatwa_pick_seat, which sets var:aqd_fatwa_seat_madhhab,
+# never runs on that path, so there is nothing to clean up) - a true
+# silent no-op, not a wasted decline that would needlessly burn a seat's
+# one-shot-per-war slot over what is really a structural edge case (see
+# aqd_fatwa_evaluate_seat_demand's own header for why this same class of
+# failure is handled differently - and still safely - for stage 2's
+# caller, which cannot use this same outer-guard shape).
+#
 # Feeds aqd_fatwa_pick_seat's resolved var:aqd_fatwa_seat_madhhab
 # straight into aqd_fatwa_evaluate_seat_demand's $MADHHAB$ parameter -
 # this variable, unlike a saved scope, survives the trigger_event below,
@@ -353,18 +442,48 @@ aqd_fatwa_episode_start_check = {
 aqd_fatwa_attempt_stage1 = {
 	if = {
 		limit = { aqd_fatwa_core_conditions = yes }
-		aqd_fatwa_pick_seat = yes
-		if = {
-			limit = { exists = scope:target_location }
-			scope:target_location = { aqd_fatwa_evaluate_seat_demand = { MADHHAB = var:aqd_fatwa_seat_madhhab } }
-			if = {
-				limit = { var:aqd_madhhab_approval_result = 1 }
-				scope:target_location = { aqd_stamp_pending_pick = yes }
-				trigger_event_non_silently = { id = z_aqd_fatwa.1  days = 1 }
+		random_current_war = {
+			limit = {
+				attacker_leader = root
+				OR = {
+					is_no_cb_war = yes
+					NOT = { has_casus_belli = yes }
+					casus_belli ?= casus_belli:cb_fabricated_conquer_province
+					casus_belli ?= casus_belli:cb_trade_conflict
+					casus_belli ?= casus_belli:cb_disrupting_trade
+					casus_belli ?= casus_belli:cb_humiliate_rival
+					casus_belli ?= casus_belli:cb_humiliate
+					casus_belli ?= casus_belli:cb_conquer_enemy
+					casus_belli ?= casus_belli:attack_threat
+					casus_belli ?= casus_belli:cb_imperialism
+				}
+				defender_leader = {
+					religion = root.religion
+					aqd_madhhab_acceptable_to_root = yes
+					war_score_versus = { target = root  value <= -0.25 }
+				}
 			}
-			else = {
-				scope:target_location = { aqd_fatwa_stamp_declined_for_seat = yes }
-				remove_variable = aqd_fatwa_seat_madhhab
+			save_scope_as = target_war
+		}
+		if = {
+			limit = { exists = scope:target_war }
+			scope:target_war = { defender_leader = { save_scope_as = enemy } }
+		}
+		if = {
+			limit = { exists = scope:enemy }
+			aqd_fatwa_pick_seat = yes
+			if = {
+				limit = { exists = scope:target_location }
+				scope:target_location = { aqd_fatwa_evaluate_seat_demand = { MADHHAB = var:aqd_fatwa_seat_madhhab } }
+				if = {
+					limit = { var:aqd_madhhab_approval_result = 1 }
+					scope:target_location = { aqd_stamp_pending_pick = yes }
+					trigger_event_non_silently = { id = z_aqd_fatwa.1  days = 1 }
+				}
+				else = {
+					scope:target_location = { aqd_fatwa_stamp_declined_for_seat = yes }
+					remove_variable = aqd_fatwa_seat_madhhab
+				}
 			}
 		}
 	}

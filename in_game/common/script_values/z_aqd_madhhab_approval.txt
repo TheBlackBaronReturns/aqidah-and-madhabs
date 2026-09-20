@@ -1,15 +1,32 @@
 # =====================================================================
 # AQIDAH SCHOOLS OF CREED - centralized madhhab-approval engine.
 #
-# For a given madhhab X, aqd_madhhab_approval_X answers one question:
-# "how disposed is a seat of X to back this realm's ruler right now?"
-# Every current and future fatwa/approval mechanic in this mod should
-# read these 9 values rather than inventing its own weighting - jihad
-# fatwa (events/religion/z_aqd_jihad_fatwa_events.txt) reads it directly
-# (high = more likely to bless the war); the white-peace fatwa (events/
-# religion/z_aqd_fatwa_events.txt) reads its INVERSE via scripted_effects/
-# z_aqd_madhhab_approval_effects.txt's aqd_invert_approval_scratch (high
-# backing = LEAST likely to turn around and demand the ruler stop a war).
+# For a given madhhab X, aqd_madhhab_approval_X answers "how disposed is a
+# seat of X to back the COUNTRY CURRENTLY EVALUATING IT?" - a question
+# about whatever country is the CURRENT SCOPE when the script_value is
+# invoked, not necessarily the realm the seat itself belongs to. Every
+# current and future fatwa/approval mechanic in this mod should read
+# these 9 values rather than inventing its own weighting.
+#
+# Two consumers, two different countries in that scope, deliberately:
+# jihad fatwa (events/religion/z_aqd_jihad_fatwa_events.txt, via
+# scripted_effects/z_aqd_madhhab_approval_effects.txt's aqd_compute_seat_
+# approval) evaluates it AT ROOT - "does this seat back its OWN ruler's
+# war" - high = more likely to bless. The white-peace fatwa (events/
+# religion/z_aqd_fatwa_events.txt, via scripted_effects/z_aqd_fatwa_
+# effects.txt's aqd_fatwa_evaluate_seat_demand) evaluates the SAME
+# formula AT scope:enemy, the war's defendant, NOT root, and does not
+# invert the result - "does this seat's own character resonate with the
+# people root is fighting" - high resonance = more likely to demand root
+# stop the war. crackdown-vacancy and seat-collapse (scripted_effects/
+# z_aqd_crackdown_vacancy_effects.txt, z_aqd_seat_collapse_effects.txt)
+# also read it directly at root, via aqd_compute_seat_approval like jihad
+# fatwa. Only aqd_fatwa_evaluate_seat_demand switches scope; every other
+# consumer stays root-only, exactly as this file's own formula assumes
+# when it uses "root" internally (the var:aqd_seat_compat term below is
+# always answering "does THIS scope's own aqidah judge the seat's own
+# madhhab" - which country "this scope" is depends entirely on the
+# caller, and for the white-peace fatwa that is now the defendant.
 #
 # Formula: a SHARED flat baseline (50, identical across all 9 - no
 # madhhab gets a head start or handicap by identity alone), plus three
@@ -69,11 +86,19 @@
 # on top of the branch below.) x5 is a placeholder TUNABLE for both
 # tolerance terms - no in-game feature to calibrate either against yet.
 #
-# Callers must run aqd_compute_seat_approval (same effects file) before
-# reading any of these - it derives var:aqd_seat_madhhab and calls
-# aqd_classify_seat_compatibility for them. Clamped 5-95 so no madhhab is
-# ever a guaranteed yes/no regardless of how extreme a realm's societal
-# values or tolerance get.
+# Most callers run aqd_compute_seat_approval (same effects file) before
+# reading any of these - it derives var:aqd_seat_madhhab and calls aqd_
+# classify_seat_compatibility for them, always at root. The one exception
+# is the white-peace fatwa's aqd_fatwa_evaluate_seat_demand (scripted_
+# effects/z_aqd_fatwa_effects.txt), which does the equivalent setup work
+# itself at scope:enemy instead - see that function's own header for why
+# it cannot reuse aqd_compute_seat_approval directly (that helper is
+# hardcoded to root, and touching it would affect jihad fatwa/crackdown-
+# vacancy/seat-collapse too). Either way, var:aqd_seat_madhhab and var:
+# aqd_seat_compat must exist on whatever scope is CURRENT when one of
+# these script_values is evaluated. Clamped 5-95 so no madhhab is ever a
+# guaranteed yes/no regardless of how extreme a realm's societal values
+# or tolerance get.
 #
 # --- mysticism_vs_jurisprudence: tiered, all nine now jurisprudence-
 # preferring (no madhhab carries a negative/mysticism-favoring sign any

@@ -88,15 +88,6 @@ aqd_compute_seat_approval = {
 	}
 }
 
-# Call at root, after aqd_compute_seat_approval, for any feature asking
-# "does this seat turn AGAINST the ruler" instead of "does it back him"
-# (the white-peace fatwa). The 5-95 clamp on every aqd_madhhab_approval_*
-# value guarantees 100-x also lands in 5-95, so no re-clamp is needed.
-aqd_invert_approval_scratch = {
-	change_variable = { name = aqd_approval_scratch  multiply = -1 }
-	change_variable = { name = aqd_approval_scratch  add = 100 }
-}
-
 # Reads var:aqd_approval_scratch (5-95) on root, writes var:aqd_madhhab_
 # approval_result (1 agree / 0 decline). EU5's random_list only accepts a
 # literal integer weight - no computed-weight support, confirmed absent
