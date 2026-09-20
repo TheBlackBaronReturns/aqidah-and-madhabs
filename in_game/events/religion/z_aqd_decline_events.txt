@@ -7,11 +7,16 @@
 # BEFORE this event ever exists - same silent-pre-roll shape as every
 # other pulse-driven system in this mod. Only fires for a seat that is
 # both currently carrying its own madhhab's z_aqd_fatwa_displeased_<X>
-# penalty (a refused unjust-war fatwa or a lost fiqh debate) AND whose
+# penalty (a refused unjust-war fatwa or a lost fiqh debate), whose
 # madhhab is orthodox or neutral to the realm's own aqidah - a heterodox
 # seat that earns the same penalty already has its own forced-removal
 # path (crackdown -> exile, z_aqd_exile_events.txt); this event is
-# reserved for a school the realm's own creed doesn't actively reject.
+# reserved for a school the realm's own creed doesn't actively reject -
+# AND whose madhhab currently has at least one bordering realm able to
+# actually receive the departing jurists (aqd_decline_target_exists_check,
+# aqd_decline_attempt's own PASS 1b). A madhhab with nowhere to go never
+# reaches this event at all; see that pass's header for the residual
+# 1-day-gap race this doesn't (and doesn't try to) fully close.
 #
 # The immediate re-derives scope:aqd_decline_loc from the disposable
 # z_aqd_decline_pending marker the picker stamped (saved scopes do not

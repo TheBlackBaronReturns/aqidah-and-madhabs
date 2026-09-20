@@ -74,6 +74,53 @@
 # aqd_classify_seat_compatibility for them. Clamped 5-95 so no madhhab is
 # ever a guaranteed yes/no regardless of how extreme a realm's societal
 # values or tolerance get.
+#
+# --- mysticism_vs_jurisprudence: tiered, all nine now jurisprudence-
+# preferring (no madhhab carries a negative/mysticism-favoring sign any
+# longer) ---
+# Reads as "how legalistic vs esoteric is this school's OWN methodological
+# self-conception" - not "how tolerant is this school's historical
+# population of coexisting with Sufi orders." The two readings genuinely
+# diverge (Shafii's heartland is deeply Sufi-saturated - al-Ghazali was a
+# Shafii jurist - despite usul al-fiqh being paradigmatically legalistic)
+# and this file deliberately takes the methodological reading throughout.
+#   Tier 1 (0.30) - hanbali, shafii, zahiri, zaidi: each defines itself
+#     against non-literal/esoteric reasoning as a matter of method, not
+#     just practice - zahiri rejects qiyas and any non-plain reading
+#     outright (zahir/"apparent" is the direct linguistic opposite of
+#     batin/"hidden", the term Ismaili ta'wil is built on); hanbali is
+#     strict-textualist with an actual polemical tradition against
+#     shrine-visitation/saint-veneration (Ibn Taymiyya, later Wahhabism);
+#     shafii systematized usul al-fiqh as a formal rule-based discipline;
+#     zaidi's theology is comparatively rationalist/Mu'tazili-adjacent,
+#     closer to mainstream legal reasoning than Twelver Jafari's genuine
+#     irfan/esoteric strand.
+#   Tier 2 (0.20) - hanafi, maliki, jafari, ibadi: real, active legal
+#     reasoning traditions (qiyas/istihsan, 'amal ahl al-Madina, ongoing
+#     ijtihad via marja taqlid, azzaba councils) without tier 1's explicit
+#     anti-esoteric self-definition.
+#   Tier 3 (0.10) - ismaili alone: the one tradition whose own self-
+#     conception treats exoteric law as secondary to esoteric truth
+#     (batin over zahir, per the Imam's ta'wil), so it barely qualifies
+#     as "jurisprudence-preferring" at all - kept positive rather than
+#     flipped negative only because every other madhhab in this table
+#     is now positive too; the magnitude carries the distinction instead.
+#
+# --- individualism_vs_communalism: two departures from a flat per-madhhab
+# read of "how communal is this school" ---
+#   hanbali is individualist (-0.15), not communal: its core methodological
+#     stance is personal accountability to primary scripture over
+#     deference to inherited communal practice - the same instinct behind
+#     its rejection of qiyas and of maliki-style communal taqlid. Puts it
+#     alongside shafii in the individualist camp, for different reasons
+#     (systematic methodology vs. textual literalism) rather than maliki's
+#     communal-custom-as-source.
+#   ibadi is raised to 0.30 (matching maliki/ismaili, up from a smaller
+#     value): its azzaba scholarly-council system - communal religious
+#     governance replacing individual/hereditary authority outright - is
+#     as textbook a case for "communal" as exists in this table; a smaller
+#     coefficient was underselling how definitional that institution is to
+#     Ibadi identity (see religious_schools/z_aqd_ibadi_aqidah.txt).
 # =====================================================================
 
 aqd_madhhab_approval_hanafi = {
@@ -98,8 +145,8 @@ aqd_madhhab_approval_hanafi = {
 aqd_madhhab_approval_hanbali = {
 	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = -0.30 }
-	add = { value = societal_value:individualism_vs_communalism  multiply = 0.20 }
-	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
+	add = { value = societal_value:individualism_vs_communalism  multiply = -0.15 }
+	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.30 }
 	add = {
 		if      = { limit = { has_policy = hanbali_policy }  value = 15 }
 		else_if = { limit = { var:aqd_seat_compat = 1 }      value = 8 }
@@ -137,7 +184,7 @@ aqd_madhhab_approval_shafii = {
 	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.10 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = -0.15 }
-	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
+	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.30 }
 	add = {
 		if      = { limit = { has_policy = shafii_policy }  value = 15 }
 		else_if = { limit = { var:aqd_seat_compat = 1 }     value = 8 }
@@ -156,7 +203,7 @@ aqd_madhhab_approval_zahiri = {
 	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = -0.35 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = -0.25 }
-	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
+	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.30 }
 	add = {
 		if      = { limit = { has_policy = zahiri_policy }  value = 15 }
 		else_if = { limit = { var:aqd_seat_compat = 1 }     value = 8 }
@@ -175,7 +222,7 @@ aqd_madhhab_approval_zaidi = {
 	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.15 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.15 }
-	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
+	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.30 }
 	add = {
 		if      = { limit = { has_policy = zaidi_policy }  value = 15 }
 		else_if = { limit = { var:aqd_seat_compat = 1 }    value = 8 }
@@ -194,7 +241,7 @@ aqd_madhhab_approval_jafari = {
 	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.20 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.15 }
-	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = -0.20 }
+	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
 	add = {
 		if      = { limit = { has_policy = jafari_policy }  value = 15 }
 		else_if = { limit = { var:aqd_seat_compat = 1 }     value = 8 }
@@ -213,7 +260,7 @@ aqd_madhhab_approval_ismaili = {
 	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = 0.30 }
 	add = { value = societal_value:individualism_vs_communalism  multiply = 0.30 }
-	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = -0.20 }
+	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.10 }
 	add = {
 		if      = { limit = { has_policy = ismaili_policy }  value = 15 }
 		else_if = { limit = { var:aqd_seat_compat = 1 }      value = 8 }
@@ -231,8 +278,8 @@ aqd_madhhab_approval_ismaili = {
 aqd_madhhab_approval_ibadi = {
 	value = 50
 	add = { value = societal_value:traditionalist_vs_innovative  multiply = -0.15 }
-	add = { value = societal_value:individualism_vs_communalism  multiply = 0.25 }
-	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = -0.20 }
+	add = { value = societal_value:individualism_vs_communalism  multiply = 0.30 }
+	add = { value = societal_value:mysticism_vs_jurisprudence    multiply = 0.20 }
 	add = {
 		if      = { limit = { has_policy = ibadi_policy }  value = 15 }
 		else_if = { limit = { var:aqd_seat_compat = 1 }    value = 8 }
