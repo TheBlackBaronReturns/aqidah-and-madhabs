@@ -182,6 +182,15 @@ aqd_fatwa_episode_cleanup_pulse = {
 # is the only cooldown, so a country with several eligible seats keeps
 # rolling for whichever ones are still off cooldown instead of the whole
 # pulse going dark for 5 years after any single success.
+# NOT = { has_variable = aqd_jihad_episode_active } OR has_country_
+# modifier = z_aqd_jihad_declaration_window in the trigger below - a
+# fresh episode (flag not yet set) must still be allowed through so
+# aqd_jihad_episode_start_check ever runs and stamps that window in the
+# first place; every month after that, the window's own presence is what
+# actually gates whether an attempt can fire. See that effect's own
+# header (scripted_effects/z_aqd_jihad_fatwa_effects.txt) for the full
+# reasoning - this bounds every seat's one lifetime roll for a given war
+# to within the first year of this country's own involvement in it.
 aqd_jihad_fatwa_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
@@ -190,6 +199,10 @@ aqd_jihad_fatwa_pulse = {
 			aqd_is_defensive_jihad_participant = yes
 		}
 		any_owned_location = { aqd_jihad_seat_eligible = yes }
+		OR = {
+			NOT = { has_variable = aqd_jihad_episode_active }
+			has_country_modifier = z_aqd_jihad_declaration_window
+		}
 	}
 	effect = {
 		# aqd_jihad_episode_start_check (scripted_effects/z_aqd_jihad_
@@ -227,6 +240,16 @@ aqd_jihad_fatwa_pulse = {
 # modifiers active) until BOTH end, not just one - the OR mirrors the
 # pulse's own gate above exactly, so the episode boundary always matches
 # whichever condition actually kept the pulse firing.
+#
+# Also clears z_aqd_jihad_declaration_window (main_menu/common/static_
+# modifiers/z_aqd_jihad_declaration_window.txt) early if the war ends
+# before its 1 year is up. Purely cosmetic, not load-bearing: this pulse
+# only ever runs once root has already stopped qualifying as a jihad
+# participant at all, at which point the pulse's own trigger above is
+# blocked by that unrelated condition regardless of whether the window
+# is still present - left unremoved, it would just expire on its own
+# with no functional difference, but would visibly linger on the country
+# for a war that's already over.
 aqd_jihad_episode_cleanup_pulse = {
 	trigger = {
 		religion.group = religion_group:muslim
@@ -240,6 +263,7 @@ aqd_jihad_episode_cleanup_pulse = {
 	}
 	effect = {
 		remove_variable = aqd_jihad_episode_active
+		remove_country_modifier = z_aqd_jihad_declaration_window
 		every_owned_location = {
 			remove_location_modifier = z_aqd_jihad_declined_hanafi
 			remove_location_modifier = z_aqd_jihad_declined_hanbali

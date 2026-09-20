@@ -408,10 +408,26 @@ aqd_jihad_fatwa_stamp_declined_for_seat = {
 # the cleanup pulse handles the normal end-of-war clearing, this is
 # purely the defensive backstop for the (should never happen, but not
 # load-bearing to prevent) case where that cleanup somehow didn't run.
+#
+# Also stamps z_aqd_jihad_declaration_window (main_menu/common/static_
+# modifiers/z_aqd_jihad_declaration_window.txt), a 1-year country-scoped
+# marker aqd_jihad_fatwa_pulse (on_action/00_aqd_game_start.txt) requires
+# to attempt anything at all - once it expires, no further attempt fires
+# for the rest of THIS war, however long the war continues afterward.
+# Combined with the pre-existing per-seat "one shot per war" gate (the
+# declined/blessed sweep above), this bounds every seat's one lifetime
+# roll to within the first year of this country's own involvement,
+# instead of the previous unbounded window where a seat could go silent
+# for a decade and still be asked one day. Stamped in the SAME guarded
+# branch as the flag above (once per episode, not renewed month to
+# month) - a fresh episode later (after aqd_jihad_episode_cleanup_pulse
+# has run) re-enters this branch and re-stamps a fresh year, exactly
+# mirroring how the flag itself resets.
 aqd_jihad_episode_start_check = {
 	if = {
 		limit = { NOT = { has_variable = aqd_jihad_episode_active } }
 		set_variable = { name = aqd_jihad_episode_active  value = 1 }
+		add_country_modifier = { modifier = z_aqd_jihad_declaration_window  years = 1 }
 		every_owned_location = {
 			remove_location_modifier = z_aqd_jihad_declined_hanafi
 			remove_location_modifier = z_aqd_jihad_declined_hanbali

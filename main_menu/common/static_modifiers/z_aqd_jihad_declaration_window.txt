@@ -1,0 +1,35 @@
+# =====================================================================
+# AQIDAH SCHOOLS OF CREED - "Jihad Declaration Window".
+#
+# Pure disposable marker, country-scoped (category = country, unlike
+# every other marker in this mod, which is location-scoped) - no stat
+# effects; stability_cost_efficiency = 0 is a harmless placeholder,
+# mirroring z_aqd_decline_pending.txt's own local_unrest = 0 shape at
+# location scope (confirmed valid country-scoped field via z_aqd_
+# independent_jurists.txt, same folder).
+#
+# Stamped once, for exactly 1 year, by scripted_effects/z_aqd_jihad_
+# fatwa_effects.txt's aqd_jihad_episode_start_check the FIRST month a
+# country becomes a jihad participant (offensive or defensive - the two
+# share one episode boundary, see that effect's own header). on_action/
+# 00_aqd_game_start.txt's aqd_jihad_fatwa_pulse requires this modifier's
+# presence to attempt anything at all - once it expires, no further
+# "Fatwa for the Jihad" attempt can fire for the REST of that same war,
+# however long the war goes on afterward. Combined with the pre-existing
+# "one shot per war" gate (z_aqd_jihad_declined_<X> / z_aqd_jihad_
+# blessed_<X>), this bounds every seat's one lifetime roll for a given
+# war to within the first year of that country's own involvement in it,
+# rather than the previous unbounded window where a seat could go silent
+# for a decade and still be asked. Explicitly removed early by aqd_jihad_
+# episode_cleanup_pulse (same on_action file) if the war ends before the
+# year is up, purely so it doesn't visually linger on the country after
+# the war it gated is already over - it would otherwise just expire on
+# its own with no functional difference.
+# =====================================================================
+
+z_aqd_jihad_declaration_window = {
+	game_data = {
+		category = country
+	}
+	stability_cost_efficiency = 0
+}
